@@ -23,4 +23,3 @@ void encoder_isr() {
 	Serial.print("enc_count = ");
 	Serial.println(enc_count);
 }
-
