@@ -14,8 +14,8 @@
 #         PWM_L_prev = voltage, scalar
 #
 # Returns:
-#         PWM_R_prev = voltage, scalar
-#         PWM_L_prev = voltage, scalar
+#         PWM_R_new = voltage, scalar
+#         PWM_L_new = voltage, scalar
 
 
 import numpy as np
