@@ -1,12 +1,10 @@
 #!/user/bin/env python
-
 import serial
-import serial.tools.list_ports as list_ports
+from serial.tools.list_ports import comports
 
 
 # connect to the open serial port
-ports = list(list_ports.comports())
-ports = [p[0] for p in ports]
+ports = [p[0] for p in comports()]
 if len(ports) == 0:
     print("Error, couldn't find any open ports")
     exit()
@@ -18,9 +16,7 @@ baud_rate = 9600
 s1 = serial.Serial(ports[0], baud_rate)
 s1.flushInput()
 
-comp_list = ["Flash complete\r\n", "Hello Pi, This is Arduino UNO...\r\n"]
-
-distance_per_tick = 22/26
+distance_per_tick = 22.0/26.0
 
 def ticks_to_distance(ticks):
 	return ticks*distance_per_tick
@@ -32,13 +28,22 @@ def main(left_ticks, right_ticks):
 
 while True:
 	if s1.inWaiting() > 0:
-		b = s1.read()
-		print(b)
-		if b in comp_list:
-			try:
-				n = input("Set arduino flash times:")
-				s1.write('%d' % n)
-			except:
-				print("Input error, please input a number")
-				s1.write('0')
+		love = s1.readline().strip()
+
+		if len(love.split()) != 2:
+			continue
+
+		left_ticks, right_ticks = [int(x) for x in love.split()]
+		# print(left_ticks, right_ticks)
+
+		left_distance, right_distance = main(left_ticks, right_ticks)
+		print(left_distance, right_distance)
+
+		# if b in comp_list:
+		# 	try:
+		# 		n = input("Set arduino flash times:")
+		# 		s1.write("0 0")
+		# 	except:
+		# 		print("Input error, please input a number")
+		# 		s1.write('0')
 
