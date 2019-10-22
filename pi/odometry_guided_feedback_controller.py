@@ -5,12 +5,18 @@
 # map the Fcontrol to a PWM command for both wheels. Tune the values
 # of K and B to make this work the way you want it to.
 #
-# Inputs: x_ref(t)   = function taking time returning triple:
+# Inputs:
+#         x_ref(t)   = function taking time returning triple:
 #                                                   [x_ref, y_ref, theta_ref]
 #         x_act      = [x_act, y_act, theta_act]
 #         t          = time, int
-#         PWM_L_prev = voltage, scalar
 #         PWM_R_prev = voltage, scalar
+#         PWM_L_prev = voltage, scalar
+#
+# Returns:
+#         PWM_R_prev = voltage, scalar
+#         PWM_L_prev = voltage, scalar
+
 
 import numpy as np
 
