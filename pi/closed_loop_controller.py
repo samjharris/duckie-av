@@ -13,7 +13,7 @@
 import numpy as pd
 import time
 import positions
-from  odometry_guided_feedback_controller import get_PWMs
+from  odometry_guided_feedback import get_PWMs
 
 timeslice = .25
 x_act = [0,0,0]
