@@ -1,5 +1,10 @@
 import serial
 import serial.tools.list_ports as list_ports
+import struct
+import time
+import sys
+sys.path.append('../pi')
+import ticks_to_distance as ticks_to_distance
 
 ## connect to the open serial port
 ports = list(list_ports.comports())
@@ -17,31 +22,39 @@ baud_rate = 115200
 s_con = serial.Serial(ports[0], baud_rate)
 s_con.flushInput()
 
-comp_list = ["Flash complete\r\n", "Hello Pi, This is Arduino UNO...\r\n"]
-
+comp_list = ["Motor Values? Pi\r\n"]
 ##begin control loop
 while True:
+	if s_con.inWaiting() > 0:
 
-	##read data over serial while data is being written
-	data = s_con.
+		inputValue = s_con.readline()
 
-
-
-	if s1.inWaiting() > 0:
-		inputValue = s1.readline() #.read(n) reads n bytes
+		
+		# n = input("Set arduino flash times:")
 		print(inputValue)
 		if inputValue in comp_list:
 			try:
-				n = input("Set arduino flash times:")
-				s1.write('%d' % n)
+				right_value = 20
+				left_value = 50
+
+				s_con.write(struct.pack('>BB', right_value, left_value))
 			except:
-				print("Input error, please input a number")
-				s1.write('0')
+				print("error passing motor values")
+				s_con.write('0')
 
 
+		if len(inputValue.split()) != 2:
+			continue
+
+		love = inputValue.strip()
+		left_ticks, right_ticks = [int(x) for x in love.split()]
+		# print(left_ticks, right_ticks)
+
+		left_distance, right_distance = ticks_to_distance.get_distances(left_ticks, right_ticks)
+		print("distances: ", left_distance, right_distance)
+
+		time.sleep(0.2)
 
 
 def sendData(data):
 	return
-
-def 
