@@ -1,18 +1,16 @@
 void setup() {
-  // put your setup code here, to run once:
-Serial.begin(9600);
-pinMode(13, OUTPUT);
-Serial.println("Hello Pi, This is Arduino UNO...");
+  Serial.begin(9600);
+  pinMode(13, OUTPUT);
+  Serial.println("Hello Pi, This is Arduino UNO...");
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-Serial.println("Hello Pi, This is Arduino UNO...");
-if(Serial.available()){
-  flash(Serial.parseInt());
-  Serial.flush();
-}
-delay(1000);
+  Serial.println("Hello Pi, This is Arduino UNO...");
+  if(Serial.available()){
+    flash(Serial.parseInt());
+    Serial.flush();
+  }
+  delay(1000);
 }
 
 void flash(int n){
@@ -24,6 +22,6 @@ void flash(int n){
     digitalWrite(13,LOW);
     delay(500);
     Serial.println(i+1);
-      }
-      Serial.println("Flash complete");
+  }
+  Serial.println("Flash complete");
 }
