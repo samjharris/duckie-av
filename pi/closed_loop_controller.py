@@ -17,17 +17,15 @@ from  odometry_guided_feedback_controller import get_PWMs
 
 timeslice = .25
 x_act = [0,0,0]
-PWM_L, PWM_R, time = 0, 0, 0
+PWM_L, PWM_R, curr_time = 0, 0, 0
 x_ref = positions.get_x_ref_func_one_meter()
 
-while true:
-    PWM_L, PWM_R = get_PWMs(x_ref, time, PWM_L, PWM_R)
+while True:
+    PWM_L, PWM_R = get_PWMs(x_ref, curr_time, x_act, PWM_L, PWM_R)
     # send to PWMs to Arduino
     time.sleep(timeslice)
+    curr_time += timeslice
     # wait for input from Arduino: wheel distances as dist_l and dist_r
+    dist_l, dist_r = 0,0
     x_act_new = positions.get_x_act_new(x_act, dist_l, dist_r)
-    if x_act == x_act_new:
-        print("Route complete")
-        break
-    else:
-        x_act = x_act_new
+    x_act = x_act_new
