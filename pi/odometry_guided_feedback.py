@@ -1,5 +1,5 @@
 # CICS 503 Fall 2019 DuckieTown Group 4
-# Odometry-Guided Feedback Controller
+# Odometry-Guided Feedback
 
 import numpy as np
 
