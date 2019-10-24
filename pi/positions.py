@@ -5,7 +5,6 @@
 # takes some route information and returns a route function
 # def get_x_ref_func():
 
-# Takes time in seconds, returns triple [x_coordinate, y_coordinate, theta]
 import numpy as np
 
 def get_x_ref_func_one_meter():
@@ -44,6 +43,29 @@ def get_x_ref_func_circle():
     def x_ref_func_circle(t):
         return position_by_time_list[t]
     return x_ref_func_circle
+
+
+def get_x_act_new(x_act_prev, dist_l, dist_r):
+    dist_diff = dist_r - dist_l
+
+    # TODO measure this
+    wheelbase = 1
+
+    # delta_theta = np.rad2deg(np.arctan2[dist_diff],[wheelbase])
+    delta_theta = np.rad2deg(dist_diff/wheelbase) % 360
+    new_theta = x_act_prev[2] + delta_theta
+    avg_theta = x_act_prev[2] + delta_theta / 2
+
+    # TODO update with better approximation
+    delta_x_length = (dist_l + dist_r) / 2
+
+    delta_x_x_component = delta_x_length * np.cos(np.deg2rad(avg_theta))
+    delta_x_y_component = delta_x_length * np.sin(np.deg2rad(avg_theta))
+
+    new_x_act_x_component = x_act_prev[0] + delta_x_x_component
+    new_x_act_y_component = x_act_prev[1] + delta_x_y_component
+
+    return (new_x_act_x_component, new_x_act_y_component, new_theta)
 
 def test():
     x = get_x_ref_func_one_meter()
