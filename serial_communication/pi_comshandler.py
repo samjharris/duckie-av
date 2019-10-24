@@ -1,47 +1,57 @@
 import serial
 import serial.tools.list_ports as list_ports
 
-## connect to the open serial port
-ports = list(list_ports.comports())
-ports = [p[0] for p in ports]
-if len(ports) == 0:
-    print("error, couldn't find any open ports")
-    exit()
-print("found open ports: {}".format(ports))
+##Serial connection object definition
+class SerialCon():
+	def __init__(self):
+		self.baud_rate=115200
+		self.port=None
+		self.sc=None
 
-## set the baud rate - this must match the uno's
-baud_rate = 115200
-#baud_rate = 9600
+	##Set the baud rate
+	def setBaud(self,baud):
+		self.baud_rate=baud
+		return
 
-##initialize our serial connection
-s_con = serial.Serial(ports[0], baud_rate)
-s_con.flushInput()
+	##Set the port
+	def setPort(self,new_port):
+		self.port=new_port
+		return
 
-comp_list = ["Flash complete\r\n", "Hello Pi, This is Arduino UNO...\r\n"]
+	##Return a list of open ports
+	def getOpenPorts(self):
+		ports=list(list_ports.comports())
+		ports=[p[0] for p in ports]
+		return ports
 
-##begin control loop
-while True:
+	##Initialize the serial connection
+	def initConnection(self):
+		self.sc=serial.Serial(self.port,self.baud_rate)
+		self.sc.flushInput()
+		#todo:handlefailure?
+		return
 
-	##read data over serial while data is being written
-	data = s_con.
+	##Read data from the serial port
+	def write(self,data):
+		self.sc.write(data)
+		#todo:handleerrors
+		return
 
+	##Write data to the serial port
+	def read(self):
+		data=self.sc.read(self.sc.inWaiting())
+		#readgetsonebyte,readLinegetsline
+		#todo:whentherewasnodata,orbusy,doesthisreturnNull?Weshouldhandlethis
+		return data
 
+##Usage example
+mySerial=SerialCon()
+ports=mySerial.getOpenPorts() #if this list is empty, no open ports
+mySerial.setPort(ports[0])
+mySerial.setBaud(115200)
+mySerial.initConnection()
 
-	if s1.inWaiting() > 0:
-		inputValue = s1.readline() #.read(n) reads n bytes
-		print(inputValue)
-		if inputValue in comp_list:
-			try:
-				n = input("Set arduino flash times:")
-				s1.write('%d' % n)
-			except:
-				print("Input error, please input a number")
-				s1.write('0')
-
-
-
-
-def sendData(data):
-	return
-
-def 
+x=0
+y=0
+x=mySerial.read()
+mySerial.write(y)
