@@ -17,8 +17,12 @@ def get_x_ref_func_one_meter():
     for i in range(int(amount_of_slices) + 1):
         position_by_time_list.append(np.array([(speed_goal * (i / 4)), 0, 0]))
     def x_ref_func_one_meter(t):
-        index = t / timeslice
-        return position_by_time_list[index]
+        index = int(t / timeslice)
+        length = len(position_by_time_list)
+        if index >= length:
+            return position_by_time_list[length - 1]
+        else:
+            return position_by_time_list[index]
     return x_ref_func_one_meter
 
 def get_x_ref_func_circle():
@@ -42,8 +46,12 @@ def get_x_ref_func_circle():
         position_by_time_list.append(np.array([x,y,theta]))
         theta = (theta + delta_theta_per_timeslice) % 360
     def x_ref_func_circle(t):
-        index = t / timeslice
-        return position_by_time_list[index]
+        index = int(t / timeslice)
+        length = len(position_by_time_list)
+        if index >= length:
+            return position_by_time_list[length - 1]
+        else:
+            return position_by_time_list[index]
     return x_ref_func_circle
 
 
