@@ -56,8 +56,8 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
 
     # Add delta PWMs to previous values to obtain new values
     # Subtract rotational term from left and add to right (right hand rule)
-    PWM_L_new = PWM_L_prev + delta_PWM_trans - delta_PWM_rot
-    PWM_R_new = PWM_R_prev + delta_PWM_trans + delta_PWM_rot
+    PWM_L_new = min(max(PWM_L_prev + delta_PWM_trans - delta_PWM_rot, -400), 400)
+    PWM_R_new = min(max(PWM_R_prev + delta_PWM_trans + delta_PWM_rot, -400), 400)
 
     return (PWM_L_new, PWM_R_new)
 
