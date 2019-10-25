@@ -1,99 +1,82 @@
+#include "DualMC33926MotorShield.h"
 // We assume that the two back encoders plugged into the interrupt pins
 // Note: interrupt pin 0 is actually pin 2
 // Note: interrupt pin 1 is actually pin 3
 
-#include "DualMC33926MotorShield.h"
-
 #define ENCODER_PIN_BACK_LEFT 2
-#define ENCODER_PIN_BACK_RIGHT 3  //analogWrite
-#define ENCODER_PIN_FRONT_LEFT 4
-#define ENCODER_PIN_FRONT_RIGHT 5  //analogWrite
-
-volatile long left_encoder_counter = 0;
-volatile long right_encoder_counter = 0;
-
-int incoming [2];
+#define ENCODER_PIN_BACK_RIGHT 3
+#define ENCODER_PIN_FRONT_LEFT 5
+#define ENCODER_PIN_FRONT_RIGHT 6
 
 DualMC33926MotorShield md;
+long left_encoder_counter = 0;
+long right_encoder_counter = 0;
+bool update_PWM = false;
+volatile int left_PWM = 0;
+volatile int right_PWM = 0;
+volatile unsigned long t = 0;
+//Mark quadrature packets with DEADBEEF
+byte quad_packet[] = {0xDE,0xAD,0xBE,0xEF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+//Mark sonar packets with DEAFFEED
+byte sonar_packet[] = {0xDE,0xAF,0xFE,0xED,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
-// initialize the encoder pins and motorshield
 void setup() {
   // put your setup code here, to run once
   Serial.begin(115200);
-
+  md.init();
   attachInterrupt(0, left_encoder_interrupt_function, CHANGE);
   attachInterrupt(1, right_encoder_interrupt_function, CHANGE);
-  md.init();
+  t = millis();
 }
 
-// currently pass the left and right encoder counters 
-// and requent then listens to motor control values
-// every 0.1 second
 void loop() {
-
-  // put your main code here, to run repeatedly
-  Serial.print(left_encoder_counter);
-  Serial.print(" ");
-  Serial.print(right_encoder_counter);
-  Serial.println();
-  // Serial.println("sent motor command");
-
-  // if there's a bug and the serial buffer gets too big
-  // while (Serial.available() > 4 * 2) {
-  // }
-
-  // sent a message to pi to request motor value
-  //TODO: add delay to not request values every 0.1 second
-  Serial.println("Motor Values? Pi");
-  while (Serial.available()) {
-  	// take in the values from Pi
-    for (int i = 0; i < 2; i++) {
-      incoming[i] = Serial.read();
+  //TODO:
+  //Handle PING sensor here
+  
+  //Handle quadrature
+  if(millis() > t + 500){ //wait 500 milliseconds without wasting cycles
+    t = millis();
+    //capture the current values for transmission (these are volatile!)
+    //TODO: mutex lock?
+    long _left_encoder_counter = left_encoder_counter;
+    long _right_encoder_counter = right_encoder_counter;
+    //package them up 
+    quad_packet[4] = (byte)(_left_encoder_counter >> 24) & 0xFF;
+    quad_packet[5] = (byte)(_left_encoder_counter >> 16) & 0xFF;
+    quad_packet[6] = (byte)(_left_encoder_counter >> 8) & 0xFF;
+    quad_packet[7] = (byte)(_left_encoder_counter) & 0xFF;
+    quad_packet[8] = (byte)(_right_encoder_counter >> 24) & 0xFF;
+    quad_packet[9] = (byte)(_right_encoder_counter >> 16) & 0xFF;
+    quad_packet[10] = (byte)(_right_encoder_counter >> 8) & 0xFF;
+    quad_packet[11] = (byte)(_right_encoder_counter) & 0xFF;
+    //send each byte over serial
+    for(int i = 0; i < 12; i++){
+      Serial.print(quad_packet[i],HEX);
     }
-    int left_motor_speed = incoming[0];
-    int right_motor_speed = incoming[1];
-    // need to debug this, either the disks are no working well
-    // or the code is off, the values returned doesn't always update
-    Serial.print("left speed parse: ");
-    Serial.print(left_motor_speed);
-    Serial.print(" right speed parse: ");
-    Serial.print(right_motor_speed);
-    Serial.println();
-    // Serial.println();
-    set_motor_speed(left_motor_speed, right_motor_speed);
+    Serial.print('\n');
+     //Serial.println(left_encoder_counter);
+    //Serial.println(right_encoder_counter);
+    //left_encoder_counter = 0;
+    //right_encoder_counter = 0;
   }
 
-  delay(100);  // delay by 0.1 second
-}
-
-
-void stopIfFault()
-{
-  if (md.getFault())
-  {
-    Serial.println("fault");
-//    while (1);
+  //Set the motor speed
+  if(update_PWM){
+    set_motor_speed(left_PWM, right_PWM); 
+    update_PWM = false;
   }
+   
 }
-
-// set the motor speed
-void set_motor_speed(int left_pwm, int right_pwm) {
-  md.setM1Speed(left_pwm);
-  md.setM2Speed(right_pwm);
-  stopIfFault(); // currently this always is true and stops the program.
-  delay(2);
-}
-
 
 void left_encoder_interrupt_function() {
   bool back_left = (digitalRead(ENCODER_PIN_BACK_LEFT) == HIGH);
   bool front_left = (digitalRead(ENCODER_PIN_FRONT_LEFT) == HIGH);
 
-  if ((!back_left && !front_left) || (back_left && front_left)) {
+  if((!back_left && !front_left) || (back_left && front_left)) {
     // moving forward
     left_encoder_counter += 1;
   }
-  else if ((!back_left && front_left) || (back_left && !front_left)) {
+  else if((!back_left && front_left) || (back_left && !front_left)) {
     // moving backward
     left_encoder_counter += -1;
   }
@@ -103,12 +86,58 @@ void right_encoder_interrupt_function() {
   bool back_right = (digitalRead(ENCODER_PIN_BACK_RIGHT) == HIGH);
   bool front_right = (digitalRead(ENCODER_PIN_FRONT_RIGHT) == HIGH);
 
-  if ((!back_right && !front_right) || (back_right && front_right)) {
+  if((!back_right && !front_right) || (back_right && front_right)) {
     // moving forward
     right_encoder_counter += 1;
   }
-  else if ((!back_right && front_right) || (back_right && !front_right)) {
+  else if((!back_right && front_right) || (back_right && !front_right)) {
     // moving backward
     right_encoder_counter += -1;
   }
+}
+
+void serialEvent() {
+  //PWM packet format: [0xDE 0xAD 0xBE 0xEF LL LL LL LL RR RR RR RR] TODO: ADD PAIRITY
+  //SEEK DEAD
+  if(Serial.available() >= 12){
+      if((byte)Serial.read() != 0xDE)
+        return;
+      if((byte)Serial.read() != 0xAD)
+        return;
+      if((byte)Serial.read() != 0xBE)
+        return;
+      if((byte)Serial.read() != 0xEF)
+        return;
+        
+      byte l_buff[4];
+      byte r_buff[4];
+      for(int i = 0; i < 4; i++){
+        l_buff[i] = (byte)Serial.read();
+      }
+      for(int i = 0; i < 4; i++){
+        r_buff[i] = (byte)Serial.read();
+      }
+
+      //TODO: this but with shifts for speed
+      left_PWM = l_buff[0]*256*256*256 + l_buff[1]*256*256 + l_buff[2]*256 + l_buff[3];
+      right_PWM = r_buff[0]*256*256*256 + r_buff[1]*256*256 + r_buff[2]*256 + r_buff[3];
+      update_PWM = true;
+   }
+}
+
+void stopIfFault()
+{
+  if (md.getFault())
+  {
+    Serial.println("fault");
+    while (1);
+  }
+}
+
+// set the motor speed
+void set_motor_speed(int left_pwm, int right_pwm) {
+  md.setM1Speed(left_pwm);
+  md.setM2Speed(right_pwm);
+  stopIfFault(); // currently this always is true and stops the program.
+  //delay(2);
 }
