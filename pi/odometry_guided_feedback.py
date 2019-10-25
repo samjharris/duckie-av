@@ -19,14 +19,14 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
 
     # TODO: measure this
     # mass of the robot (kilograms)
-    m = 1.0
+    m = 0.750
 
     # TODO: measure this
     # yoke point distance from center of the wheel base (meters)
     r_length = 1.0
 
     K = 1  # spring constant
-    B = 1  # damper constant
+    B = 0.1  # damper constant
 
     # TODO: check this formula
     # https://en.wikipedia.org/wiki/Moment_of_inertia
