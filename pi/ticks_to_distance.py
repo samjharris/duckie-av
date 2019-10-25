@@ -41,6 +41,8 @@ s_con.flushInput()
 # to establish handshake with arduino to sent PWM value for motors.
 comp_list = ["Motor Values? Pi\r\n"]
 
+start_time = int(round(time.time() * 1000))
+
 ##begin control loop
 while True:
 	if s_con.inWaiting() > 0:
@@ -52,21 +54,30 @@ while True:
 		# TODO: set some delay so the PWM won't be continuously pass to Arduino
 		# also currently, when PWM is pass in, it always ends up in the 
 		# fault
+
 		if inputValue in comp_list:
-			try:
+			# try:
+			current_time = int(round(time.time() * 1000))
+			print("time difference: %d milliseconds" %(current_time-start_time))
+			if current_time - start_time > 500:
 				# TODO: change to get the new PWM values
 				# also hasn't check if the values passed in actually corresponds
 				# to the correct wheel. 
-				right_value,left_value = random.randInt(-400, 400), random.randInt(-400, 400)
-
+				right_value,left_value = random.randint(0, 200), random.randint(0, 200)
+				print("right %d, left %d" %(right_value,left_value))
 				# pass the values to Arduino
 				# if want to pass more Int values add to '>BB', each B means
 				# one byte value pass in the serial.  On Arduino's side,
 				# Serial.read() will be turn it back into int. 
 				s_con.write(struct.pack('>BB', right_value, left_value))
-			except:
-				print("error passing motor values")
-				s_con.write('0')
+				start_time = current_time
+			else: 
+
+				print("not enough time")
+				continue
+			# except:
+			# 	print("error passing motor values")
+			# 	s_con.write('0')
 
 		# check if Arudiono is trying to pass in the tick values
 		if len(inputValue.split()) != 2:
