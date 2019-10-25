@@ -16,6 +16,7 @@ int incoming [2];
 
 DualMC33926MotorShield md;
 
+// initialize the encoder pins and motorshield
 void setup() {
   // put your setup code here, to run once
   Serial.begin(115200);
@@ -25,6 +26,9 @@ void setup() {
   md.init();
 }
 
+// currently pass the left and right encoder counters 
+// and requent then listens to motor control values
+// every 0.1 second
 void loop() {
 
   // put your main code here, to run repeatedly
@@ -35,19 +39,21 @@ void loop() {
   // Serial.println("sent motor command");
 
   // if there's a bug and the serial buffer gets too big
-  while (Serial.available() > 4 * 2) {
-  }
+  // while (Serial.available() > 4 * 2) {
+  // }
 
   // sent a message to pi to request motor value
-  //TODO: add delay to not request values every time
+  //TODO: add delay to not request values every 0.1 second
   Serial.println("Motor Values? Pi");
   while (Serial.available()) {
-    // int left_motor_speed = Serial.read();
+  	// take in the values from Pi
     for (int i = 0; i < 2; i++) {
       incoming[i] = Serial.read();
     }
     int left_motor_speed = incoming[0];
     int right_motor_speed = incoming[1];
+    // need to debug this, either the disks are no working well
+    // or the code is off, the values returned doesn't always update
     Serial.print("left speed parse: ");
     Serial.print(left_motor_speed);
     Serial.print(" right speed parse: ");
@@ -57,8 +63,9 @@ void loop() {
     set_motor_speed(left_motor_speed, right_motor_speed);
   }
 
-  delay(100);
+  delay(100);  // delay by 0.1 second
 }
+
 
 void stopIfFault()
 {
@@ -69,20 +76,11 @@ void stopIfFault()
   }
 }
 
-void set_motor_speed(int left_speed, int right_speed) {
-  md.setM1Speed(left_speed);
-  md.setM2Speed(right_speed);
-  stopIfFault();
-  if (abs(left_speed) % 200 == 100)
-  {
-    Serial.print("M1 current: ");
-    Serial.println(md.getM1CurrentMilliamps());
-  }
-  if (abs(right_speed) % 200 == 100)
-  {
-    Serial.print("M2 current: ");
-    Serial.println(md.getM2CurrentMilliamps());
-  }
+// set the motor speed
+void set_motor_speed(int left_pwm, int right_pwm) {
+  md.setM1Speed(left_pwm);
+  md.setM2Speed(right_pwm);
+  stopIfFault(); // currently this always is true and stops the program.
   delay(2);
 }
 
