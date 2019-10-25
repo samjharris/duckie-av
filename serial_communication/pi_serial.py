@@ -52,16 +52,22 @@ class SerialCon():
 		#todo:handle failure?
 		return
 
-	##Read data from the serial port
+	##Write data to the serial port
 	def write(self,data):
 		self.sc.write(data)
 		#todo:handle errors
 		return
 
-	##Write data to the serial port
-	def read(self):
+	##Read data from the serial port
+	def readAll(self):
 		data=self.sc.read(self.sc.inWaiting())
 		#read() gets one byte, readLine() gets line
 		#todo: must handle when there was no data, or busy
 		return data
 
+	##Read data from the serial port
+	def readN(self, n):
+		data=self.sc.read(n)
+		#read() gets one byte, readLine() gets line
+		#todo: must handle when there was no data, or busy
+		return data
