@@ -73,8 +73,8 @@ class SerialCon():
 		return data
 
 	##Read data from the serial port
-	def readLine(self, n):
-		data=self.sc.readLine(n)
+	def readLine(self):
+		data=self.sc.readline()
 		#read() gets one byte, readLine() gets line
 		#todo: must handle when there was no data, or busy
 		return data
