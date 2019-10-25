@@ -19,9 +19,10 @@ from ticks_to_distance import get_distances
 from struct import *
 
 quad_marker = 1145128260
+# quad_marker = int("deadbeef", 16)
+quad_marker_bytes = pack('I', quad_marker)
 sonar_marker = int("deaffeed", 16)
 PWM_begin_marker = int("deadbeef", 16)
-PWM_end_marker = int("beefdead", 16)
 timeslice = .25
 x_act = [0,0,0]
 PWM_L, PWM_R, curr_time = 0, 0, 0
@@ -58,23 +59,21 @@ while True:
     msg_in = []
     while True:
         # read in a byte at a time: verify DEADBEEF, then read the rest of the line
+        found_deadbeef = False
         while True:
-            char_in = sc.read()
-            if char_in ==
-        if length == 17:
-            break
-        else:
+            for i in range(4):
+                char_in = sc.read()
+                if char_in != quad_marker_bytes[i]
+                    break
+                if i == 3:
+                    found_deadbeef = True
+        if found_deadbeef:
             msg_in = sc.readAll()
             print(msg_in)
-    print(msg_in)
-    print(len(msg_in))
+            print(len(msg_in))
     # translate msg_in into left and right ticks and ping output
     # format 16 bytes, start with deadbeef for quadrature and deaffeed end with newline
-    msg_marker, l_ticks, r_ticks, junk_1, junk_2 = unpack('Iiiic', msg_in)
-    print(msg_marker)
-    print(quad_marker)
-    if msg_marker != quad_marker:
-        raise Exception('Message marker is not deadbeef')
+    l_ticks, r_ticks, junk_1, junk_2 = unpack('iiic', msg_in)
     dist_l, dist_r = get_distances(l_ticks - curr_l_ticks, r_ticks - curr_r_ticks)
     x_act_new = positions.get_x_act_new(x_act, dist_l, dist_r)
     x_act = x_act_new
