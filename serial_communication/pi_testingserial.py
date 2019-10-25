@@ -1,4 +1,4 @@
-from pi_serial import SerialCon 
+from pi_serial import SerialCon
 import time
 
 ##Initialize serial communication
@@ -17,8 +17,12 @@ sc.initConnection()
 
 
 x = 0
+# while (True):
+# 	sc.write(chr(x))
+# 	x+=1
+# 	time.sleep(1)
+
 while (True):
-	sc.write(x)
+	data = sc.read()
 	x+=1
 	time.sleep(1)
-	
