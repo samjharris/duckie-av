@@ -60,13 +60,12 @@ while True:
     while True:
         # read in a byte at a time: verify DEADBEEF, then read the rest of the line
         found_deadbeef = False
-        while True:
-            for i in range(4):
-                char_in = sc.read()
-                if char_in != quad_marker_bytes[i]
-                    break
-                if i == 3:
-                    found_deadbeef = True
+        for i in range(4):
+            char_in = sc.read()
+            if char_in != quad_marker_bytes[i]
+                break
+            if i == 3:
+                found_deadbeef = True
         if found_deadbeef:
             msg_in = sc.readAll()
             print(msg_in)
