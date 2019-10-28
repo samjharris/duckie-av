@@ -32,6 +32,12 @@ void setup() {
 void loop() {
   //TODO:
   //Handle PING sensor here
+  //Get a reading periodically
+  ////if that reading tells us there is an object close
+  //////disable interupts
+  //////while there is an object in front of us
+  ////////repeatedly send PWM = 0,0
+  //////enable interupts
 
   //Handle quadrature
   if(millis() > t + 500){ //wait 500 milliseconds without wasting cycles
