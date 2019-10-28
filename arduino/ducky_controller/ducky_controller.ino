@@ -1,5 +1,4 @@
 #include "DualMC33926MotorShield.h"
-#include <mutex>
 // We assume that the two back encoders plugged into the interrupt pins
 // Note: interrupt pin 0 is actually pin 2
 // Note: interrupt pin 1 is actually pin 3
@@ -12,8 +11,6 @@
 DualMC33926MotorShield md;
 long left_encoder_counter = 0;
 long right_encoder_counter = 0;
-mutex left_encoder_mutex;
-mutex right_encoder_mutex;
 bool update_PWM = false;
 volatile int left_PWM = 0;
 volatile int right_PWM = 0;
@@ -41,12 +38,8 @@ void loop() {
     t = millis();
     //capture the current values for transmission (these are volatile!)
     //TODO: mutex lock?
-    left_encoder_mutex.lock();
     long _left_encoder_counter = left_encoder_counter;
-    left_encoder_mutex.unlock();
-    right_encoder_mutex.lock();
     long _right_encoder_counter = right_encoder_counter;
-    right_encoder_mutex.unlock();
     //package them up
     quad_packet[4] = (byte)(_left_encoder_counter >> 24) & 0xFF;
     quad_packet[5] = (byte)(_left_encoder_counter >> 16) & 0xFF;
@@ -81,15 +74,11 @@ void left_encoder_interrupt_function() {
 
   if((!back_left && !front_left) || (back_left && front_left)) {
     // moving forward
-    left_encoder_mutex.lock();
     left_encoder_counter += 1;
-    left_encoder_mutex.unlock();
   }
   else if((!back_left && front_left) || (back_left && !front_left)) {
     // moving backward
-    left_encoder_mutex.lock();
     left_encoder_counter += -1;
-    left_encoder_mutex.unlock();
   }
 }
 
@@ -99,15 +88,11 @@ void right_encoder_interrupt_function() {
 
   if((!back_right && !front_right) || (back_right && front_right)) {
     // moving forward
-    right_encoder_mutex.lock();
     right_encoder_counter += 1;
-    right_encoder_mutex.unlock();
   }
   else if((!back_right && front_right) || (back_right && !front_right)) {
     // moving backward
-    right_encoder_mutex.lock();
     right_encoder_counter += -1;
-    right_encoder_mutex.unlock();
   }
 }
 
