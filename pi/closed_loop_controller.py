@@ -62,7 +62,7 @@ while True:
         found_deadbeef = False
         for i in range(4):
             char_in = sc.read()
-            if char_in != quad_marker_bytes[i]
+            if char_in != quad_marker_bytes[i]:
                 break
             if i == 3:
                 found_deadbeef = True
