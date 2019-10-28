@@ -61,7 +61,7 @@ while True:
         # read in a byte at a time: verify DEADBEEF, then read the rest of the line
         found_deadbeef = False
         for i in range(4):
-            char_in = sc.read()
+            char_in = sc.readN(1)
             if char_in != quad_marker_bytes[i]:
                 break
             if i == 3:
