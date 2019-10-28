@@ -47,14 +47,10 @@ void loop() {
     long _left_encoder_counter = left_encoder_counter;
     long _right_encoder_counter = right_encoder_counter;
     //package them up
-    quad_packet[4] = (_left_encoder_counter >> 24) & 0xFF;
-    quad_packet[5] = (_left_encoder_counter >> 16) & 0xFF;
-    quad_packet[6] = (_left_encoder_counter >> 8) & 0xFF;
-    quad_packet[7] = (_left_encoder_counter) & 0xFF;
-    quad_packet[8] = (_right_encoder_counter >> 24) & 0xFF;
-    quad_packet[9] = (_right_encoder_counter >> 16) & 0xFF;
-    quad_packet[10] = (_right_encoder_counter >> 8) & 0xFF;
-    quad_packet[11] = (_right_encoder_counter) & 0xFF;
+
+    memcpy(&quad_packet+4,_left_encoder_counter,4);
+    memcpy(&quad_packet+8,_right_encoder_counter,4);
+
     //send each byte over serial
     for(int i = 0; i < 12; i++){
       Serial.print(quad_packet[i],HEX);
@@ -103,32 +99,29 @@ void right_encoder_interrupt_function() {
 }
 
 void serialEvent() {
+  noInterrupts();   //Disable interrupts during this routine
   //PWM packet format: [0xDE 0xAD 0xBE 0xEF LL LL LL LL RR RR RR RR] TODO: ADD PAIRITY
-  //SEEK DEAD
-  if(Serial.available() >= 12){
+  while(Serial.available()){
+      //Seek the packet-header: DEADBEEF
       if((byte)Serial.read() != 0xDE)
-        return;
+        continue;
       if((byte)Serial.read() != 0xAD)
-        return;
+        continue;
       if((byte)Serial.read() != 0xBE)
-        return;
+        continue;
       if((byte)Serial.read() != 0xEF)
-        return;
+        continue;
 
       byte l_buff[4];
       byte r_buff[4];
-      for(int i = 0; i < 4; i++){
-        l_buff[i] = (byte)Serial.read();
-      }
-      for(int i = 0; i < 4; i++){
-        r_buff[i] = (byte)Serial.read();
-      }
+      Serial.readBytes(l_buff, 4);
+      Serial.readBytes(r_buff, 4);
 
-      //TODO: this but with shifts for speed
-      left_PWM = l_buff[0]*256*256*256 + l_buff[1]*256*256 + l_buff[2]*256 + l_buff[3];
-      right_PWM = r_buff[0]*256*256*256 + r_buff[1]*256*256 + r_buff[2]*256 + r_buff[3];
+      memcpy(&left_PWM, &l_buff, 4);
+      memcpy(&right_PWM, &r_buff, 4);
       update_PWM = true;
    }
+   interrupts(); //We are done, re-enable interrupts
 }
 
 void stopIfFault()
