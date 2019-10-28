@@ -46,7 +46,7 @@ sc.initConnection()
 
 counter = 0
 while True:
-    print(counter)
+    print(f"counter: {counter}")
     counter += 1
     PWM_L, PWM_R = get_PWMs(x_ref, curr_time, x_act, PWM_L, PWM_R)
     ##Send to PWMs to Arduino
@@ -68,8 +68,8 @@ while True:
                 found_deadbeef = True
         if found_deadbeef:
             msg_in = sc.readAll()
-            print(msg_in)
-            print(len(msg_in))
+            print(f"msg_in: {msg_in}")
+            print(f"len(msg_in): {len(msg_in)}")
     # translate msg_in into left and right ticks and ping output
     # format 16 bytes, start with deadbeef for quadrature and deaffeed end with newline
     l_ticks, r_ticks, junk_1, junk_2 = unpack('iiic', msg_in)
