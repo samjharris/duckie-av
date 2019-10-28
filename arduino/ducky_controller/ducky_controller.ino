@@ -9,8 +9,8 @@
 #define ENCODER_PIN_FRONT_RIGHT 6
 
 DualMC33926MotorShield md;
-long left_encoder_counter = 0;
-long right_encoder_counter = 0;
+volatile long left_encoder_counter = 0;
+volatile long right_encoder_counter = 0;
 bool update_PWM = false;
 volatile int left_PWM = 0;
 volatile int right_PWM = 0;
@@ -34,10 +34,10 @@ void loop() {
   //Handle PING sensor here
   //Get a reading periodically
   ////if that reading tells us there is an object close
-  //////disable interupts
+  //////disable interupts (noInterrupts();)
   //////while there is an object in front of us
   ////////repeatedly send PWM = 0,0
-  //////enable interupts
+  //////enable interupts (interrupts();)
 
   //Handle quadrature
   if(millis() > t + 500){ //wait 500 milliseconds without wasting cycles
@@ -47,20 +47,20 @@ void loop() {
     long _left_encoder_counter = left_encoder_counter;
     long _right_encoder_counter = right_encoder_counter;
     //package them up
-    quad_packet[4] = (byte)(_left_encoder_counter >> 24) & 0xFF;
-    quad_packet[5] = (byte)(_left_encoder_counter >> 16) & 0xFF;
-    quad_packet[6] = (byte)(_left_encoder_counter >> 8) & 0xFF;
-    quad_packet[7] = (byte)(_left_encoder_counter) & 0xFF;
-    quad_packet[8] = (byte)(_right_encoder_counter >> 24) & 0xFF;
-    quad_packet[9] = (byte)(_right_encoder_counter >> 16) & 0xFF;
-    quad_packet[10] = (byte)(_right_encoder_counter >> 8) & 0xFF;
-    quad_packet[11] = (byte)(_right_encoder_counter) & 0xFF;
+    quad_packet[4] = (_left_encoder_counter >> 24) & 0xFF;
+    quad_packet[5] = (_left_encoder_counter >> 16) & 0xFF;
+    quad_packet[6] = (_left_encoder_counter >> 8) & 0xFF;
+    quad_packet[7] = (_left_encoder_counter) & 0xFF;
+    quad_packet[8] = (_right_encoder_counter >> 24) & 0xFF;
+    quad_packet[9] = (_right_encoder_counter >> 16) & 0xFF;
+    quad_packet[10] = (_right_encoder_counter >> 8) & 0xFF;
+    quad_packet[11] = (_right_encoder_counter) & 0xFF;
     //send each byte over serial
     for(int i = 0; i < 12; i++){
       Serial.print(quad_packet[i],HEX);
     }
     Serial.print('\n');
-     //Serial.println(left_encoder_counter);
+    //Serial.println(left_encoder_counter);
     //Serial.println(right_encoder_counter);
     //left_encoder_counter = 0;
     //right_encoder_counter = 0;
