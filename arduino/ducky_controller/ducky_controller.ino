@@ -9,8 +9,8 @@
 #define ENCODER_PIN_FRONT_RIGHT 6
 
 DualMC33926MotorShield md;
-long left_encoder_counter = 0;
-long right_encoder_counter = 0;
+volatile long left_encoder_counter = 0;
+volatile long right_encoder_counter = 0;
 bool update_PWM = false;
 volatile int left_PWM = 0;
 volatile int right_PWM = 0;
@@ -32,7 +32,13 @@ void setup() {
 void loop() {
   //TODO:
   //Handle PING sensor here
-  
+  //Get a reading periodically
+  ////if that reading tells us there is an object close
+  //////disable interupts (noInterrupts();)
+  //////while there is an object in front of us
+  ////////repeatedly send PWM = 0,0
+  //////enable interupts (interrupts();)
+
   //Handle quadrature
   if(millis() > t + 500){ //wait 500 milliseconds without wasting cycles
     t = millis();
@@ -40,26 +46,31 @@ void loop() {
     //TODO: mutex lock?
     long _left_encoder_counter = left_encoder_counter;
     long _right_encoder_counter = right_encoder_counter;
-    Serial.print("left ");
-    Serial.print(_left_encoder_counter);
-    Serial.print("right ");
-    Serial.print(_right_encoder_counter);
-    Serial.println();
+    // Serial.print("left ");
+    // Serial.print(_left_encoder_counter);
+    // Serial.print("right ");
+    // Serial.print(_right_encoder_counter);
+    // Serial.println();
     //package them up 
-    quad_packet[4] = (byte)(_left_encoder_counter >> 24) & 0xFF;
-    quad_packet[5] = (byte)(_left_encoder_counter >> 16) & 0xFF;
-    quad_packet[6] = (byte)(_left_encoder_counter >> 8) & 0xFF;
-    quad_packet[7] = (byte)(_left_encoder_counter) & 0xFF;
-    quad_packet[8] = (byte)(_right_encoder_counter >> 24) & 0xFF;
-    quad_packet[9] = (byte)(_right_encoder_counter >> 16) & 0xFF;
-    quad_packet[10] = (byte)(_right_encoder_counter >> 8) & 0xFF;
-    quad_packet[11] = (byte)(_right_encoder_counter) & 0xFF;
+    // quad_packet[4] = (byte)(_left_encoder_counter >> 24) & 0xFF;
+    // quad_packet[5] = (byte)(_left_encoder_counter >> 16) & 0xFF;
+    // quad_packet[6] = (byte)(_left_encoder_counter >> 8) & 0xFF;
+    // quad_packet[7] = (byte)(_left_encoder_counter) & 0xFF;
+    // quad_packet[8] = (byte)(_right_encoder_counter >> 24) & 0xFF;
+    // quad_packet[9] = (byte)(_right_encoder_counter >> 16) & 0xFF;
+    // quad_packet[10] = (byte)(_right_encoder_counter >> 8) & 0xFF;
+    // quad_packet[11] = (byte)(_right_encoder_counter) & 0xFF;
+
+    //package them up another way
+    memcpy(&quad_packet+4,_left_encoder_counter,4);
+    memcpy(&quad_packet+8,_right_encoder_counter,4);
+
     //send each byte over serial
     for(int i = 0; i < 12; i++){
       Serial.print(quad_packet[i],HEX);
     }
     Serial.print('\n');
-     //Serial.println(left_encoder_counter);
+    //Serial.println(left_encoder_counter);
     //Serial.println(right_encoder_counter);
     //left_encoder_counter = 0;
     //right_encoder_counter = 0;
@@ -67,21 +78,21 @@ void loop() {
 
   //Set the motor speed
   if(update_PWM){
-    set_motor_speed(left_PWM, right_PWM); 
+    set_motor_speed(left_PWM, right_PWM);
     update_PWM = false;
   }
-   
+
 }
 
 void left_encoder_interrupt_function() {
   bool back_left = (digitalRead(ENCODER_PIN_BACK_LEFT) == HIGH);
   bool front_left = (digitalRead(ENCODER_PIN_FRONT_LEFT) == HIGH);
 
-  if((!back_left && !front_left) || (back_left && front_left)) {
+  if(!(back_left || front_left) || (back_left && front_left)) {
     // moving forward
     left_encoder_counter += 1;
   }
-  else if((!back_left && front_left) || (back_left && !front_left)) {
+  else{ //if((!back_left && front_left) || (back_left && !front_left)) {
     // moving backward
     left_encoder_counter += -1;
   }
@@ -91,43 +102,40 @@ void right_encoder_interrupt_function() {
   bool back_right = (digitalRead(ENCODER_PIN_BACK_RIGHT) == HIGH);
   bool front_right = (digitalRead(ENCODER_PIN_FRONT_RIGHT) == HIGH);
 
-  if((!back_right && !front_right) || (back_right && front_right)) {
+  if(!(back_right || front_right) || (back_right && front_right)) {
     // moving forward
     right_encoder_counter += 1;
   }
-  else if((!back_right && front_right) || (back_right && !front_right)) {
+  else{ //if((!back_right && front_right) || (back_right && !front_right)) {
     // moving backward
     right_encoder_counter += -1;
   }
 }
 
 void serialEvent() {
+  noInterrupts();   //Disable interrupts during this routine
   //PWM packet format: [0xDE 0xAD 0xBE 0xEF LL LL LL LL RR RR RR RR] TODO: ADD PAIRITY
-  //SEEK DEAD
-  if(Serial.available() >= 12){
+  while(Serial.available()){
+      //Seek the packet-header: DEADBEEF
       if((byte)Serial.read() != 0xDE)
-        return;
+        continue;
       if((byte)Serial.read() != 0xAD)
-        return;
+        continue;
       if((byte)Serial.read() != 0xBE)
-        return;
+        continue;
       if((byte)Serial.read() != 0xEF)
-        return;
-        
+        continue;
+
       byte l_buff[4];
       byte r_buff[4];
-      for(int i = 0; i < 4; i++){
-        l_buff[i] = (byte)Serial.read();
-      }
-      for(int i = 0; i < 4; i++){
-        r_buff[i] = (byte)Serial.read();
-      }
+      Serial.readBytes(l_buff, 4);
+      Serial.readBytes(r_buff, 4);
 
-      //TODO: this but with shifts for speed
-      left_PWM = l_buff[0]*256*256*256 + l_buff[1]*256*256 + l_buff[2]*256 + l_buff[3];
-      right_PWM = r_buff[0]*256*256*256 + r_buff[1]*256*256 + r_buff[2]*256 + r_buff[3];
+      memcpy(&left_PWM, &l_buff, 4);
+      memcpy(&right_PWM, &r_buff, 4);
       update_PWM = true;
    }
+   interrupts(); //We are done, re-enable interrupts
 }
 
 void stopIfFault()
@@ -143,6 +151,6 @@ void stopIfFault()
 void set_motor_speed(int left_pwm, int right_pwm) {
   md.setM1Speed(left_pwm);
   md.setM2Speed(right_pwm);
-  stopIfFault(); // currently this always is true and stops the program.
+  stopIfFault(); 
   //delay(2);
 }
