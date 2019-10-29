@@ -143,7 +143,6 @@ void stopIfFault()
   if (md.getFault())
   {
     Serial.println("fault");
-    while (1);
   }
 }
 
