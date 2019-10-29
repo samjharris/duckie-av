@@ -14,7 +14,8 @@ import numpy as np
 #         PWM_L_prev = voltage, scalar
 #
 # Returns:
-#         (PWM_R_new, PWM_L_new) = pair of motor control signals in the range [-400, 400]
+#         (PWM_R_new, PWM_L_new) =
+#                         pair of motor control signals in the range [-400, 400]
 def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
 
     # TODO: measure this
@@ -22,11 +23,11 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
     m = 0.750
 
     # TODO: measure this
-    # yoke point distance from center of the wheel base (meters)
-    r_length = 1.0
+    # yoke point distance from center of the wheel base (centimeters)
+    r_length = 0.5
 
-    K = 1  # spring constant
-    B = 0.1  # damper constant
+    K = -1  # spring constant
+    B = -0.1  # damper constant
 
     # TODO: check this formula
     # https://en.wikipedia.org/wiki/Moment_of_inertia
@@ -36,21 +37,38 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
     x_ref = x_ref_func(t)
 
     # Unit vector in direction of x_act
-    x_r = np.array([np.cos(np.deg2rad(x_act[2])), np.sin(np.deg2rad(x_act[2]))])
+    x_unit_bot = np.array([np.cos(np.deg2rad(x_act[2])),
+                           np.sin(np.deg2rad(x_act[2]))])
+
+    # World Frame location of the yoke point
+    x_r = x_unit_bot * r_length + x_act[:2]
+
+    # Distance vector from yoke to x_ref
+    x_spring = x_ref[0:2] - x_r
+    spring_displacement = np.linalg.norm(x_spring)
+
+    # Unit vector in direction from yoke to x_ref
+    x_unit_spring = x_spring / spring_displacement
+
+    speed = (PWM_L_prev + PWM_R_prev) / 2
+
+    world_frame_velocity = np.array([speed * x_unit_bot[0],
+                                     speed * x_unit_bot[1]])
+    spring_frame_velocity = np.dot(world_frame_velocity,
+                                   x_unit_spring) * x_unit_spring
+    spring_frame_speed = np.linalg.norm(spring_frame_velocity)
 
     # F_pd as given by the spring / damper function
-    # F_pd = -K((x,y)act - (x,y)ref) - B((x_speed, y_speed)act)
-    speed = (PWM_L_prev + PWM_R_prev) / 2
-    world_frame_velocity = np.array([speed * x_r[0], speed * x_r[1]])
-    F_pd = -K * (x_act[0:2] - x_ref[0:2]) - B * (world_frame_velocity)
+    # F_pd = -K * x - B * x_dot
+    F_pd = (-K * spring_displacement - B * spring_frame_speed) * x_unit_spring
 
-    # F_trans = <F_pd, x_r> / m = delta_PWM_trans
-    delta_PWM_trans = np.dot(F_pd, x_r) / m
+    # F_trans = <F_pd, x_unit_bot> / m = delta_PWM_trans
+    delta_PWM_trans = np.dot(F_pd, x_unit_bot) / m
 
     # M_rot = r cross F_pd
     # delta_theta_dot = M_rot / I = r cross F_pd
     # delta_PWM_rot = delta_theta_dot * r_length
-    r = x_r * r_length
+    r = x_unit_bot * r_length
     M_rot = np.cross(r, F_pd)
     delta_PWM_rot = r_length * (M_rot / I)
 
@@ -63,10 +81,10 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
 
 
 def x_ref_dumb_func(t):
-    return np.array([2,0,0])
+    return np.array([9,9,0])
 
 
 def test():
-    test_x_act = np.array([1,-1,-15])
-    result = get_PWMs(x_ref_dumb_func, 1, test_x_act, 0, 0)
+    test_x_act = np.array([2,-2.0,15])
+    result = get_PWMs(x_ref_dumb_func, 1, test_x_act, 10, 10)
     print(result)
