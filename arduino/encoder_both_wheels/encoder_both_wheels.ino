@@ -4,8 +4,8 @@
 
 #define ENCODER_PIN_BACK_LEFT 2
 #define ENCODER_PIN_BACK_RIGHT 3
-#define ENCODER_PIN_FRONT_LEFT 4
-#define ENCODER_PIN_FRONT_RIGHT 5
+#define ENCODER_PIN_FRONT_LEFT 5
+#define ENCODER_PIN_FRONT_RIGHT 6
 
 volatile long left_encoder_counter = 0;
 volatile long right_encoder_counter = 0;
@@ -13,7 +13,7 @@ volatile long right_encoder_counter = 0;
 
 void setup() {
 	// put your setup code here, to run once
-	Serial.begin(9600);
+	Serial.begin(115200);
 
 	attachInterrupt(0, left_encoder_interrupt_function, CHANGE);
 	attachInterrupt(1, right_encoder_interrupt_function, CHANGE);

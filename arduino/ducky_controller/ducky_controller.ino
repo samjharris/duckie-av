@@ -40,6 +40,11 @@ void loop() {
     //TODO: mutex lock?
     long _left_encoder_counter = left_encoder_counter;
     long _right_encoder_counter = right_encoder_counter;
+    Serial.print("left ");
+    Serial.print(_left_encoder_counter);
+    Serial.print("right ");
+    Serial.print(_right_encoder_counter);
+    Serial.println();
     //package them up 
     quad_packet[4] = (byte)(_left_encoder_counter >> 24) & 0xFF;
     quad_packet[5] = (byte)(_left_encoder_counter >> 16) & 0xFF;
