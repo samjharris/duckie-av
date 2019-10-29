@@ -116,7 +116,7 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
         print(PWM_L_new)
         print("PWM_R_new")
         print(PWM_R_new)
-    print_debug_info()
+    # print_debug_info()
     return (PWM_L_new, PWM_R_new)
 
 
