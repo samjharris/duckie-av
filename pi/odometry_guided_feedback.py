@@ -50,6 +50,7 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
     # Unit vector in direction from yoke to x_ref
     x_unit_spring = x_spring / spring_displacement
 
+    # TODO correct to using x_act_prev - x_act / timeslice
     speed = (PWM_L_prev + PWM_R_prev) / 2
 
     world_frame_velocity = np.array([speed * x_unit_bot[0],
@@ -62,13 +63,14 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
     # F_pd = -K * x - B * x_dot
     F_pd = (-K * spring_displacement - B * spring_frame_speed) * x_unit_spring
 
-    # F_trans = <F_pd, x_unit_bot> / m = delta_PWM_trans
-    delta_PWM_trans = np.dot(F_pd, x_unit_bot) / m
+    # F_trans = <F_pd, x_yoke_robot_frame>
+    # F_trans / m = delta_PWM_trans
+    r = x_unit_bot * r_length
+    delta_PWM_trans = np.dot(F_pd, r) / m
 
     # M_rot = r cross F_pd
     # delta_theta_dot = M_rot / I = r cross F_pd
     # delta_PWM_rot = delta_theta_dot * r_length
-    r = x_unit_bot * r_length
     M_rot = np.cross(r, F_pd)
     delta_PWM_rot = r_length * (M_rot / I)
 
@@ -77,6 +79,44 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
     PWM_L_new = min(max(PWM_L_prev + delta_PWM_trans - delta_PWM_rot, -400), 400)
     PWM_R_new = min(max(PWM_R_prev + delta_PWM_trans + delta_PWM_rot, -400), 400)
 
+    def print_debug_info():
+        print("x_act")
+        print(x_act)
+        print("x_ref")
+        print(x_ref)
+        print("x_unit_bot")
+        print(x_unit_bot)
+        print("x_r")
+        print(x_r)
+        print("x_spring")
+        print(x_spring)
+        print("spring_displacement")
+        print(spring_displacement)
+        print("x_unit_spring")
+        print(x_unit_spring)
+        print("speed")
+        print(speed)
+        print("world_frame_velocity")
+        print(world_frame_velocity)
+        print("spring_frame_velocity")
+        print(spring_frame_velocity)
+        print("spring_frame_speed")
+        print(spring_frame_speed)
+        print("F_pd")
+        print(F_pd)
+        print("delta_PWM_trans")
+        print(delta_PWM_trans)
+        print("r")
+        print(r)
+        print("M_rot")
+        print(M_rot)
+        print("delta_PWM_rot")
+        print(delta_PWM_rot)
+        print("PWM_L_new")
+        print(PWM_L_new)
+        print("PWM_R_new")
+        print(PWM_R_new)
+    print_debug_info()
     return (PWM_L_new, PWM_R_new)
 
 
