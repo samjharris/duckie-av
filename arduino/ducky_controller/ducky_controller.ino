@@ -101,38 +101,11 @@ void right_encoder_interrupt_function() {
   }
 }
 
-// void serialEvent() {
-//   noInterrupts();   //Disable interrupts during this routine
-//   //PWM packet format: [0xDE 0xAD 0xBE 0xEF LL LL LL LL RR RR RR RR] TODO: ADD PAIRITY
-//   while(Serial.available()){
-//       //Seek the packet-header: DEADBEEF
-//       if((byte)Serial.read() != 0xDE)
-//         continue;
-//       if((byte)Serial.read() != 0xAD)
-//         continue;
-//       if((byte)Serial.read() != 0xBE)
-//         continue;
-//       if((byte)Serial.read() != 0xEF)
-//         continue;
-
-//       byte l_buff[4];
-//       byte r_buff[4];
-//       Serial.readBytes(l_buff, 4);
-//       Serial.readBytes(r_buff, 4);
-
-//       memcpy(&left_PWM, &l_buff, 4);
-//       memcpy(&right_PWM, &r_buff, 4);
-//       update_PWM = true;
-//    }
-//    interrupts(); //We are done, re-enable interrupts
-// }
-
 void stopIfFault()
 {
   if (md.getFault())
   {
     Serial.println("fault");
-    while (1);
   }
 }
 
