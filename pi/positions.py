@@ -59,7 +59,7 @@ def get_x_act_new(x_act_prev, dist_l, dist_r):
     dist_diff = dist_r - dist_l
 
     # TODO measure this
-    wheelbase = 1
+    wheelbase = 16.5
 
     # delta_theta = np.rad2deg(np.arctan2[dist_diff],[wheelbase])
     delta_theta = np.rad2deg(dist_diff/wheelbase) % 360
