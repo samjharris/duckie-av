@@ -97,14 +97,17 @@ void loop() {
   }
 
   // receive motor commands
-  int leftMotorValue = Serial.parseInt();
-  int rightMotorValue = Serial.parseInt();
+  if(Serial.available() >= 4) {
+    int leftMotorValue = Serial.parseInt();
+    int rightMotorValue = Serial.parseInt();
 
-  // flash(leftMotorValue);
-  md.setM1Speed(leftMotorValue);
-  stopIfFault();
-  md.setM2Speed(rightMotorValue);
-  stopIfFault();
+    // flash(leftMotorValue);
+    md.setM1Speed(leftMotorValue);
+    stopIfFault();
+    md.setM2Speed(rightMotorValue);
+    stopIfFault();
+  }
+
 
 
   // TODO: remove this in the final program
