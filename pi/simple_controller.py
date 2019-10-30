@@ -24,7 +24,8 @@ while True:
 		print("arduino->pi: encoder: {} {}".format(left_ticks, right_ticks))
 
 		# send the new motor signals
-		left_motor, right_motor = 3, 3
+		# left_motor, right_motor = 300, 300
+		left_motor, right_motor = 0, 0
 		print("pi->arduino: motor: {} {}".format(left_motor, right_motor))
 		message = "{} {}\n".format(left_motor, right_motor)
 		to_write = bytearray(message.encode("ascii"))
