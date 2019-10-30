@@ -16,9 +16,11 @@ DualMC33926MotorShield md;
 volatile long left_encoder_counter = 0;
 volatile long right_encoder_counter = 0;
 
+const int encoder_debounce_time = 10; 
+
+volatile long last_update_left;
+volatile long last_update_right;
 long encodersLastSent;
-
-
 
 void flash(int n) {
   for(int i = 0; i < n; i++) {
@@ -39,6 +41,10 @@ void stopIfFault() {
 
 
 void left_encoder_interrupt_function() {
+
+  if(millis() < last_update_left + encoder_debounce_time) 
+    return;
+
   bool back_left = (digitalRead(ENCODER_PIN_BACK_LEFT) == HIGH);
   bool front_left = (digitalRead(ENCODER_PIN_FRONT_LEFT) == HIGH);
 
@@ -53,6 +59,10 @@ void left_encoder_interrupt_function() {
 }
 
 void right_encoder_interrupt_function() {
+
+  if(millis() < last_update_right + encoder_debounce_time)
+    return;
+
   bool back_right = (digitalRead(ENCODER_PIN_BACK_RIGHT) == HIGH);
   bool front_right = (digitalRead(ENCODER_PIN_FRONT_RIGHT) == HIGH);
 
@@ -74,10 +84,13 @@ void setup() {
   // initialize LED for debugging
   pinMode(13, OUTPUT);
 
+
   // initialize encoders
   attachInterrupt(0, left_encoder_interrupt_function, CHANGE);
   attachInterrupt(1, right_encoder_interrupt_function, CHANGE);
   encodersLastSent = millis();
+  last_update_left = millis();
+  last_update_right = millis();
 
   // initialize motors
   md.init();
@@ -98,6 +111,7 @@ void loop() {
 
   // receive motor commands
   if(Serial.available() >= 4) {
+
     int leftMotorValue = Serial.parseInt();
     int rightMotorValue = Serial.parseInt();
 
