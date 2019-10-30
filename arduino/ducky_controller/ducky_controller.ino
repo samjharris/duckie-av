@@ -16,13 +16,14 @@ volatile int left_PWM = 0;
 volatile int right_PWM = 0;
 volatile unsigned long t = 0;
 //Mark quadrature packets with DEADBEEF
-byte quad_packet[] = {0xDE,0xAD,0xBE,0xEF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-//Mark sonar packets with DEAFFEED
-byte sonar_packet[] = {0xDE,0xAF,0xFE,0xED,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+// byte quad_packet[] = {0xDE,0xAD,0xBE,0xEF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+// //Mark sonar packets with DEAFFEED
+// byte sonar_packet[] = {0xDE,0xAF,0xFE,0xED,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+
 
 void setup() {
   // put your setup code here, to run once
-  Serial.begin(115200);
+  Serial.begin(9600);
   md.init();
   attachInterrupt(0, left_encoder_interrupt_function, CHANGE);
   attachInterrupt(1, right_encoder_interrupt_function, CHANGE);
@@ -39,8 +40,8 @@ void loop() {
   ////////repeatedly send PWM = 0,0
   //////enable interupts (interrupts();)
 
-  //Handle quadrature
-  if(millis() > t + 500){ //wait 500 milliseconds without wasting cycles
+  if(Serial.available() > 0) {
+    if(millis() > t + 500){ //wait 500 milliseconds without wasting cycles
     t = millis();
     //capture the current values for transmission (these are volatile!)
     //TODO: mutex lock?
@@ -51,36 +52,24 @@ void loop() {
     // Serial.print("right ");
     // Serial.print(_right_encoder_counter);
     // Serial.println();
-    //package them up 
-    // quad_packet[4] = (byte)(_left_encoder_counter >> 24) & 0xFF;
-    // quad_packet[5] = (byte)(_left_encoder_counter >> 16) & 0xFF;
-    // quad_packet[6] = (byte)(_left_encoder_counter >> 8) & 0xFF;
-    // quad_packet[7] = (byte)(_left_encoder_counter) & 0xFF;
-    // quad_packet[8] = (byte)(_right_encoder_counter >> 24) & 0xFF;
-    // quad_packet[9] = (byte)(_right_encoder_counter >> 16) & 0xFF;
-    // quad_packet[10] = (byte)(_right_encoder_counter >> 8) & 0xFF;
-    // quad_packet[11] = (byte)(_right_encoder_counter) & 0xFF;
 
-    //package them up another way
-    memcpy(&quad_packet+4,_left_encoder_counter,4);
-    memcpy(&quad_packet+8,_right_encoder_counter,4);
+    Serial.print("encoder values\n");
 
-    //send each byte over serial
-    for(int i = 0; i < 12; i++){
-      Serial.print(quad_packet[i],HEX);
-    }
+    Serial.print(_left_encoder_counter);
+    Serial.print(_right_encoder_counter);
     Serial.print('\n');
-    //Serial.println(left_encoder_counter);
-    //Serial.println(right_encoder_counter);
     //left_encoder_counter = 0;
     //right_encoder_counter = 0;
   }
 
-  //Set the motor speed
-  if(update_PWM){
-    set_motor_speed(left_PWM, right_PWM);
-    update_PWM = false;
+    //Set the motor speed
+    if(update_PWM){
+      set_motor_speed(left_PWM, right_PWM);
+      update_PWM = false;
+    }
   }
+  //Handle quadrature
+  
 
 }
 
@@ -112,31 +101,31 @@ void right_encoder_interrupt_function() {
   }
 }
 
-void serialEvent() {
-  noInterrupts();   //Disable interrupts during this routine
-  //PWM packet format: [0xDE 0xAD 0xBE 0xEF LL LL LL LL RR RR RR RR] TODO: ADD PAIRITY
-  while(Serial.available()){
-      //Seek the packet-header: DEADBEEF
-      if((byte)Serial.read() != 0xDE)
-        continue;
-      if((byte)Serial.read() != 0xAD)
-        continue;
-      if((byte)Serial.read() != 0xBE)
-        continue;
-      if((byte)Serial.read() != 0xEF)
-        continue;
+// void serialEvent() {
+//   noInterrupts();   //Disable interrupts during this routine
+//   //PWM packet format: [0xDE 0xAD 0xBE 0xEF LL LL LL LL RR RR RR RR] TODO: ADD PAIRITY
+//   while(Serial.available()){
+//       //Seek the packet-header: DEADBEEF
+//       if((byte)Serial.read() != 0xDE)
+//         continue;
+//       if((byte)Serial.read() != 0xAD)
+//         continue;
+//       if((byte)Serial.read() != 0xBE)
+//         continue;
+//       if((byte)Serial.read() != 0xEF)
+//         continue;
 
-      byte l_buff[4];
-      byte r_buff[4];
-      Serial.readBytes(l_buff, 4);
-      Serial.readBytes(r_buff, 4);
+//       byte l_buff[4];
+//       byte r_buff[4];
+//       Serial.readBytes(l_buff, 4);
+//       Serial.readBytes(r_buff, 4);
 
-      memcpy(&left_PWM, &l_buff, 4);
-      memcpy(&right_PWM, &r_buff, 4);
-      update_PWM = true;
-   }
-   interrupts(); //We are done, re-enable interrupts
-}
+//       memcpy(&left_PWM, &l_buff, 4);
+//       memcpy(&right_PWM, &r_buff, 4);
+//       update_PWM = true;
+//    }
+//    interrupts(); //We are done, re-enable interrupts
+// }
 
 void stopIfFault()
 {
