@@ -27,7 +27,7 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
     r_length = 0.5
 
     K = -1  # spring constant
-    B = -0.1  # damper constant
+    B = 0.1  # damper constant
 
     # TODO: check this formula
     # https://en.wikipedia.org/wiki/Moment_of_inertia
