@@ -19,7 +19,7 @@ import numpy as np
 def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
 
     # mass of the robot (kilograms)
-    m = 1.4  # about 3 lb
+    m = 0.830
 
     # TODO: measure this
     # yoke point distance from center of the wheel base (centimeters)
