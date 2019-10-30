@@ -28,15 +28,18 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
     K = -1  # spring constant
     B = 0.1  # damper constant
 
-    # The target in the world frame
-    x_ref = x_ref_func(t)
-
     # Unit vector in direction of x_act
     x_unit_bot = np.array([np.cos(np.deg2rad(x_act[2])),
                            np.sin(np.deg2rad(x_act[2]))])
 
+    # World  frame yoke vector
+    r = x_unit_bot * r_length
+
     # World Frame location of the yoke point
-    x_r = x_unit_bot * r_length + x_act[:2]
+    x_r = r + x_act[:2]
+
+    # The target in the world frame
+    x_ref = x_ref_func(t)[:2] + r
 
     # Distance vector from yoke to x_ref
     x_spring = x_ref[0:2] - x_r
