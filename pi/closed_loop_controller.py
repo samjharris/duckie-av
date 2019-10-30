@@ -57,8 +57,11 @@ while True:
         curr_r_ticks = r_ticks
         curr_time = time() - start_time
         PWM_l, PWM_r = get_PWMs(x_ref, curr_time, x_act, PWM_l, PWM_r)
+        PWM_l, PWM_r = int(PWM_l), int(PWM_r)
 
         # send the new motor signals
+        assert type(PWM_l) == int, "PWM_l is not int"
+        assert type(PWM_r) == int, "PWM_r is not int"
         message = "{} {}\n".format(PWM_l, PWM_r)
         to_write = bytearray(message.encode("ascii"))
         ser.write(to_write)
