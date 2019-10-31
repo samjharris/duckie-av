@@ -74,8 +74,19 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
 
     # Add delta PWMs to previous values to obtain new values
     # Subtract rotational term from left and add to right (right hand rule)
-    PWM_L_new = min(max(PWM_L_prev + delta_PWM_trans - delta_PWM_rot, -400), 400)
-    PWM_R_new = min(max(PWM_R_prev + delta_PWM_trans + delta_PWM_rot, -400), 400)
+    PWM_L_new = PWM_L_prev + delta_PWM_trans - delta_PWM_rot
+    PWM_R_new = PWM_R_prev + delta_PWM_trans + delta_PWM_rot
+
+    reduction_coefficient = 1
+    if abs(PWM_L_new) > 400:
+        reduction_coefficient = 400/PWM_L_new
+    if abs(PWM_R_new) > 400:
+        right_reduction_coefficient = 400/PWM_R_new
+        reduction_coefficient =
+            min(right_reduction_coefficient, reduction_coefficient)
+
+    PWM_L_new = int(reduction_coefficient * PWM_L_new)
+    PWM_R_new = int(reduction_coefficient * PWM_R_new)
 
     def print_debug_info():
         print("{:>22} : {}".format("x_act", x_act))
