@@ -92,7 +92,7 @@ def get_x_act_new(x_act_prev, dist_l, dist_r):
     new_theta = new_theta % 360
     # print("new_theta", new_theta)
 
-    return (new_x_act_x_component, new_x_act_y_component, new_theta)
+    return np.array([new_x_act_x_component, new_x_act_y_component, new_theta])
 
 def test():
     x = get_x_ref_func_one_meter()
