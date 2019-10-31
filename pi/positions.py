@@ -15,7 +15,7 @@ def get_x_ref_func_one_meter():
     amount_of_slices = total_time / timeslice
     position_by_time_list = []
     for i in range(int(amount_of_slices) + 1):
-        position_by_time_list.append(np.array([(speed_goal * (i * timeslice)), 0, 0]))
+        position_by_time_list.append(np.array([(speed_goal * (i / 4)), 0, 0]))
     def x_ref_func_one_meter(t):
         index = int(t / timeslice)
         length = len(position_by_time_list)
