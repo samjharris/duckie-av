@@ -10,7 +10,7 @@
 #		distance traveled in centimeter(cm) 
 def tick_to_centimeter(ticks):
 	# based on the circumfrance of the wheel and the number of steps on encoder
-	distance_per_tick = 22.0/26.0
+	distance_per_tick = 5 / 6 #unit: (cm per tick), experiment yeilded 145cm over 174 ticks = 5/6cm per tick
 	return ticks*distance_per_tick
 
 # input:
