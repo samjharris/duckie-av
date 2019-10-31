@@ -16,11 +16,15 @@ while True:
 	if ser.inWaiting():
 		# receive the encoder values
 		inputValue = ser.readline().decode("utf-8").strip()
-		if len(inputValue.split()) != 2:
-			print("error: input was '{}'".format(inputValue))
+		print(inputValue)
+		if len(inputValue.split()) != 3:
+			print("mode 1: input was '{}'".format(inputValue))
+			continue
+		if inputValue.split()[0] != "encoder":
+			print("mode 2: input was '{}'".format(inputValue))
 			continue
 
-		left_ticks, right_ticks = inputValue.split()
+		_, left_ticks, right_ticks = inputValue.split()
 		print("arduino->pi: encoder: {} {}".format(left_ticks, right_ticks))
 
 		# send the new motor signals

@@ -70,7 +70,7 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
     # delta_theta_dot = M_rot / I = r cross F_pd
     # delta_PWM_rot = delta_theta_dot * r_length
     M_rot = np.cross(r, F_pd)
-    delta_PWM_rot = r_length * M_rot
+    delta_PWM_rot = r_length * M_rot / 10
 
     # Add delta PWMs to previous values to obtain new values
     # Subtract rotational term from left and add to right (right hand rule)
@@ -82,8 +82,7 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
         reduction_coefficient = 400/PWM_L_new
     if abs(PWM_R_new) > 400:
         right_reduction_coefficient = 400/PWM_R_new
-        reduction_coefficient =
-            min(right_reduction_coefficient, reduction_coefficient)
+        reduction_coefficient = min(right_reduction_coefficient, reduction_coefficient)
 
     PWM_L_new = int(reduction_coefficient * PWM_L_new)
     PWM_R_new = int(reduction_coefficient * PWM_R_new)
