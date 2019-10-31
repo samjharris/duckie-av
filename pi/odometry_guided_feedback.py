@@ -24,8 +24,10 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
         min_pwm = 70
         if velocity > 0:
             return min_pwm + velocity * cm_per_sec_per_PWM
-        if velocity < 0:
+        elif velocity < 0:
             return -min_pwm + velocity * cm_per_sec_per_PWM
+        else:
+            return 0
 
     # mass of the robot (kilograms)
     m = 0.830
