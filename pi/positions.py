@@ -56,7 +56,7 @@ def get_x_ref_func_circle():
 
 
 def get_x_act_new(x_act_prev, dist_l, dist_r):
-    dist_diff = dist_r - dist_l
+    dist_diff = dist_l - dist_r
 
     # print("dist_diff (should be 0)", dist_diff)
 
