@@ -19,7 +19,7 @@ import numpy as np
 def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
 
     # conversion rate for pvm to cm/sec
-    cm_per_sec_to_PWM = 0.1326
+    cm_per_sec_per_PWM = 0.1326
 
     # mass of the robot (kilograms)
     m = 0.830
@@ -28,8 +28,8 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
     # yoke point distance from center of the wheel base (centimeters)
     r_length = 5
 
-    K = -1  # spring constant
-    B = 0.1  # damper constant
+    K = -0.1  # spring constant
+    B = 0.0  # damper constant
 
     # Unit vector in direction of x_act
     x_unit_bot = np.array([np.cos(np.deg2rad(x_act[2])),
@@ -67,13 +67,13 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
     # F_trans = <F_pd, x_yoke_robot_frame>
     # F_trans / m = delta_PWM_trans
     r = x_unit_bot * r_length
-    delta_PWM_trans = (np.dot(F_pd, r) / m) * cm_per_sec_to_PWM
+    delta_PWM_trans = (np.dot(F_pd, r) / m) / cm_per_sec_per_PWM
 
     # M_rot = r cross F_pd
     # delta_theta_dot = M_rot / I = r cross F_pd
     # delta_PWM_rot = delta_theta_dot * r_length
     M_rot = np.cross(r, F_pd)
-    delta_PWM_rot = (r_length * M_rot / 10) * cm_per_sec_to_PWM
+    delta_PWM_rot = (r_length * M_rot / 10) / cm_per_sec_per_PWM
 
 
 
@@ -82,15 +82,21 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
     PWM_L_new = PWM_L_prev + delta_PWM_trans - delta_PWM_rot
     PWM_R_new = PWM_R_prev + delta_PWM_trans + delta_PWM_rot
 
+    # print("{:>22} : {}".format("PWM_L_new before scaling", PWM_L_new))
+    # print("{:>22} : {}".format("PWM_R_new before scaling", PWM_R_new))
+
     reduction_coefficient = 1
     if abs(PWM_L_new) > 400:
-        reduction_coefficient = 400/PWM_L_new
+        reduction_coefficient = 400/abs(PWM_L_new)
     if abs(PWM_R_new) > 400:
-        right_reduction_coefficient = 400/PWM_R_new
+        right_reduction_coefficient = 400/abs(PWM_R_new)
         reduction_coefficient = min(right_reduction_coefficient, reduction_coefficient)
 
     PWM_L_new = int(reduction_coefficient * PWM_L_new)
     PWM_R_new = int(reduction_coefficient * PWM_R_new)
+
+    # print("{:>22} : {}".format("PWM_L_new after scaling", PWM_L_new))
+    # print("{:>22} : {}".format("PWM_R_new after scaling", PWM_R_new))
 
     def print_debug_info():
         print("{:>22} : {}".format("x_act", x_act))
@@ -112,7 +118,7 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
         print("{:>22} : {}".format("PWM_L_new", PWM_L_new))
         print("{:>22} : {}".format("PWM_R_new", PWM_R_new))
         print("="*30)
-    # print_debug_info()
+    print_debug_info()
     return (PWM_L_new, PWM_R_new)
 
 
