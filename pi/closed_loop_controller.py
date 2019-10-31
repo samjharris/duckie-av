@@ -29,6 +29,10 @@ ser = Serial(port=ports[0], baudrate=9600)
 ser.flushInput()
 
 start_time = time()
+curr_time = 0
+last_time = 0
+delta_time = 0
+
 x_act = [0,0,0]
 PWM_l, PWM_r = 0, 0
 x_ref_func = positions.get_x_ref_func_one_meter()
@@ -70,7 +74,9 @@ while True:
             curr_l_ticks = delta_l_ticks
             curr_r_ticks = delta_r_ticks
             curr_time = time() + 0.5 - start_time
-            PWM_l, PWM_r = get_PWMs(x_ref_func, curr_time, x_act, PWM_l, PWM_r)
+            delta_time = curr_time - last_time 
+            PWM_l, PWM_r = get_PWMs(x_ref_func, curr_time, delta_time, x_act, PWM_l, PWM_r)
+            last_time = curr_time
             PWM_l, PWM_r = int(PWM_l), int(PWM_r)
 
             # send the new motor signals

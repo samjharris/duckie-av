@@ -16,7 +16,7 @@ import numpy as np
 # Returns:
 #         (PWM_R_new, PWM_L_new) =
 #                         pair of motor control signals in the range [-400, 400]
-def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
+def get_PWMs(x_ref_func, t, dt, x_act, PWM_L_prev, PWM_R_prev):
 
     # conversion rate for pvm to cm/sec
     cm_per_sec_per_PWM = 0.1326
@@ -52,7 +52,8 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
     x_unit_spring = x_spring / spring_displacement
 
     # TODO correct to using x_act_prev - x_act / timeslice
-    speed = (PWM_L_prev + PWM_R_prev) / 2
+    #speed = (PWM_L_prev + PWM_R_prev) / 2
+    speed = (x_act_prev - x_act) / dt
 
     world_frame_velocity = np.array([speed * x_unit_bot[0],
                                      speed * x_unit_bot[1]])
