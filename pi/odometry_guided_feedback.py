@@ -20,6 +20,11 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
 
     # conversion rate for pvm to cm/sec
     cm_per_sec_per_PWM = 0.1326
+    def convert_cm_per_sec_to_PWM(velocity):
+        if velocity > 0:
+            return 110 + velocity / cm_per_sec_per_pwm
+        else:
+            return -110 + velocity / cm_per_sec_per_pwm
 
     # mass of the robot (kilograms)
     m = 0.830
@@ -28,8 +33,9 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
     # yoke point distance from center of the wheel base (centimeters)
     r_length = 5
 
-    K = -0.1  # spring constant
-    B = 0.0  # damper constant
+    K = -0.5  # spring constant
+    B = 0.8  # damper constant
+    I = 20
 
     # Unit vector in direction of x_act
     x_unit_bot = np.array([np.cos(np.deg2rad(x_act[2])),
@@ -72,13 +78,13 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
     # F_trans = <F_pd, x_yoke_robot_frame>
     # F_trans / m = delta_PWM_trans
     r = x_unit_bot * r_length
-    delta_PWM_trans = (np.dot(F_pd, r) / m) / cm_per_sec_per_PWM
+    delta_PWM_trans = convert_cm_per_sec_to_PWM(np.dot(F_pd, r) / m))
 
     # M_rot = r cross F_pd
     # delta_theta_dot = M_rot / I = r cross F_pd
     # delta_PWM_rot = delta_theta_dot * r_length
     M_rot = np.cross(r, F_pd)
-    delta_PWM_rot = (r_length * M_rot / 10) / cm_per_sec_per_PWM
+    delta_PWM_rot = convert_cm_per_sec_to_PWM(r_length * M_rot / I))
 
 
 
