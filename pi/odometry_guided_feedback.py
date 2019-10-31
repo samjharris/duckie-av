@@ -64,16 +64,9 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
     norm = np.linalg.norm(dot)
     speed = norm / dt
 
-
-    world_frame_velocity = np.array([speed * x_unit_bot[0],
-                                     speed * x_unit_bot[1]])
-    spring_frame_velocity = np.dot(world_frame_velocity,
-                                   x_unit_spring) * x_unit_spring
-    spring_frame_speed = np.linalg.norm(spring_frame_velocity)
-
     # F_pd as given by the spring / damper function
     # F_pd = -K * x - B * x_dot
-    F_pd = (-K * spring_displacement - B * spring_frame_speed) * x_unit_spring
+    F_pd = (-K * spring_displacement - B * speed) * x_unit_spring
 
     # F_trans = <F_pd, x_yoke_robot_frame>
     # F_trans / m = delta_PWM_trans
