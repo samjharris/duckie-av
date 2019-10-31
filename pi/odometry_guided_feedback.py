@@ -53,7 +53,11 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
 
     # TODO correct to using x_act_prev - x_act / timeslice
     #speed = (PWM_L_prev + PWM_R_prev) / 2
-    speed = (np.linalg.norm(np.dot((x_act_prev[:2] - x_act[:2]), np.array(x_unit_spring)))) / dt
+    delta_x_act = x_act_prev - x_act
+    dot = np.dot(delta_x_act[:2], np.array(x_unit_spring))
+    norm = np.linalg.norm(dot)
+    speed = norm / dt
+
 
     world_frame_velocity = np.array([speed * x_unit_bot[0],
                                      speed * x_unit_bot[1]])
