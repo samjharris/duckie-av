@@ -35,10 +35,6 @@ x_ref_func = positions.get_x_ref_func_one_meter()
 curr_l_ticks = 0
 curr_r_ticks = 0
 
-initial_l_ticks = 0
-initial_r_ticks = 0
-first_run = True
-
 received_start_signal = False
 
 while True:
@@ -63,27 +59,16 @@ while True:
                 print("error 1: input was '{}'".format(inputValue))
                 continue
 
-            _, l_ticks, r_ticks = args
-            # print("arduino->pi: encoder: {} {}".format(l_ticks, r_ticks))
-            l_ticks, r_ticks = int(l_ticks), int(r_ticks)
-
-            # subtract the initial number of ticks
-            # TODO have the arduino zero out the ticks on first run instead
-            if first_run:
-                first_run = False
-                initial_l_ticks, initial_r_ticks = l_ticks, r_ticks
-            l_ticks = l_ticks - initial_l_ticks
-            r_ticks = r_ticks - initial_r_ticks
-
-            delta_l_ticks = l_ticks - curr_l_ticks
-            delta_r_ticks = r_ticks - curr_r_ticks
+            _, delta_l_ticks, delta_r_ticks = args
+            # print("arduino->pi: encoder: {} {}".format(delta_l_ticks, delta_r_ticks))
+            delta_l_ticks, delta_r_ticks = int(delta_l_ticks), int(delta_r_ticks)
 
             # translate encoder values to distances and generate new PWMs
             dist_l, dist_r = get_distances(delta_l_ticks, delta_r_ticks)
             x_act_new = positions.get_x_act_new(x_act, dist_l, dist_r)
             x_act = x_act_new
-            curr_l_ticks = l_ticks
-            curr_r_ticks = r_ticks
+            curr_l_ticks = delta_l_ticks
+            curr_r_ticks = delta_r_ticks
             curr_time = time() + 0.5 - start_time
             PWM_l, PWM_r = get_PWMs(x_ref_func, curr_time, x_act, PWM_l, PWM_r)
             PWM_l, PWM_r = int(PWM_l), int(PWM_r)
