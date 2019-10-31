@@ -33,8 +33,8 @@ curr_time = 0
 last_time = 0
 delta_time = 0
 
-x_act = [0,0,0]
-x_act_prev = [0,0,0]
+x_act = np.array([0,0,0])
+x_act_prev = np.array([0,0,0])
 
 PWM_l, PWM_r = 0, 0
 x_ref_func = positions.get_x_ref_func_one_meter()
