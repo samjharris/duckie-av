@@ -34,6 +34,8 @@ last_time = 0
 delta_time = 0
 
 x_act = [0,0,0]
+x_act_prev = [0,0,0]
+
 PWM_l, PWM_r = 0, 0
 x_ref_func = positions.get_x_ref_func_one_meter()
 curr_l_ticks = 0
@@ -75,7 +77,8 @@ while True:
             curr_r_ticks = delta_r_ticks
             curr_time = time() + 0.5 - start_time
             delta_time = curr_time - last_time 
-            PWM_l, PWM_r = get_PWMs(x_ref_func, curr_time, delta_time, x_act, PWM_l, PWM_r)
+            PWM_l, PWM_r = get_PWMs(x_ref_func, curr_time, delta_time, x_act, x_act_prev, PWM_l, PWM_r)
+            x_act_prev = x_act
             last_time = curr_time
             PWM_l, PWM_r = int(PWM_l), int(PWM_r)
 
