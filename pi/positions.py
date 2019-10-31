@@ -67,12 +67,7 @@ def get_x_act_new(x_act_prev, dist_l, dist_r):
     # print("delta_theta (should be ~0)", delta_theta)
     new_theta = x_act_prev[2] + delta_theta
     # print("new_theta (should be ~0)", new_theta)
-
-    ys = np.sin(np.deg2rad(x_act_prev[2])) + np.sin(np.deg2rad(delta_theta))
-    xs = np.cos(np.deg2rad(x_act_prev[2])) + np.cos(np.deg2rad(delta_theta))
-    avg_theta = np.arctan2(ys, xs)
-
-    # avg_theta = x_act_prev[2] + delta_theta / 2
+    avg_theta = x_act_prev[2] + delta_theta / 2
     # print("avg_theta (should be ~0)", avg_theta)
 
     # TODO update with better approximation
@@ -92,7 +87,7 @@ def get_x_act_new(x_act_prev, dist_l, dist_r):
     new_theta = new_theta % 360
     # print("new_theta", new_theta)
 
-    return np.array([new_x_act_x_component, new_x_act_y_component, new_theta])
+    return (new_x_act_x_component, new_x_act_y_component, new_theta)
 
 def test():
     x = get_x_ref_func_one_meter()
