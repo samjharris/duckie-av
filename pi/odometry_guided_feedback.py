@@ -19,12 +19,13 @@ import numpy as np
 def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
 
     # conversion rate for pvm to cm/sec
-    cm_per_sec_per_PWM = 0.1326
-    def convert_cm_per_sec_to_PWM(velocity):
+    def convert_vel_to_PWM(velocity):
+        cm_per_sec_per_PWM = 0.15
+        min_pwm = 70
         if velocity > 0:
-            return 110 + velocity / cm_per_sec_per_pwm
-        else:
-            return -110 + velocity / cm_per_sec_per_pwm
+            return min_pwm + velocity * cm_per_sec_per_PWM
+        if velocity < 0:
+            return -min_pwm + velocity * cm_per_sec_per_PWM
 
     # mass of the robot (kilograms)
     m = 0.830
@@ -71,13 +72,13 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
     # F_trans = <F_pd, x_yoke_robot_frame>
     # F_trans / m = delta_PWM_trans
     r = x_unit_bot * r_length
-    delta_PWM_trans = convert_cm_per_sec_to_PWM(np.dot(F_pd, r) / m))
+    delta_PWM_trans = convert_vel_to_PWM(np.dot(F_pd, r) / m)
 
     # M_rot = r cross F_pd
     # delta_theta_dot = M_rot / I = r cross F_pd
     # delta_PWM_rot = delta_theta_dot * r_length
     M_rot = np.cross(r, F_pd)
-    delta_PWM_rot = convert_cm_per_sec_to_PWM(r_length * M_rot / I))
+    delta_PWM_rot = convert_vel_to_PWM(r_length * M_rot / I)
 
 
 
@@ -111,9 +112,6 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
         print("{:>22} : {}".format("spring_displacement", spring_displacement))
         print("{:>22} : {}".format("x_unit_spring", x_unit_spring))
         print("{:>22} : {}".format("speed", speed))
-        print("{:>22} : {}".format("world_frame_velocity", world_frame_velocity))
-        print("{:>22} : {}".format("spring_frame_velocity", spring_frame_velocity))
-        print("{:>22} : {}".format("spring_frame_speed", spring_frame_speed))
         print("{:>22} : {}".format("F_pd", F_pd))
         print("{:>22} : {}".format("delta_PWM_trans", delta_PWM_trans))
         print("{:>22} : {}".format("r", r))
@@ -132,5 +130,5 @@ def x_ref_dumb_func(t):
 
 def test():
     test_x_act = np.array([2,-2.0,15])
-    result = get_PWMs(x_ref_dumb_func, 1, test_x_act, 10, 10)
+    result = get_PWMs(x_ref_dumb_func, 1, 1, test_x_act, test_x_act, 10, 10)
     print(result)
