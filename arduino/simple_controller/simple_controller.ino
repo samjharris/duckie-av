@@ -41,9 +41,10 @@ void stopIfFault() {
 
 
 void left_encoder_interrupt_function() {
-
+  // debounce the encoder
   if(millis() < last_update_left + encoder_debounce_time) 
     return;
+  last_update_left = millis();
 
   bool back_left = (digitalRead(ENCODER_PIN_BACK_LEFT) == HIGH);
   bool front_left = (digitalRead(ENCODER_PIN_FRONT_LEFT) == HIGH);
@@ -59,9 +60,10 @@ void left_encoder_interrupt_function() {
 }
 
 void right_encoder_interrupt_function() {
-
+  // debounce the encoder
   if(millis() < last_update_right + encoder_debounce_time)
     return;
+  last_update_right = millis();
 
   bool back_right = (digitalRead(ENCODER_PIN_BACK_RIGHT) == HIGH);
   bool front_right = (digitalRead(ENCODER_PIN_FRONT_RIGHT) == HIGH);
