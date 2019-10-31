@@ -18,6 +18,9 @@ import numpy as np
 #                         pair of motor control signals in the range [-400, 400]
 def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
 
+    # conversion rate for pvm to cm/sec
+    cm_per_sec_to_PWM = 0.1326
+
     # mass of the robot (kilograms)
     m = 0.830
 
@@ -64,13 +67,15 @@ def get_PWMs(x_ref_func, t, x_act, PWM_L_prev, PWM_R_prev):
     # F_trans = <F_pd, x_yoke_robot_frame>
     # F_trans / m = delta_PWM_trans
     r = x_unit_bot * r_length
-    delta_PWM_trans = np.dot(F_pd, r) / m
+    delta_PWM_trans = (np.dot(F_pd, r) / m) * cm_per_sec_to_PWM
 
     # M_rot = r cross F_pd
     # delta_theta_dot = M_rot / I = r cross F_pd
     # delta_PWM_rot = delta_theta_dot * r_length
     M_rot = np.cross(r, F_pd)
-    delta_PWM_rot = r_length * M_rot / 10
+    delta_PWM_rot = (r_length * M_rot / 10) * cm_per_sec_to_PWM
+
+
 
     # Add delta PWMs to previous values to obtain new values
     # Subtract rotational term from left and add to right (right hand rule)
