@@ -1,3 +1,4 @@
+#include <avr/wdt.h>
 #include "DualMC33926MotorShield.h"
 
 DualMC33926MotorShield md;
@@ -80,8 +81,13 @@ void right_encoder_interrupt_function() {
 
 
 void setup() {
+  wdt_enable(WDTO_8S);
+
   Serial.begin(9600);
   // Serial.begin(115200);
+
+  Serial.print("arduino start");
+  Serial.println();
 
   // initialize LED for debugging
   pinMode(13, OUTPUT);
@@ -105,10 +111,15 @@ void loop() {
     encodersLastSent = millis();
 
     // send encoder values
+    Serial.print("encoder");
+    Serial.print(" ");
     Serial.print(left_encoder_counter);
     Serial.print(" ");
     Serial.print(right_encoder_counter);
     Serial.println();
+
+    left_encoder_counter = 0;
+    right_encoder_counter = 0;
   }
 
   // receive motor commands
