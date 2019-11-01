@@ -1,8 +1,7 @@
 # CICS 503 Fall 2019 DuckieTown Group 4
 # Odometry-Guided Feedback
 
-import numpy as np
-
+from odometry_guided_feedback_header import *
 
 # Inputs:
 #         x_ref(t)   = function taking time returning triple:
@@ -18,8 +17,6 @@ import numpy as np
 #                         pair of motor control signals in the range [-400, 400]
 def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
 
-    cm_per_sec_per_PWM = 0.15
-    min_pwm = 70
     def convert_vel_to_PWM(velocity):
         if velocity > 0:
             return min_pwm + velocity * cm_per_sec_per_PWM
@@ -36,18 +33,6 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
             return (PWM + min_pwm) / cm_per_sec_per_PWM
         else:
             return 0
-
-
-    # mass of the robot (kilograms)
-    m = 0.830
-
-    # TODO: measure this
-    # yoke point distance from center of the wheel base (centimeters)
-    r_length = 5
-
-    K = -0.5  # spring constant
-    B = 0.8  # damper constant
-    I = 20
 
     # Unit vector in direction of x_act
     x_unit_bot = np.array([np.cos(np.deg2rad(x_act[2])),
