@@ -68,7 +68,7 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
         else:
             sign = 1
     
-    spring_displacement = np.linalg.norm(x_spring) * sign
+    spring_displacement = np.linalg.norm(x_spring) 
 
     # Unit vector in direction from yoke to x_ref
     x_unit_spring = x_spring / spring_displacement
@@ -87,7 +87,7 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
     # F_trans = <F_pd, x_yoke_robot_frame>
     # F_trans / m = delta_PWM_trans
     r = x_unit_bot * YOKE_POINT
-    delta_vel_trans = np.dot(F_pd, x_unit_bot) / ROBOT_MASS
+    delta_vel_trans = (np.dot(F_pd, x_unit_bot) / ROBOT_MASS) * sign
 
     # M_rot = r cross F_pd
     # delta_theta_dot = M_rot / I = r cross F_pd
