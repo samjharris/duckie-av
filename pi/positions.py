@@ -5,19 +5,16 @@
 # takes some route information and returns a route function
 # def get_x_ref_func():
 
-import numpy as np
+from positions_header import *
 
 def get_x_ref_func_one_meter():
-    timeslice = 0.5 # fraction of a second; resolution of our function
-    endgoal = 100 # goal is one meter measured in centimeters
-    speed_goal = 5 # cm/s
-    total_time = endgoal / speed_goal
-    amount_of_slices = total_time / timeslice
+    total_time = END_GOAL / SPEED_LIMIT
+    num_slices = total_time / TIME_SLICE
     position_by_time_list = []
-    for i in range(int(amount_of_slices) + 1):
-        position_by_time_list.append(np.array([(speed_goal * (i * timeslice)), 0, 0]))
+    for i in range(int(num_slices) + 1):
+        position_by_time_list.append(np.array([(SPEED_LIMIT * (i * TIME_SLICE)), 0, 0]))
     def x_ref_func_one_meter(t):
-        index = int(t / timeslice)
+        index = int(t / TIME_SLICE)
         length = len(position_by_time_list)
         if index >= length:
             return position_by_time_list[length - 1]
@@ -26,27 +23,24 @@ def get_x_ref_func_one_meter():
     return x_ref_func_one_meter
 
 def get_x_ref_func_circle():
-    timeslice = 0.5
-    speed_goal = 5 # cm/s
-    radius = 10
-    circumference = 2 * np.pi * radius
-    time_to_circle = circumference / speed_goal
-    timeslices_per_circle = time_to_circle / timeslice
+    circle_circum = 2 * np.pi * CIRCLE_RADIUS
+    time_to_circle = circle_circum / SPEED_LIMIT
+    timeslices_per_circle = time_to_circle / TIME_SLICE
     delta_theta_per_timeslice = 360 / timeslices_per_circle
     num_circles = 5
     total_time = time_to_circle * num_circles
-    amount_of_slices = total_time / timeslice
+    num_slices = total_time / TIME_SLICE
     position_by_time_list = []
     x = 0
     y = 0
     theta = 0
-    for i in range(int(amount_of_slices) + 1):
-        x = radius * np.sin(np.deg2rad(theta))
-        y = radius * (1 - np.cos(np.deg2rad(theta)))
+    for i in range(int(num_slices) + 1):
+        x = CIRCLE_RADIUS * np.sin(np.deg2rad(theta))
+        y = CIRCLE_RADIUS * (1 - np.cos(np.deg2rad(theta)))
         position_by_time_list.append(np.array([x,y,theta]))
         theta = (theta + delta_theta_per_timeslice) % 360
     def x_ref_func_circle(t):
-        index = int(t / timeslice)
+        index = int(t / TIME_SLICE)
         length = len(position_by_time_list)
         if index >= length:
             return position_by_time_list[length - 1]
@@ -60,10 +54,10 @@ def get_x_act_new(x_act_prev, dist_l, dist_r):
 
     # print("dist_diff (should be 0)", dist_diff)
 
-    wheelbase = 16.5
+    WHEEL_BASE = 16.5
 
     # delta_theta = np.rad2deg(np.arctan2[dist_diff],[wheelbase])
-    delta_theta = np.rad2deg(dist_diff/wheelbase) % 360
+    delta_theta = np.rad2deg(dist_diff/WHEEL_BASE) % 360
     # print("delta_theta (should be ~0)", delta_theta)
     new_theta = x_act_prev[2] + delta_theta
     # print("new_theta (should be ~0)", new_theta)

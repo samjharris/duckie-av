@@ -10,25 +10,17 @@
 #     get left and right distance deltas from arduino
 #     update x_act
 
-import numpy as np
-from time import time
-from serial import Serial
-from serial.tools.list_ports import comports as get_serial_ports
-
-import positions
-from odometry_guided_feedback import get_PWMs
-from ticks_to_distance import get_distances
+from closed_loop_controller_header import *
 
 # connect to the open serial port
 ports = [p[0] for p in get_serial_ports()]
 if len(ports) == 0:
     print("Error, couldn't find any open ports")
     exit()
-ser = Serial(port=ports[0], baudrate=9600)
-# ser = Serial(port=ports[0], baudrate=115200)
+ser = Serial(port=ports[0], baudrate=BAUDRATE)
 ser.flushInput()
 
-start_time = time()
+start_time = time() + 0.5 #TODO: is this magic?
 curr_time = 0
 last_time = 0
 delta_time = 0
@@ -76,7 +68,7 @@ while True:
             x_act = x_act_new
             curr_l_ticks = delta_l_ticks
             curr_r_ticks = delta_r_ticks
-            curr_time = time() + 0.5 - start_time
+            curr_time = time() - start_time
             delta_time = curr_time - last_time
             PWM_l, PWM_r = get_PWMs(x_ref_func, curr_time, delta_time, x_act, x_act_prev, PWM_l, PWM_r)
             x_act_prev = x_act
