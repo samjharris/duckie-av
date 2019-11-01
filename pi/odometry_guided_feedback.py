@@ -99,18 +99,20 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
 
     # Add delta PWMs to previous values to obtain new values
     # Subtract rotational term from left and add to right (right hand rule)
-    PWM_L_new = convert_vel_to_PWM(vel_L_new)
-    PWM_R_new = convert_vel_to_PWM(vel_R_new)
 
     # print("{:>22} : {}".format("PWM_L_new before scaling", PWM_L_new))
     # print("{:>22} : {}".format("PWM_R_new before scaling", PWM_R_new))
 
     reduction_coefficient = 1
-    if abs(PWM_L_new) > 400:
-        reduction_coefficient = 400/abs(PWM_L_new)
-    if abs(PWM_R_new) > 400:
-        right_reduction_coefficient = 400/abs(PWM_R_new)
+    max_vel = convert_PWM_to_vel(400)
+    if abs(vel_L_new) > max_vel:
+        reduction_coefficient = max_vel/abs(vel_L_new)
+    if abs(vel_R_new) > max_vel:
+        right_reduction_coefficient = max_vel/abs(vel_R_new)
         reduction_coefficient = min(right_reduction_coefficient, reduction_coefficient)
+
+    PWM_L_new = convert_vel_to_PWM(vel_L_new)
+    PWM_R_new = convert_vel_to_PWM(vel_R_new)
 
     PWM_L_new = int(reduction_coefficient * PWM_L_new)
     PWM_R_new = int(reduction_coefficient * PWM_R_new)
@@ -145,9 +147,9 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
     return (PWM_L_new, PWM_R_new)
 
 
-def test(PWM_L, PWM_R):
+def test(PWM_L, PWM_R, x_ref_x_val):
     def x_ref_dumb_func(t):
-        return np.array([9,0,0])
+        return np.array([x_ref_x_val,0,0])
 
     test_x_act = np.array([0,0,0])
     result = get_PWMs(x_ref_dumb_func, 1, 1, test_x_act, test_x_act, 80, 80)
