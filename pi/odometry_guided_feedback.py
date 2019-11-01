@@ -18,16 +18,25 @@ import numpy as np
 #                         pair of motor control signals in the range [-400, 400]
 def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
 
-    # conversion rate for pvm to cm/sec
+    cm_per_sec_per_PWM = 0.15
+    min_pwm = 70
     def convert_vel_to_PWM(velocity):
-        cm_per_sec_per_PWM = 0.15
-        min_pwm = 70
         if velocity > 0:
             return min_pwm + velocity * cm_per_sec_per_PWM
         elif velocity < 0:
             return -min_pwm + velocity * cm_per_sec_per_PWM
         else:
             return 0
+
+
+    def convert_PWM_to_vel(PWM):
+        if PWM > 0:
+            return (PWM - min_pwm) / cm_per_sec_per_PWM
+        elif PWM < 0:
+            return (PWM + min_pwm) / cm_per_sec_per_PWM
+        else:
+            return 0
+
 
     # mass of the robot (kilograms)
     m = 0.830
@@ -74,20 +83,24 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
     # F_trans = <F_pd, x_yoke_robot_frame>
     # F_trans / m = delta_PWM_trans
     r = x_unit_bot * r_length
-    delta_PWM_trans = convert_vel_to_PWM(np.dot(F_pd, r) / m)
+    delta_vel_trans = np.dot(F_pd, r) / m
 
     # M_rot = r cross F_pd
     # delta_theta_dot = M_rot / I = r cross F_pd
     # delta_PWM_rot = delta_theta_dot * r_length
     M_rot = np.cross(r, F_pd)
-    delta_PWM_rot = convert_vel_to_PWM(r_length * M_rot / I)
+    delta_vel_rot = r_length * M_rot / I
 
+    vel_L_prev = convert_PWM_to_vel(PWM_L_prev)
+    vel_R_prev = convert_PWM_to_vel(PWM_R_prev)
 
+    vel_L_new = vel_L_prev + delta_vel_trans - delta_vel_rot
+    vel_R_new = vel_R_prev + delta_vel_trans + delta_vel_rot
 
     # Add delta PWMs to previous values to obtain new values
     # Subtract rotational term from left and add to right (right hand rule)
-    PWM_L_new = PWM_L_prev + delta_PWM_trans - delta_PWM_rot
-    PWM_R_new = PWM_R_prev + delta_PWM_trans + delta_PWM_rot
+    PWM_L_new = convert_vel_to_PWM(vel_L_new)
+    PWM_R_new = convert_vel_to_PWM(vel_R_new)
 
     # print("{:>22} : {}".format("PWM_L_new before scaling", PWM_L_new))
     # print("{:>22} : {}".format("PWM_R_new before scaling", PWM_R_new))
@@ -108,6 +121,8 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
     def print_debug_info():
         print("{:>22} : {}".format("x_act", x_act))
         print("{:>22} : {}".format("x_ref", x_ref))
+        print("{:>22} : {}".format("PWM_L_prev", PWM_L_prev))
+        print("{:>22} : {}".format("PWM_R_prev", PWM_R_prev))
         print("{:>22} : {}".format("x_unit_bot", x_unit_bot))
         print("{:>22} : {}".format("x_r", x_r))
         print("{:>22} : {}".format("x_spring", x_spring))
@@ -115,10 +130,14 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
         print("{:>22} : {}".format("x_unit_spring", x_unit_spring))
         print("{:>22} : {}".format("speed", speed))
         print("{:>22} : {}".format("F_pd", F_pd))
-        print("{:>22} : {}".format("delta_PWM_trans", delta_PWM_trans))
+        print("{:>22} : {}".format("delta_vel_trans", delta_vel_trans))
         print("{:>22} : {}".format("r", r))
         print("{:>22} : {}".format("M_rot", M_rot))
-        print("{:>22} : {}".format("delta_PWM_rot", delta_PWM_rot))
+        print("{:>22} : {}".format("delta_vel_rot", delta_vel_rot))
+        print("{:>22} : {}".format("vel_L_prev", vel_L_prev))
+        print("{:>22} : {}".format("vel_R_prev", vel_R_prev))
+        print("{:>22} : {}".format("vel_L_new", vel_L_new))
+        print("{:>22} : {}".format("vel_R_new", vel_R_new))
         print("{:>22} : {}".format("PWM_L_new", PWM_L_new))
         print("{:>22} : {}".format("PWM_R_new", PWM_R_new))
         print("="*30)
@@ -126,11 +145,10 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
     return (PWM_L_new, PWM_R_new)
 
 
-def x_ref_dumb_func(t):
-    return np.array([9,9,0])
+def test(PWM_L, PWM_R):
+    def x_ref_dumb_func(t):
+        return np.array([9,0,0])
 
-
-def test():
-    test_x_act = np.array([2,-2.0,15])
-    result = get_PWMs(x_ref_dumb_func, 1, 1, test_x_act, test_x_act, 10, 10)
+    test_x_act = np.array([0,0,0])
+    result = get_PWMs(x_ref_dumb_func, 1, 1, test_x_act, test_x_act, 80, 80)
     print(result)
