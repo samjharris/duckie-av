@@ -55,6 +55,7 @@ while True:
             if not received_start_signal:
                 if inputValue == "arduino start":
                     received_start_signal = True
+                    continue
                 else:
                     continue
 
@@ -76,7 +77,7 @@ while True:
             curr_l_ticks = delta_l_ticks
             curr_r_ticks = delta_r_ticks
             curr_time = time() + 0.5 - start_time
-            delta_time = curr_time - last_time 
+            delta_time = curr_time - last_time
             PWM_l, PWM_r = get_PWMs(x_ref_func, curr_time, delta_time, x_act, x_act_prev, PWM_l, PWM_r)
             x_act_prev = x_act
             last_time = curr_time
@@ -107,4 +108,5 @@ while True:
             break
             # exit()
         except SystemExit:
-            exit()
+            break
+ser.close()

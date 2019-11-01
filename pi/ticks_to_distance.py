@@ -7,15 +7,15 @@
 # input:
 #		ticks : int, the number of ticks
 # return:
-#		distance traveled in centimeter(cm) 
+#		distance traveled in centimeter(cm)
 def tick_to_centimeter(ticks):
 	# based on the circumfrance of the wheel and the number of steps on encoder
-	distance_per_tick = 5 / 6 #unit: (cm per tick), experiment yeilded 145cm over 174 ticks = 5/6cm per tick
+	distance_per_tick = 5 / 6 #unit: (cm per tick), experiment yielded 145cm over 174 ticks = 5/6cm per tick
 	return ticks*distance_per_tick
 
 # input:
-#		left_ticks: int, the number of ticks from teh left wheel encoder
-#		right_ticks: int, the number of ticks from teh right wheel encoder
+#		left_ticks: int, the number of ticks from the left wheel encoder
+#		right_ticks: int, the number of ticks from the right wheel encoder
 # return:
 #		the distances traveled by each wheel in centimeter(cm)
 def get_distances(left_ticks, right_ticks):
@@ -24,5 +24,3 @@ def get_distances(left_ticks, right_ticks):
 	right_distance = tick_to_centimeter(right_ticks)
 	# print("left_distance, right_distance : ", left_distance, right_distance)
 	return left_distance, right_distance
-
-
