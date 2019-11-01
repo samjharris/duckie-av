@@ -55,6 +55,7 @@ while True:
             if not received_start_signal:
                 if inputValue == "arduino start":
                     received_start_signal = True
+                    continue
                 else:
                     continue
 
