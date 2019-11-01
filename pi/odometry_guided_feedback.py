@@ -19,18 +19,18 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
 
     def convert_vel_to_PWM(velocity):
         if velocity > 0:
-            return min_pwm + velocity * cm_per_sec_per_PWM
+            return (velocity / cm_per_sec_per_PWM) + min_pwm
         elif velocity < 0:
-            return -min_pwm + velocity * cm_per_sec_per_PWM
+            return (velocity / cm_per_sec_per_PWM) - min_pwm
         else:
             return 0
 
 
     def convert_PWM_to_vel(PWM):
         if PWM > 0:
-            return (PWM - min_pwm) / cm_per_sec_per_PWM
+            return (PWM - min_pwm) * cm_per_sec_per_PWM
         elif PWM < 0:
-            return (PWM + min_pwm) / cm_per_sec_per_PWM
+            return (PWM + min_pwm) * cm_per_sec_per_PWM
         else:
             return 0
 
@@ -106,6 +106,8 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
     # print("{:>22} : {}".format("PWM_R_new after scaling", PWM_R_new))
 
     def print_debug_info():
+        print("{:>22} : {}".format("K", K))
+        print("{:>22} : {}".format("B", B))
         print("{:>22} : {}".format("x_act", x_act))
         print("{:>22} : {}".format("x_ref", x_ref))
         print("{:>22} : {}".format("PWM_L_prev", PWM_L_prev))
