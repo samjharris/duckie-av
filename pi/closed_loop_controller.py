@@ -20,7 +20,7 @@ if len(ports) == 0:
 ser = Serial(port=ports[0], baudrate=BAUDRATE)
 ser.flushInput()
 
-start_time = time() + 0.5 #TODO: is this magic?
+start_time = time() + TIME_SLICE
 curr_time = 0
 last_time = 0
 delta_time = 0
@@ -47,6 +47,7 @@ while True:
             if not received_start_signal:
                 if inputValue == "arduino start":
                     received_start_signal = True
+                    start_time = time() + TIME_SLICE
                     continue
                 else:
                     continue
