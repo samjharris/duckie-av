@@ -19,18 +19,17 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
 
     def convert_vel_to_PWM(velocity):
         if velocity > 0:
-            return (velocity / cm_per_sec_per_PWM) + min_pwm
+            return (velocity / CM_S_PWM) + MIN_PWM
         elif velocity < 0:
-            return (velocity / cm_per_sec_per_PWM) - min_pwm
+            return (velocity / CM_S_PWM) - MIN_PWM
         else:
             return 0
 
-
     def convert_PWM_to_vel(PWM):
         if PWM > 0:
-            return (PWM - min_pwm) * cm_per_sec_per_PWM
+            return (PWM - MIN_PWM) * CM_S_PWM
         elif PWM < 0:
-            return (PWM + min_pwm) * cm_per_sec_per_PWM
+            return (PWM + MIN_PWM) * CM_S_PWM
         else:
             return 0
 
@@ -39,7 +38,7 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
                            np.sin(np.deg2rad(x_act[2]))])
 
     # World  frame yoke vector
-    r = x_unit_bot * r_length
+    r = x_unit_bot * YOKE_POINT
 
     # World Frame location of the yoke point
     x_r = r + x_act[:2]
@@ -49,16 +48,36 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
 
     # Distance vector from yoke to x_ref
     x_spring = x_ref[0:2] - x_r
-    spring_displacement = np.linalg.norm(x_spring)
+
+    # useful comment
+    delta_x_act = x_act_prev - x_act
+
+    sign =0
+    dir_vel_vec = np.dot(x_spring, delta_x_act[:2])
+    if(np.linalg.norm(dir_vel_vec) == 0):
+        sign = 1
+    else:
+        dir_sign_vec = x_spring / dir_vel_vec
+        # if the sign of the spring displacement is positive:
+        if(dir_sign_vec[0] > 0):
+            sign = 1
+        # if the sign of the spring displacement is negative:
+        elif(dir_sign_vec[0] < 0):
+            sign = -1
+        # if x_spring was 0:
+        else:
+            sign = 1
+    
+    spring_displacement = np.linalg.norm(x_spring) * sign
 
     # Unit vector in direction from yoke to x_ref
     x_unit_spring = x_spring / spring_displacement
 
     # TODO correct to using x_act_prev - x_act / timeslice
     #speed = (PWM_L_prev + PWM_R_prev) / 2
-    delta_x_act = x_act_prev - x_act
-    dot = np.dot(delta_x_act[:2], np.array(x_unit_spring))
-    norm = np.linalg.norm(dot)
+    
+    spring_frame_vel = np.dot(delta_x_act[:2], np.array(x_unit_spring))
+    norm = np.linalg.norm(spring_frame_vel)
     speed = norm / dt
 
     # F_pd as given by the spring / damper function
@@ -67,14 +86,14 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
 
     # F_trans = <F_pd, x_yoke_robot_frame>
     # F_trans / m = delta_PWM_trans
-    r = x_unit_bot * r_length
-    delta_vel_trans = np.dot(F_pd, x_unit_bot) / m
+    r = x_unit_bot * YOKE_POINT
+    delta_vel_trans = np.dot(F_pd, x_unit_bot) / ROBOT_MASS
 
     # M_rot = r cross F_pd
     # delta_theta_dot = M_rot / I = r cross F_pd
-    # delta_PWM_rot = delta_theta_dot * r_length
+    # delta_PWM_rot = delta_theta_dot * YOKE_POINT
     M_rot = np.cross(r, F_pd)
-    delta_vel_rot = r_length * M_rot / I
+    delta_vel_rot = YOKE_POINT * M_rot / I
 
     vel_L_prev = convert_PWM_to_vel(PWM_L_prev)
     vel_R_prev = convert_PWM_to_vel(PWM_R_prev)
