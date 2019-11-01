@@ -73,8 +73,8 @@ def get_x_act_new(x_act_prev, dist_l, dist_r):
     delta_x_length = (dist_l + dist_r) / 2
     # print("delta_x_length", delta_x_length)
 
-    delta_x_x_component = delta_x_length * np.cos(np.deg2rad(avg_theta))
-    delta_x_y_component = delta_x_length * np.sin(np.deg2rad(avg_theta))
+    delta_x_x_component = delta_x_length * np.cos(avg_theta)
+    delta_x_y_component = delta_x_length * np.sin(avg_theta)
     # print("delta_x_x_component", delta_x_x_component)
     # print("delta_x_y_component", delta_x_y_component)
 
