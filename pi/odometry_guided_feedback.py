@@ -68,7 +68,7 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
     # F_trans = <F_pd, x_yoke_robot_frame>
     # F_trans / m = delta_PWM_trans
     r = x_unit_bot * r_length
-    delta_vel_trans = np.dot(F_pd, r) / m
+    delta_vel_trans = np.dot(F_pd, x_unit_bot) / m
 
     # M_rot = r cross F_pd
     # delta_theta_dot = M_rot / I = r cross F_pd
