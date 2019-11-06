@@ -138,5 +138,5 @@ void loop() {
 
 
   // TODO: remove this in the final program
-  delay(100);
+  delay(20);
 }
