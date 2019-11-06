@@ -1,6 +1,5 @@
 # CICS 503 Fall 2019 DuckieTown Group 4
 # controller_config.py
-import numpy as np
 
 #cm/s/PWM
 CM_S_PWM = 0.15
@@ -21,9 +20,10 @@ I = 20    # length of torque arm
 TIME_SLICE = 0.5 # fraction of a second; resolution of our function
 END_GOAL = 100 # goal is one meter measured in centimeters
 SPEED_LIMIT = 5 # cm/s
-    
+
 CIRCLE_RADIUS = 10
 
 WHEEL_BASE = 16.5
-BAUDRATE = 9600
+# BAUDRATE = 9600
+BAUDRATE = 115200
 
