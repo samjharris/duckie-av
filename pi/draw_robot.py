@@ -1,3 +1,4 @@
+
 # CICS 503 Fall 2019 DuckieTown Group 4
 # Closed loop controller
 # Pseudocode:
@@ -35,7 +36,49 @@ curr_r_ticks = 0
 
 received_start_signal = False
 
-while True:
+
+
+
+
+
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+
+fig, ax = plt.subplots()
+
+world_line, = plt.plot([0,0,100], [100,0,0], color='black', animated=True)
+
+bot_line, = plt.plot([0], [0], color='red', animated=True)
+x_ref_line, = plt.plot([0], [0], color='green', animated=True)
+
+
+
+
+def init():
+    ax.set_xlim(-100, 200)
+    ax.set_ylim(-150, 150)
+    return [world_line, bot_line, x_ref_line]
+
+
+def update(frame):
+    global start_time
+    global curr_time
+    global last_time
+    global delta_time
+
+    global x_act
+    global x_act_prev
+
+    global PWM_l, PWM_r
+    global x_ref_func
+    global curr_l_ticks
+    global curr_r_ticks
+
+    global received_start_signal
+
     try:
 
         if ser.inWaiting():
@@ -43,21 +86,21 @@ while True:
             inputValue = ser.readline().decode("utf-8").strip()
             args = inputValue.split()
             if inputValue == "":
-                continue
+                return [world_line, bot_line, x_ref_line]
             if not received_start_signal:
                 if inputValue == "arduino start":
                     received_start_signal = True
                     start_time = time() + TIME_SLICE
-                    continue
+                    return [world_line, bot_line, x_ref_line]
                 else:
-                    continue
+                    return [world_line, bot_line, x_ref_line]
 
             if args[0] != "encoder":
                 print("error 2: input was '{}'".format(inputValue))
-                continue
+                return [world_line, bot_line, x_ref_line]
             if len(args) != 3:
                 print("error 1: input was '{}'".format(inputValue))
-                continue
+                return [world_line, bot_line, x_ref_line]
 
             _, delta_l_ticks, delta_r_ticks = args
             # print("arduino->pi: encoder: {} {}".format(delta_l_ticks, delta_r_ticks))
@@ -98,8 +141,42 @@ while True:
             message = "{} {}\n".format(PWM_l, PWM_r)
             to_write = bytearray(message.encode("ascii"))
             ser.write(to_write)
-            break
+            ser.close()
+            exit()
             # exit()
         except SystemExit:
-            break
+            ser.close()
+            exit()
+
+
+
+    angles = x_act[-1] + np.array( [ - np.pi/6, np.pi/6, np.pi - np.pi/6, np.pi + np.pi/6, - np.pi/6 ] )
+    bot_line_x = 10 * np.cos(angles) + x_act[0]
+    bot_line_y = 10 * np.sin(angles) + x_act[1]
+
+    bot_line.set_data(bot_line_x, bot_line_y)
+    x_ref_line.set_data(25, 0)
+
+    return [world_line, bot_line, x_ref_line]
+
+
+
+print("loading visualizer")
+fps = 20
+ftime = 1000/fps # delay between frames in milliseconds
+
+ani = FuncAnimation(fig, update, frames=np.linspace(0, 1, 100000),
+                    init_func=init, interval=ftime, blit=True)
+
+# plt.axis('equal')
+plt.show()
+
+
+
+
+
+PWM_l, PWM_r = 0, 0
+message = "{} {}\n".format(PWM_l, PWM_r)
+to_write = bytearray(message.encode("ascii"))
+ser.write(to_write)
 ser.close()
