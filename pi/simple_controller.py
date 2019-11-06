@@ -1,5 +1,8 @@
 from serial import Serial
 from serial.tools.list_ports import comports as get_serial_ports
+import struct
+from time import sleep, time
+from tqdm import tqdm
 
 
 # connect to the open serial port
@@ -11,26 +14,54 @@ if len(ports) == 0:
 ser = Serial(port=ports[0], baudrate=115200)
 ser.flushInput()
 
+last_write = time()
 
-while True:
-	if ser.inWaiting():
-		# receive the encoder values
-		inputValue = ser.readline().decode("utf-8").strip()
-		print(inputValue)
-		if len(inputValue.split()) != 3:
-			print("mode 1: input was '{}'".format(inputValue))
-			continue
-		if inputValue.split()[0] != "encoder":
-			print("mode 2: input was '{}'".format(inputValue))
-			continue
+# bytes_buffer = bytearray(4)
+bytes_buffer = b""
+buffer_i = 0
+with tqdm(total=1) as pbar:
+	while True:
+		if ser.in_waiting > 0:
+			new_byte = ser.read()
+			# print(new_byte)
 
-		_, left_ticks, right_ticks = inputValue.split()
-		print("arduino->pi: encoder: {} {}".format(left_ticks, right_ticks))
+			# grooble = ser.read_until('A')
+			# print(grooble)
 
-		# send the new motor signals
-		# left_motor, right_motor = 300, 300
-		left_motor, right_motor = 0, 0
-		print("pi->arduino: motor: {} {}".format(left_motor, right_motor))
-		message = "{} {}\n".format(left_motor, right_motor)
-		to_write = bytearray(message.encode("ascii"))
-		ser.write(to_write)
+
+			if len(bytes_buffer) == 4:
+				# new_byte == b'A'
+				# print("arduino->pi", bytes_buffer)
+				binary_string = "arduino->pi {:08b}".format(int(bytes_buffer.hex(),16))
+				print(binary_string)
+
+				left_encoder, right_encoder = struct.unpack('<hh', bytes_buffer)
+				print("arduino->pi", left_encoder, right_encoder)
+
+				bytes_buffer = b""
+				pbar.update()
+
+			else:
+				bytes_buffer += new_byte
+				# bytes_buffer[buffer_i] = int(new_byte)
+				# buffer_i += 1
+
+
+		else:
+			# print("nope, no serial data yet")
+			# if buffer_i == 0 and ser.out_waiting == 0:
+			curr_time = time()
+			if curr_time - last_write > 0.01:
+
+				last_write = time()
+				left_motor, right_motor = -257, 21000
+				print("pi->arduino", left_motor, right_motor)
+				to_write = struct.pack('hhc', left_motor, right_motor, b'A')
+				# print("pi->arduino", to_write)
+
+				binary_string = "pi->arduino {:08b}".format(int(to_write.hex(),16))[:-8]
+				print(binary_string)
+
+				ser.write(to_write)
+				sleep(0.01)
+				# print(ser.out_waiting)
