@@ -17,7 +17,7 @@ DualMC33926MotorShield md;
 volatile long left_encoder_counter = 0;
 volatile long right_encoder_counter = 0;
 
-const int encoder_debounce_time = 10; 
+const int encoder_debounce_time = 10;
 
 volatile long last_update_left;
 volatile long last_update_right;
@@ -43,7 +43,7 @@ void stopIfFault() {
 
 void left_encoder_interrupt_function() {
   // debounce the encoder
-  if(millis() < last_update_left + encoder_debounce_time) 
+  if(millis() < last_update_left + encoder_debounce_time)
     return;
   last_update_left = millis();
 
@@ -83,8 +83,8 @@ void right_encoder_interrupt_function() {
 void setup() {
   wdt_enable(WDTO_8S);
 
-  Serial.begin(9600);
-  // Serial.begin(115200);
+  // Serial.begin(9600);
+  Serial.begin(115200);
 
   Serial.print("arduino start");
   Serial.println();

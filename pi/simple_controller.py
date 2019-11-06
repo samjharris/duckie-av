@@ -7,8 +7,8 @@ ports = [p[0] for p in get_serial_ports()]
 if len(ports) == 0:
     print("Error, couldn't find any open ports")
     exit()
-ser = Serial(port=ports[0], baudrate=9600)
-# ser = Serial(port=ports[0], baudrate=115200)
+# ser = Serial(port=ports[0], baudrate=9600)
+ser = Serial(port=ports[0], baudrate=115200)
 ser.flushInput()
 
 
