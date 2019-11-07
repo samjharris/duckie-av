@@ -17,7 +17,7 @@ K = -0.5  # spring constant
 B = 0.8   # damper constant
 I = 20    # length of torque arm
 
-TIME_SLICE = 0.5 # fraction of a second; resolution of our function
+TIME_SLICE = 0.1 # fraction of a second; resolution of our function
 END_GOAL = 100 # goal is one meter measured in centimeters
 STRAIGHT_SPEED_LIMIT = 15 # cm/s
 TURN_SPEED_LIMIT = 10 # cm/s
