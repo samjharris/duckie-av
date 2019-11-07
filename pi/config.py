@@ -1,5 +1,5 @@
 # CICS 503 Fall 2019 DuckieTown Group 4
-# controller_config.py
+# config.py
 
 #cm/s/PWM
 CM_S_PWM = 0.15
@@ -26,4 +26,3 @@ CIRCLE_RADIUS = 10
 WHEEL_BASE = 16.5
 # BAUDRATE = 9600
 BAUDRATE = 115200
-
