@@ -4,20 +4,18 @@ import struct
 from time import sleep, time
 from tqdm import tqdm
 from new_closed_loop import compute_motor_values
+
 # from simple_command import compute_motor_values
-
-
 debug_mode = False
-
 
 # connect to the open serial port
 ports = [p[0] for p in get_serial_ports()]
+
 if len(ports) == 0:
     print("Error, couldn't find any open ports")
     exit()
 with Serial(port=ports[0], baudrate=115200) as ser:
 	ser.flushInput()
-
 
 	last_write = time()
 	def write_motors(left_motor, right_motor):
@@ -40,12 +38,29 @@ with Serial(port=ports[0], baudrate=115200) as ser:
 			try:
 				if ser.in_waiting > 0:
 					new_byte = ser.read()
+					#print(bytes_buffer, " -> ", len(bytes_buffer))
+					# wait until we have recieved consecutive data
+					# in the format: [DEADxxxxxxxxCAFE]
+					if len(bytes_buffer) == 0 and new_byte != b'\xde':
+						bytes_buffer = b""
+						continue
+					if len(bytes_buffer) == 1 and new_byte != b'\xad':
+						bytes_buffer = b""
+						continue
+					if len(bytes_buffer) == 6 and new_byte != b'\xca':
+						bytes_buffer = b""
+						continue
+					if len(bytes_buffer) == 7 and new_byte != b'\xfe':
+						bytes_buffer = b""
+						continue
+					
+					bytes_buffer += new_byte
 
-					if len(bytes_buffer) == 4:
+					if len(bytes_buffer) == 8:
 						# extract the encoder values
-						left_encoder, right_encoder = struct.unpack('<hh', bytes_buffer)
+						left_encoder, right_encoder = struct.unpack('<hh', bytes_buffer[2:6])
 						if debug_mode:
-							print("arduino->pi", left_encoder, right_encoder)
+							print("arduino->pi encoder values (l,r): ", "(", left_encoder, ") (" , right_encoder,")")
 							# print("arduino->pi {:08b}".format(int(bytes_buffer.hex(),16)))
 						bytes_buffer = b""
 
@@ -71,9 +86,6 @@ with Serial(port=ports[0], baudrate=115200) as ser:
 						write_motors(left_motor, right_motor)
 
 						# pbar.update()  # only to measure communication delay
-
-					else:
-						bytes_buffer += new_byte
 
 				else:
 					curr_time = time()
