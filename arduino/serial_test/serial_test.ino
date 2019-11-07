@@ -53,11 +53,11 @@ void left_encoder_interrupt_function() {
 
   if((!back_left && !front_left) || (back_left && front_left)) {
     // moving forward
-    left_encoder_counter += -1;
+    left_encoder_counter += 1;
   }
   else if((!back_left && front_left) || (back_left && !front_left)) {
     // moving backward
-    left_encoder_counter += 1;
+    left_encoder_counter += -1;
   }
 }
 
@@ -134,7 +134,6 @@ void loop() {
 
 
       // pack up the current encoder values
-      char mask = 255;
       encoderBuffer[0] = lowByte(left_encoder_counter);
       encoderBuffer[1] = highByte(left_encoder_counter);
       encoderBuffer[2] = lowByte(right_encoder_counter);
