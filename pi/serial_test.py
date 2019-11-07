@@ -31,6 +31,7 @@ def write_motors(left_motor, right_motor):
 
 start_time = 0
 received_first_message = False
+left_encoder_previous_value, right_encoder_previous_value = 0, 0
 
 bytes_buffer = b""
 buffer_i = 0
@@ -40,21 +41,34 @@ with tqdm(total=1) as pbar:
 			new_byte = ser.read()
 
 			if len(bytes_buffer) == 4:
-				if not received_first_message:
-					start_time = time()
-					received_first_message = True
-
+				# extract the encoder values
 				left_encoder, right_encoder = struct.unpack('<hh', bytes_buffer)
 				if debug_mode:
 					print("arduino->pi", left_encoder, right_encoder)
 					# print("arduino->pi {:08b}".format(int(bytes_buffer.hex(),16)))
+				bytes_buffer = b""
+
+				if not received_first_message:
+					start_time = time()
+					received_first_message = True
+					left_encoder_previous_value, right_encoder_previous_value = left_encoder, right_encoder
+					prev_t = 0
 
 				t = time() - start_time
-				left_motor, right_motor = compute_motor_values(t, left_encoder, right_encoder)
+				delta_t = t - prev_t
+				prev_t = t
+
+				# compute the encoder deltas
+				delta_left_encoder = left_encoder - left_encoder_previous_value
+				delta_right_encoder = right_encoder - right_encoder_previous_value
+
+				# ask the controller what to do
+				left_motor, right_motor = compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder)
+				left_encoder_previous_value, right_encoder_previous_value = left_encoder, right_encoder
+
+				# do what the controller said to do
 				write_motors(left_motor, right_motor)
 
-
-				bytes_buffer = b""
 				# pbar.update()  # only to measure communication delay
 
 			else:
