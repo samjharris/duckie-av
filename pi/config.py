@@ -19,7 +19,8 @@ I = 20    # length of torque arm
 
 TIME_SLICE = 0.5 # fraction of a second; resolution of our function
 END_GOAL = 100 # goal is one meter measured in centimeters
-SPEED_LIMIT = 5 # cm/s
+STRAIGHT_SPEED_LIMIT = 15 # cm/s
+TURN_SPEED_LIMIT = 10 # cm/s
 
 CIRCLE_RADIUS = 10
 
