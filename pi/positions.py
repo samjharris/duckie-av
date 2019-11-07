@@ -29,7 +29,7 @@ def get_x_ref_func_circle():
     circle_circum = 2 * np.pi * CIRCLE_RADIUS
     time_to_circle = circle_circum / TURN_SPEED_LIMIT
     timeslices_per_circle = time_to_circle / TIME_SLICE
-    delta_theta_per_timeslice = 360 / timeslices_per_circle
+    delta_theta_deg_per_timeslice = 360 / timeslices_per_circle
     num_circles = 5
     total_time = time_to_circle * num_circles
     num_slices = total_time / TIME_SLICE
@@ -41,7 +41,7 @@ def get_x_ref_func_circle():
         x = CIRCLE_RADIUS * np.sin(np.deg2rad(theta))
         y = CIRCLE_RADIUS * (1 - np.cos(np.deg2rad(theta)))
         position_by_time_list.append(np.array([x,y,theta]))
-        theta = (theta + delta_theta_per_timeslice) % 360
+        theta = (theta + delta_theta_deg_per_timeslice) % 360
     def x_ref_func_circle(t):
         index = round(t / TIME_SLICE)
         length = len(position_by_time_list)
@@ -64,20 +64,19 @@ def get_x_act_new(x_act_prev, dist_l, dist_r):
 
     WHEEL_BASE = 16.5
 
-    # delta_theta = np.rad2deg(np.arctan2[dist_diff],[wheelbase])
-    delta_theta = np.rad2deg(dist_diff/WHEEL_BASE) % 360
-    # print("delta_theta (should be ~0)", delta_theta)
-    new_theta = x_act_prev[2] + delta_theta
+    # delta_theta_deg = np.rad2deg(np.arctan2[dist_diff],[wheelbase])
+    delta_theta_deg = dist_diff/(2 * np.pi * WHEEL_BASE) * 360
+    # print("delta_theta_deg (should be ~0)", delta_theta_deg)
+    new_theta = (x_act_prev[2] + delta_theta_deg) % 360
     # print("new_theta (should be ~0)", new_theta)
 
-    ys = np.sin(np.deg2rad(x_act_prev[2])) + np.sin(np.deg2rad(delta_theta))
-    xs = np.cos(np.deg2rad(x_act_prev[2])) + np.cos(np.deg2rad(delta_theta))
+    ys = np.sin(np.deg2rad(x_act_prev[2])) + np.sin(np.deg2rad(delta_theta_deg))
+    xs = np.cos(np.deg2rad(x_act_prev[2])) + np.cos(np.deg2rad(delta_theta_deg))
     avg_theta = np.arctan2(ys, xs)
 
-    # avg_theta = x_act_prev[2] + delta_theta / 2
+    # avg_theta = x_act_prev[2] + delta_theta_deg / 2
     # print("avg_theta (should be ~0)", avg_theta)
 
-    # TODO update with better approximation
     delta_x_length = (dist_l + dist_r) / 2
     # print("delta_x_length", delta_x_length)
 
@@ -90,9 +89,6 @@ def get_x_act_new(x_act_prev, dist_l, dist_r):
     new_x_act_y_component = x_act_prev[1] + delta_x_y_component
     # print("new_x_act_x_component", new_x_act_x_component)
     # print("new_x_act_y_component", new_x_act_y_component)
-
-    new_theta = new_theta % 360
-    # print("new_theta", new_theta)
 
     return np.array([new_x_act_x_component, new_x_act_y_component, new_theta])
 
