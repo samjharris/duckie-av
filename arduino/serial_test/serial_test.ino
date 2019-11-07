@@ -53,11 +53,11 @@ void left_encoder_interrupt_function() {
 
   if((!back_left && !front_left) || (back_left && front_left)) {
     // moving forward
-    left_encoder_counter += 1;
+    left_encoder_counter += -1;
   }
   else if((!back_left && front_left) || (back_left && !front_left)) {
     // moving backward
-    left_encoder_counter += -1;
+    left_encoder_counter += 1;
   }
 }
 
