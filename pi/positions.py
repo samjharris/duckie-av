@@ -9,13 +9,14 @@ from config import *
 import numpy as np
 
 def get_x_ref_func_one_meter():
-    total_time = END_GOAL / SPEED_LIMIT
+    total_time = END_GOAL / STRAIGHT_SPEED_LIMIT
     num_slices = total_time / TIME_SLICE
     position_by_time_list = []
     for i in range(int(num_slices) + 1):
-        position_by_time_list.append(np.array([(SPEED_LIMIT * (i * TIME_SLICE)), 0, 0]))
+        position_by_time_list.append(np.array([(STRAIGHT_SPEED_LIMIT * (i * TIME_SLICE)), 0, 0]))
+    position_by_time_list.append(np.array([END_GOAL, 0, 0]))
     def x_ref_func_one_meter(t):
-        index = int(t / TIME_SLICE)
+        index = round(t / TIME_SLICE)
         length = len(position_by_time_list)
         if index >= length:
             return position_by_time_list[length - 1]
@@ -23,9 +24,10 @@ def get_x_ref_func_one_meter():
             return position_by_time_list[index]
     return x_ref_func_one_meter
 
+
 def get_x_ref_func_circle():
     circle_circum = 2 * np.pi * CIRCLE_RADIUS
-    time_to_circle = circle_circum / SPEED_LIMIT
+    time_to_circle = circle_circum / TURN_SPEED_LIMIT
     timeslices_per_circle = time_to_circle / TIME_SLICE
     delta_theta_per_timeslice = 360 / timeslices_per_circle
     num_circles = 5
@@ -41,12 +43,17 @@ def get_x_ref_func_circle():
         position_by_time_list.append(np.array([x,y,theta]))
         theta = (theta + delta_theta_per_timeslice) % 360
     def x_ref_func_circle(t):
-        index = int(t / TIME_SLICE)
+        index = round(t / TIME_SLICE)
         length = len(position_by_time_list)
         if index >= length:
             return position_by_time_list[length - 1]
         else:
             return position_by_time_list[index]
+    def print_debug_info():
+        print("{:>22} : {}".format("total_time", total_time))
+        print("{:>22} : {}".format("TIME_SLICE", TIME_SLICE))
+        print("{:>22} : {}".format("num_slices", num_slices))
+    print_debug_info()
     return x_ref_func_circle
 
 
@@ -90,8 +97,15 @@ def get_x_act_new(x_act_prev, dist_l, dist_r):
     return np.array([new_x_act_x_component, new_x_act_y_component, new_theta])
 
 def test():
-    x = get_x_ref_func_one_meter()
-    y = get_x_ref_func_circle()
-    for i in range(10):
+    x = get_x_ref_func_circle()
+    for i in range(6):
+        print(x(i/10))
+    print('='*30)
+    for i in range(1,7):
         print(x(i))
-        print(y(i))
+    print('='*30)
+    print(x(6.5))
+    print(x(6.6))
+    print(x(6.7))
+    print(x(6.8))
+    return x
