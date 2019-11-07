@@ -1,7 +1,8 @@
 # CICS 503 Fall 2019 DuckieTown Group 4
 # Odometry-Guided Feedback
 
-from odometry_guided_feedback_header import *
+from config import *
+import numpy as np
 
 # Inputs:
 #         x_ref(t)   = function taking time returning triple:
@@ -67,15 +68,15 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
         # if x_spring was 0:
         else:
             sign = 1
-    
-    spring_displacement = np.linalg.norm(x_spring) 
+
+    spring_displacement = np.linalg.norm(x_spring)
 
     # Unit vector in direction from yoke to x_ref
     x_unit_spring = x_spring / spring_displacement
 
     # TODO correct to using x_act_prev - x_act / timeslice
     #speed = (PWM_L_prev + PWM_R_prev) / 2
-    
+
     spring_frame_vel = np.dot(delta_x_act[:2], np.array(x_unit_spring))
     norm = np.linalg.norm(spring_frame_vel)
     speed = norm / dt

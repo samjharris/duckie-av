@@ -5,7 +5,8 @@
 # takes some route information and returns a route function
 # def get_x_ref_func():
 
-from positions_header import *
+from config import *
+import numpy as np
 
 def get_x_ref_func_one_meter():
     total_time = END_GOAL / SPEED_LIMIT
