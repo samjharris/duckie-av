@@ -30,7 +30,7 @@ union ShortsOrBytes
 };
 char motorBufferIndex = 0;
 char motorBuffer[4];
-char encoderBuffer[5];
+char encoderBuffer[8];
 
 
 // called when either of the motors fails
@@ -132,14 +132,20 @@ void loop() {
       md.setM2Speed(motorRight);
       stopIfFault();
 
-
+      // capture volatile values
+      short temp_left_encoder_counter = left_encoder_counter;
+      short temp_right_encoder_counter = right_encoder_counter;
+       
       // pack up the current encoder values
-      encoderBuffer[0] = lowByte(left_encoder_counter);
-      encoderBuffer[1] = highByte(left_encoder_counter);
-      encoderBuffer[2] = lowByte(right_encoder_counter);
-      encoderBuffer[3] = highByte(right_encoder_counter);
-      encoderBuffer[4] = 'A';
-
+      encoderBuffer[0] = 0xDE;
+      encoderBuffer[1] = 0xAD;
+      encoderBuffer[2] = lowByte(temp_left_encoder_counter);
+      encoderBuffer[3] = highByte(temp_left_encoder_counter);
+      encoderBuffer[4] = lowByte(temp_right_encoder_counter);
+      encoderBuffer[5] = highByte(temp_right_encoder_counter);
+      encoderBuffer[6] = 0xCA;
+      encoderBuffer[7] = 0xFE;
+      
       // send the encoder values over serial
       Serial.write(encoderBuffer, sizeof(encoderBuffer));
     }
