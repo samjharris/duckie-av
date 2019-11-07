@@ -3,8 +3,8 @@ from serial.tools.list_ports import comports as get_serial_ports
 import struct
 from time import sleep, time
 from tqdm import tqdm
-# from new_closed_loop import compute_motor_values
-from simple_command import compute_motor_values
+from new_closed_loop import compute_motor_values
+# from simple_command import compute_motor_values
 
 
 debug_mode = False
