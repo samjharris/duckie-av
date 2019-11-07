@@ -39,7 +39,7 @@ with tqdm(total=1) as pbar:
 			if curr_time - last_write > 0.01:
 
 				last_write = time()
-				left_motor, right_motor = -257, 21000
+				left_motor, right_motor = 400, 400
 				print("pi->arduino", left_motor, right_motor)
 				to_write = struct.pack('hhc', left_motor, right_motor, b'A')
 				# print("pi->arduino {:08b}".format(int(to_write.hex(),16))[:-8])
