@@ -60,35 +60,30 @@ def get_x_ref_func_circle():
 def get_x_act_new(x_act_prev, dist_l, dist_r):
     dist_diff = dist_l - dist_r
 
-    # print("dist_diff (should be 0)", dist_diff)
-
     WHEEL_BASE = 16.5
 
+    # coefficients to correct for nearly constant error with distance and angle
+    # conversion from ticks
+    angle_dist_correction_coefficient = 9/8
+    lateral_dist_correction_coefficient = 91/84.2
+
     # delta_theta_deg = np.rad2deg(np.arctan2[dist_diff],[wheelbase])
-    delta_theta_deg = dist_diff/(2 * np.pi * WHEEL_BASE) * 360
-    # print("delta_theta_deg (should be ~0)", delta_theta_deg)
+    delta_theta_deg = angle_dist_correction_coefficient * \
+                        (dist_diff/(2 * np.pi * WHEEL_BASE)) * 360
+
     new_theta = (x_act_prev[2] + delta_theta_deg) % 360
-    # print("new_theta (should be ~0)", new_theta)
 
     ys = np.sin(np.deg2rad(x_act_prev[2])) + np.sin(np.deg2rad(delta_theta_deg))
     xs = np.cos(np.deg2rad(x_act_prev[2])) + np.cos(np.deg2rad(delta_theta_deg))
     avg_theta = np.arctan2(ys, xs)
 
-    # avg_theta = x_act_prev[2] + delta_theta_deg / 2
-    # print("avg_theta (should be ~0)", avg_theta)
-
-    delta_x_length = (dist_l + dist_r) / 2
-    # print("delta_x_length", delta_x_length)
+    delta_x_length = lateral_dist_correction_coefficient * (dist_l + dist_r) / 2
 
     delta_x_x_component = delta_x_length * np.cos(avg_theta)
     delta_x_y_component = delta_x_length * np.sin(avg_theta)
-    # print("delta_x_x_component", delta_x_x_component)
-    # print("delta_x_y_component", delta_x_y_component)
 
     new_x_act_x_component = x_act_prev[0] + delta_x_x_component
     new_x_act_y_component = x_act_prev[1] + delta_x_y_component
-    # print("new_x_act_x_component", new_x_act_x_component)
-    # print("new_x_act_y_component", new_x_act_y_component)
 
     return np.array([new_x_act_x_component, new_x_act_y_component, new_theta])
 
