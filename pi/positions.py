@@ -68,8 +68,10 @@ def get_x_act_new(x_act_prev, dist_l, dist_r):
     lateral_dist_correction_coefficient = 91/84.2
 
     # delta_theta_deg = np.rad2deg(np.arctan2[dist_diff],[wheelbase])
-    delta_theta_deg = angle_dist_correction_coefficient * \
-                        (dist_diff/(2 * np.pi * WHEEL_BASE)) * 360
+    # Our old way
+    # delta_theta_deg = angle_dist_correction_coefficient * \
+    #                     (dist_diff/(2 * np.pi * WHEEL_BASE)) * 360
+    delta_theta_deg = np.rad2deg(np.arctan2((angle_dist_correction_coefficient * dist_diff)/2,WHEEL_BASE/2))
 
     new_theta = (x_act_prev[2] + delta_theta_deg) % 360
 
