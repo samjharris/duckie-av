@@ -32,7 +32,14 @@ def convert_PWM_to_vel(PWM):
     else:
         return 0
 
-def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
+def convert_delta_PWM_to_vel(delta_PWM):
+    if delta_PWM > 0:
+        delta_PWM += MIN_PWM
+    if delta_PWM < 0:
+        delta_PWM -= MIN_PWM
+    return convert_PWM_to_vel(delta_PWM)
+
+def get_PWMs_from_odometry(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
 
     # Unit vector in direction of x_act
     x_unit_bot = np.array([np.cos(np.deg2rad(x_act[2])),
@@ -152,7 +159,7 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
         # print("{:>22} : {}".format("PWM_L_new", PWM_L_new))
         # print("{:>22} : {}".format("PWM_R_new", PWM_R_new))
         # print("="*50)
-    print_debug_info()
+    # print_debug_info()
     return (PWM_L_new, PWM_R_new)
 
 

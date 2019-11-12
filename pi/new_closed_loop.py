@@ -1,7 +1,8 @@
 import numpy as np
 
 import positions
-from odometry_guided_feedback import get_PWMs
+from odometry_guided_feedback import get_PWMs_from_odometry
+from visual_controller import get_PWMs_from_visual
 from ticks_to_distance import get_distances
 
 
@@ -24,8 +25,14 @@ def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_enc
     x_act_new = positions.get_x_act_new(x_act, dist_l, dist_r)
     x_act = x_act_new
 
+    # get displacement from center of the lane from visual components
+    # TODO: call for this from visual processing module
+    # lane_error, stop_marker = get_lane_error()
+    lane_error, stop_marker = 0, False
+
     # compute the new motor commands
-    PWM_l, PWM_r = get_PWMs(x_ref_func, t, delta_t, x_act, x_act_prev, PWM_l, PWM_r)
+    # PWM_l, PWM_r = get_PWMs_from_odometry(x_ref_func, t, delta_t, x_act, x_act_prev, PWM_l, PWM_r)
+    PWM_l, PWM_r = get_PWMs_from_visual(lane_error, delta_t, stop_marker, PWM_l, PWM_r)
     x_act_prev = x_act
 
     # debug
