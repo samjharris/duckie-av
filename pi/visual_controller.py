@@ -1,6 +1,6 @@
 # using equation theta_2 = -K (theta - theta_ref) - B (theta_dot - theta_1_ref)
 # theta_dot = theta_(t+1) - theta_t
-from odometry_guided_feedback import convert_PWM_to_vel, convert_vel_to_PWM
+from odometry_guided_feedback import convert_PWM_to_vel, convert_vel_to_PWM, convert_delta_PWM_to_vel
 from config import *
 import numpy as np
 from collections import deque
@@ -47,11 +47,7 @@ def get_PWMs_from_visual(lane_error_pix, dt, stop_marker_seen, PWM_l_prev, PWM_r
     # handle PWM <==> velocity stuff  
     vel_l_prev = convert_PWM_to_vel(PWM_l_prev)
     vel_r_prev = convert_PWM_to_vel(PWM_r_prev)
-    if delta_PWM > 0:
-        delta_PWM += MIN_PWM
-    if delta_PWM < 0:
-        delta_PWM -= MIN_PWM
-    delta_vel = convert_PWM_to_vel(delta_PWM)
+    delta_vel = convert_delta_PWM_to_vel(delta_PWM)
 
     # TODO: return PWMs
     PWM_l = convert_vel_to_PWM(vel_l_prev - delta_vel)

@@ -18,6 +18,9 @@ K = -0.6  # spring constant
 B = 3  # damper constant
 I = 5    # length of torque arm
 
+DIST_TO_ROI_CM = 10 # distance from bot to center of ROI
+PIX_PER_CM = 100 # pixels per cm in ROI
+
 TIME_SLICE = 0.1 # fraction of a second; resolution of our function
 END_GOAL = 100 # goal is one meter measured in centimeters
 STRAIGHT_SPEED_LIMIT = 15 # cm/s
