@@ -13,8 +13,9 @@ ROBOT_MASS = 0.830 #
 # yoke point distance from center of the wheel base (centimeters)
 YOKE_POINT = 5 #prev r_length
 
+# K of 0.5, B of 3 and I of 30 work well for straight
 K = -0.6  # spring constant
-B = 2  # damper constant
+B = 3  # damper constant
 I = 5    # length of torque arm
 
 TIME_SLICE = 0.1 # fraction of a second; resolution of our function
