@@ -30,7 +30,7 @@ def get_x_ref_func_circle():
     time_to_circle = circle_circum / TURN_SPEED_LIMIT
     timeslices_per_circle = time_to_circle / TIME_SLICE
     delta_theta_deg_per_timeslice = 360 / timeslices_per_circle
-    num_circles = 5
+    num_circles = 1
     total_time = time_to_circle * num_circles
     num_slices = total_time / TIME_SLICE
     position_by_time_list = []
@@ -81,24 +81,41 @@ def get_x_act_new(x_act_prev, dist_l, dist_r):
 
     delta_x_length = lateral_dist_correction_coefficient * (dist_l + dist_r) / 2
 
-    delta_x_x_component = delta_x_length * np.cos(avg_theta)
-    delta_x_y_component = delta_x_length * np.sin(avg_theta)
+    unit_bot = np.array([np.cos(avg_theta),np.sin(avg_theta)])
+    delta_x_x_component = delta_x_length * unit_bot[0]
+    delta_x_y_component = delta_x_length * unit_bot[1]
 
     new_x_act_x_component = x_act_prev[0] + delta_x_x_component
     new_x_act_y_component = x_act_prev[1] + delta_x_y_component
 
+    def print_debug_info():
+        np.set_printoptions(precision=3)
+        print("{:>22} : {}".format("x_act_prev", x_act_prev))
+        print("{:>22} : {}".format("dist_l", dist_l))
+        print("{:>22} : {}".format("dist_r", dist_r))
+        print("{:>22} : {}".format("dist_diff", dist_diff))
+        print("{:>22} : {}".format("delta_theta", delta_theta_deg))
+        print("{:>22} : {}".format("new_theta", new_theta))
+        print("{:>22} : {}".format("avg_theta", avg_theta))
+        print("{:>22} : {}".format("unit_bot", unit_bot))
+        print("{:>22} : {}".format("delta_x_length", delta_x_length))
+        print("{:>22} : {}".format("delta_x_component", delta_x_x_component))
+        print("{:>22} : {}".format("delta_y_component", delta_x_y_component))
+        print("{:>22} : {}".format("new_x_component", new_x_act_x_component))
+        print("{:>22} : {}".format("new_y_component", new_x_act_y_component))
+        print("="*50)
+    print_debug_info()
+
     return np.array([new_x_act_x_component, new_x_act_y_component, new_theta])
 
-def test():
+def get_speed(x_act_prev, x_act_curr, dt):
+    velocity = ((x_act_curr[:2] - x_act_prev[:2]) / dt)
+    speed = np.linalg.norm(velocity)
+    return speed
+
+def test(t):
     x = get_x_ref_func_circle()
-    for i in range(6):
-        print(x(i/10))
-    print('='*30)
-    for i in range(1,7):
-        print(x(i))
-    print('='*30)
-    print(x(6.5))
-    print(x(6.6))
-    print(x(6.7))
-    print(x(6.8))
-    return x
+    # for i in range(1000):
+    #     print(x(i/10))
+    # print('='*30)
+    print(x(t))
