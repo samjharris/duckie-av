@@ -16,23 +16,23 @@ import numpy as np
 # Returns:
 #         (PWM_R_new, PWM_L_new) =
 #                         pair of motor control signals in the range [-400, 400]
+def convert_vel_to_PWM(velocity):
+    if velocity > 0:
+        return (velocity / CM_S_PWM) + MIN_PWM
+    elif velocity < 0:
+        return (velocity / CM_S_PWM) - MIN_PWM
+    else:
+        return 0
+
+def convert_PWM_to_vel(PWM):
+    if PWM > 0:
+        return (PWM - MIN_PWM) * CM_S_PWM
+    elif PWM < 0:
+        return (PWM + MIN_PWM) * CM_S_PWM
+    else:
+        return 0
+
 def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
-
-    def convert_vel_to_PWM(velocity):
-        if velocity > 0:
-            return (velocity / CM_S_PWM) + MIN_PWM
-        elif velocity < 0:
-            return (velocity / CM_S_PWM) - MIN_PWM
-        else:
-            return 0
-
-    def convert_PWM_to_vel(PWM):
-        if PWM > 0:
-            return (PWM - MIN_PWM) * CM_S_PWM
-        elif PWM < 0:
-            return (PWM + MIN_PWM) * CM_S_PWM
-        else:
-            return 0
 
     # Unit vector in direction of x_act
     x_unit_bot = np.array([np.cos(np.deg2rad(x_act[2])),
@@ -50,7 +50,6 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
     # Distance vector from yoke to x_ref_yoke
     x_spring = x_ref_yoke[0:2] - x_r
 
-    # useful comment
     delta_x_act = x_act_prev - x_act
 
     sign = 0
@@ -101,12 +100,6 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
     M_rot = np.cross(r, F_pd)
     delta_vel_rot = YOKE_POINT * M_rot / I
 
-    # vel_L_prev = convert_PWM_to_vel(PWM_L_prev)
-    # vel_R_prev = convert_PWM_to_vel(PWM_R_prev)
-
-    # vel_L_new = vel_L_prev + delta_vel_trans - delta_vel_rot
-    # vel_R_new = vel_R_prev + delta_vel_trans + delta_vel_rot
-
     vel_L_new = speed + delta_vel_trans - delta_vel_rot
     vel_R_new = speed + delta_vel_trans + delta_vel_rot
 
@@ -128,36 +121,37 @@ def get_PWMs(x_ref_func, t, dt, x_act, x_act_prev, PWM_L_prev, PWM_R_prev):
         np.set_printoptions(precision=3)
         # print("{:>22} : {}".format("K", K))
         # print("{:>22} : {}".format("B", B))
+        print("{:>22} : {}".format("t", t))
         print("{:>22} : {}".format("x_act", x_act))
         # print("{:>22} : {}".format("PWM_L_prev", PWM_L_prev))
         # print("{:>22} : {}".format("PWM_R_prev", PWM_R_prev))
         # print("{:>22} : {}".format("x_unit_bot", x_unit_bot))
-        print("{:>22} : {}".format("x_r", x_r))
-        print("{:>22} : {}".format("x_ref_yoke", x_ref_yoke))
+        # print("{:>22} : {}".format("x_r", x_r))
+        # print("{:>22} : {}".format("x_ref_yoke", x_ref_yoke))
         # print("{:>22} : {}".format("x_spring", x_spring))
         # print("{:>22} : {}".format("dir_vel_vec", dir_vel_vec))
         # print("{:>22} : {}".format("delta_x_act", delta_x_act))
-        print("{:>22} : {}".format("spring_displacement", spring_displacement))
-        print("{:>22} : {}".format("x_unit_spring", x_unit_spring))
+        # print("{:>22} : {}".format("spring_displacement", spring_displacement))
+        # print("{:>22} : {}".format("x_unit_spring", x_unit_spring))
         # print("{:>22} : {}".format("norm", norm))
         # print("{:>22} : {}".format("dt", dt))
         # print("{:>22} : {}".format("speed", speed))
-        print("{:>22} : {}".format("spring_component", spring_component))
-        print("{:>22} : {}".format("damping_component", damping_component))
-        print("{:>22} : {}".format("F_pd", F_pd))
+        # print("{:>22} : {}".format("spring_component", spring_component))
+        # print("{:>22} : {}".format("damping_component", damping_component))
+        # print("{:>22} : {}".format("F_pd", F_pd))
         # print("{:>22} : {}".format("delta_vel_trans", delta_vel_trans))
         # print("{:>22} : {}".format("r", r))
-        print("{:>22} : {}".format("F_trans", F_trans))
-        print("{:>22} : {}".format("M_rot", M_rot))
+        # print("{:>22} : {}".format("F_trans", F_trans))
+        # print("{:>22} : {}".format("M_rot", M_rot))
         # print("{:>22} : {}".format("delta_vel_rot", delta_vel_rot))
         # print("{:>22} : {}".format("vel_L_prev", vel_L_prev))
         # print("{:>22} : {}".format("vel_R_prev", vel_R_prev))
-        print("{:>22} : {}".format("vel_L_new", vel_L_new))
-        print("{:>22} : {}".format("vel_R_new", vel_R_new))
+        # print("{:>22} : {}".format("vel_L_new", vel_L_new))
+        # print("{:>22} : {}".format("vel_R_new", vel_R_new))
         # print("{:>22} : {}".format("max_vel_allowed", max_vel_allowed))
-        print("{:>22} : {}".format("PWM_L_new", PWM_L_new))
-        print("{:>22} : {}".format("PWM_R_new", PWM_R_new))
-        print("="*50)
+        # print("{:>22} : {}".format("PWM_L_new", PWM_L_new))
+        # print("{:>22} : {}".format("PWM_R_new", PWM_R_new))
+        # print("="*50)
     print_debug_info()
     return (PWM_L_new, PWM_R_new)
 
