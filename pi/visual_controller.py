@@ -26,8 +26,6 @@ def get_PWMs_from_visual(lane_error_pix, dt, stop_marker_seen, PWM_l_prev, PWM_r
     # TODO: translate pixel error from center of bot to center of lane to theta
     # tan(theta) = o/a = lane error in centimeters / dist from ROI center to bot center
     # theta = arctan(lane error in centimeters / dist from ROI center to bot center)
-    DIST_TO_ROI_CM = 10
-    PIX_PER_CM = 100
     lane_error_cm = lane_error_pix / PIX_PER_CM
     theta = np.arctan2(lane_error_cm, DIST_TO_ROI_CM)
 
