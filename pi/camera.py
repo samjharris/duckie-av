@@ -11,10 +11,11 @@ from image_interpreter import get_pixel_error_from_image
 
 class Camera:
     def __init__(self, width=640, height=480):
+        self.width, self.height = width, height
         self.camera = picamera.PiCamera()
         self.camera.resolution = (width, height)
         # self.camera.framerate = 80
-        
+
         ## wait for exposure/gain to adjust
         sleep(2)
         ## set exposure/gain for consistent images
@@ -23,7 +24,7 @@ class Camera:
         g = self.camera.awb_gains
         self.camera.awb_mode = "off"
         self.camera.awb_gains = g
-        
+
         self.raw_capture = picamera.array.PiRGBArray(self.camera, size=(self.width, self.height))
         self.lock = Lock()
         self.cur_error = 0
