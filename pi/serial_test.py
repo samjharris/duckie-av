@@ -24,8 +24,8 @@ with Serial(port=ports[0], baudrate=115200) as ser:
     def write_motors(left_motor, right_motor):
         global last_write, left_motor_prev, right_motor_prev
 
-        assert type(left_motor) == int or type(left_motor) == float
-        assert type(right_motor) == int or type(right_motor) == float
+        assert type(left_motor) == int or type(left_motor) == float, "motor input should be of type int, not {}".format(type(left_motor))
+        assert type(right_motor) == int or type(right_motor) == float, "motor input should be of type int, not {}".format(type(right_motor))
         left_motor, right_motor = int(left_motor), int(right_motor)
 
         last_write = time()
