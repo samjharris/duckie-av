@@ -5,8 +5,8 @@ import picamera
 import numpy as np
 import picamera.array
 
-# w, h = 640, 480
-w, h = 320, 240
+w, h = 640, 480
+# w, h = 320, 240
 
 def process(frame):
     # from PIL import Image
