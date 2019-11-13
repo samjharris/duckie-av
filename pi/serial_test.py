@@ -23,6 +23,11 @@ with Serial(port=ports[0], baudrate=115200) as ser:
     left_motor_prev, right_motor_prev = 0, 0
     def write_motors(left_motor, right_motor):
         global last_write, left_motor_prev, right_motor_prev
+
+        assert type(left_motor) == int or type(left_motor) == float
+        assert type(right_motor) == int or type(right_motor) == float
+        left_motor, right_motor = int(left_motor), int(right_motor)
+
         last_write = time()
         to_write = struct.pack('hhc', left_motor, right_motor, b'A')
         if debug_mode:
@@ -58,7 +63,7 @@ with Serial(port=ports[0], baudrate=115200) as ser:
                     if len(bytes_buffer) == 7 and new_byte != b'\xfe':
                         bytes_buffer = b""
                         continue
-                    
+
                     bytes_buffer += new_byte
 
                     if len(bytes_buffer) == 8:
