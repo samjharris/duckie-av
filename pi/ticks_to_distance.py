@@ -2,7 +2,7 @@
 # Ticks to Distance
 # Function: Covert the number of ticks counted by the wheel encoder into distance(cm)
 # Last update: 10/25/2019
-
+import numpy as np
 
 # input:
 #		ticks : int, the number of ticks
@@ -10,7 +10,9 @@
 #		distance traveled in centimeter(cm)
 def tick_to_centimeter(ticks):
 	# based on the circumfrance of the wheel and the number of steps on encoder
-	distance_per_tick = 5 / 6 #unit: (cm per tick), experiment yielded 145cm over 174 ticks = 5/6cm per tick
+	# distance_per_tick = 5 / 6 #unit: (cm per tick), experiment yielded 145cm over 174 ticks = 5/6cm per tick
+	distance_per_tick = (6.5 * np.pi) / 26 #unit: (cm per tick), experiment yielded 145cm over 174 ticks = 5/6cm per tick
+
 	return ticks*distance_per_tick
 
 # input:
