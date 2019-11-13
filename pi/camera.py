@@ -53,7 +53,7 @@ class Camera():
         # img.save('my.png')
         # img.show()
 
-        print(frame.shape, self.width*self.height)
+        # print(frame.shape, self.width*self.height)
 
         #process image here
         error = get_pixel_error_from_image(frame)
