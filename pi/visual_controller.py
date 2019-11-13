@@ -4,9 +4,15 @@ from odometry_guided_feedback import convert_PWM_to_vel, convert_vel_to_PWM, con
 from config import *
 import numpy as np
 from collections import deque
+from camera import Camera
+
+
+cam = Camera()
+cam.start_capture_async()
 
 previous_thetas = deque()
 previous_dts = deque()
+
 
 # takes 
 #   PWM_l_prev: float,
@@ -53,9 +59,24 @@ def get_PWMs_from_visual(lane_error_pix, dt, stop_marker_seen, PWM_l_prev, PWM_r
 
     return PWM_l, PWM_r
 
+
 def clear_visual_globals():
     previous_thetas.clear()
     previous_dts.clear()
+
+
+def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev):
+    PWM_l, PWM_r = 0, 0
+    error = cam.get_error()
+
+    stop_marker_seen = False
+
+    PWM_l_prev, PWM_r_prev = pass, pass
+
+    PWM_l, PWM_r = get_PWMs_from_visual(error, delta_t, stop_marker_seen, PWM_l_prev, PWM_r_prev)
+
+    return PWM_l, PWM_r
+
 
 def test():
     return get_PWMs_from_visual(20, 0.1, False, 150, 150)

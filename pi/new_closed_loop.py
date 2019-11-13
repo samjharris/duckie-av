@@ -13,7 +13,7 @@ x_ref_func = positions.get_x_ref_func_one_meter()
 PWM_l, PWM_r = 0, 0
 
 
-def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder):
+def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev):
     global x_act
     global x_act_prev
     global x_ref_func

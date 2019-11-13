@@ -1,4 +1,4 @@
-def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder):
+def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev):
     print(left_encoder, right_encoder)
     # print("go forward!")
     return 400, 400
