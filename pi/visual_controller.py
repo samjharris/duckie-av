@@ -8,7 +8,7 @@ from camera import Camera
 
 
 cam = Camera()
-cam.start_capture_async()
+
 
 previous_thetas = deque()
 previous_dts = deque()

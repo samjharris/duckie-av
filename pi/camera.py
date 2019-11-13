@@ -9,59 +9,64 @@ import picamera.array
 from image_interpreter import get_pixel_error_from_image
 
 
-class Camera:
+class Camera():
     def __init__(self, width=640, height=480):
         self.width, self.height = width, height
-        self.camera = picamera.PiCamera()
-        self.camera.resolution = (width, height)
-        # self.camera.framerate = 80
-
-        ## wait for exposure/gain to adjust
-        sleep(2)
-        ## set exposure/gain for consistent images
-        self.camera.shutter_speed = self.camera.exposure_speed
-        self.camera.exposure_mode = "off"
-        g = self.camera.awb_gains
-        self.camera.awb_mode = "off"
-        self.camera.awb_gains = g
-
-        self.raw_capture = picamera.array.PiRGBArray(self.camera, size=(self.width, self.height))
         self.lock = Lock()
         self.cur_error = 0
         self.should_stop = False
 
-
-    def process_frame(self, frame):
-        #process image here
-        error = get_pixel_error_from_image(frame)
-        print(error)
-        return error
-
-
-    def start_capture_async(self):
+        # start a thread to start capturing video
         video_thread = Thread(target=self.start_capture)
         video_thread.start()
 
 
     def start_capture(self):
-        stream = self.camera.capture_continuous(self.raw_capture, format="rgb", use_video_port=True)
-        for f in stream:
-            if(self.should_stop):
-                return
-            self.raw_capture.truncate(0)
+        with picamera.PiCamera() as camera:
+            camera.resolution = (self.width, self.height)
+            # camera.framerate = 30
 
-            # process the frame
-            error = self.process_frame(f.array)
+            # expose the camera properly
+            sleep(2)
+            camera.shutter_speed = camera.exposure_speed
+            camera.exposure_mode = 'off'
+            g = camera.awb_gains
+            camera.awb_mode = 'off'
+            camera.awb_gains = g
 
-            # update the pixel error (instance attribute)
-            self.lock.acquire()
-            self.cur_error = error
-            self.lock.release()
+            with picamera.array.PiRGBArray(camera) as stream:
+                    rawCapture = picamera.array.PiRGBArray(camera, size=(self.width, self.height))
+                    stream = camera.capture_continuous(rawCapture, format="rgb", use_video_port=True)
+
+                    for f in stream:
+                        if self.should_stop:
+                            break
+
+                        rawCapture.truncate(0)
+
+                        self.process(f.array)
+
+
+    def process(self, frame):
+        # from PIL import Image
+        # img = Image.fromarray(frame, 'RGB')
+        # img.save('my.png')
+        # img.show()
+
+        print(frame.shape, self.width*self.height)
+
+        #process image here
+        error = get_pixel_error_from_image(frame)
+        print(error)
+
+        # set the error
+        self.lock.acquire()
+        self.cur_error = error
+        self.lock.release()
 
 
     def get_error(self):
         self.lock.acquire()
         error = self.cur_error
         self.lock.release()
-        self.camera.close()
         return error
