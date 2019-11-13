@@ -5,7 +5,7 @@ from time import sleep, time
 from tqdm import tqdm
 # from simple_command import compute_motor_values
 # from new_closed_loop import compute_motor_values
-from visual_controller import compute_motor_values
+from visual_controller import compute_motor_values, cam
 from numpy import int64, float64
 
 
@@ -107,6 +107,7 @@ with Serial(port=ports[0], baudrate=115200) as ser:
             except KeyboardInterrupt:
                 print('Interrupted with ctrl+c')
                 try:
+                    cam.should_stop = True
                     write_motors(0, 0)
                     break
                 except SystemExit:
