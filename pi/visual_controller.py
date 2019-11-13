@@ -57,6 +57,10 @@ def get_PWMs_from_visual(lane_error_pix, dt, stop_marker_seen, PWM_l_prev, PWM_r
     PWM_l = convert_vel_to_PWM(vel_l_prev - delta_vel)
     PWM_r = convert_vel_to_PWM(vel_r_prev + delta_vel)
 
+    # TODO: what is the right way to clamp these values?
+    PWM_l = np.clip(PWM_l, -400, 400)
+    PWM_r = np.clip(PWM_r, -400, 400)
+
     return PWM_l, PWM_r
 
 
