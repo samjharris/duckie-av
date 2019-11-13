@@ -2,6 +2,7 @@ from tqdm import tqdm
 # import io
 from time import sleep
 from PIL import Image
+from threading import Lock
 import picamera
 import numpy as np
 import picamera.array
@@ -24,6 +25,8 @@ class camera:
         self.stream = picamera.array.PiRGBArray(self.cam, size=(self.width, self.height))
         ## initialize the raw buffer
         self.raw = picamera.array.PiRGBArray(self.cam, size=(self.width, self.height))
+        ## initialize the lock 
+        self.lock = threading.Lock()
         ## initialize the current error to 0
         self.cur_error = 0
         ## initialize the stop signal
@@ -38,20 +41,20 @@ class camera:
             self.stream.seek(0)
             ## get the error of the current frame
             error = process_image(self.stream)
-            #acquire lock
+            self.lock.acquire()
             self.cur_error = error
-            #release lock
+            self.lock.release()
     
     def process_image(frame):
         #process image here
         img = Image.fromarray(frame, 'RGB')
-        
+
         return 0
 
     def get_error():
-        #aquire lock
-        #access error = self.cur_error
-        #release lock
+        self.lock.acquire()
+        error = self.cur_error
+        self.lock.release()
         return error
 
 
