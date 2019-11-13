@@ -14,13 +14,13 @@ previous_thetas = deque()
 previous_dts = deque()
 
 
-# takes 
+# takes
 #   PWM_l_prev: float,
 #   PWM_r_prev: float,
 #   lane_error_pix: int,
-#   time since last call, dt: float, 
+#   time since last call, dt: float,
 #   stop_marker_seen: bool
-# returns 
+# returns
 #   (PWM_l, PWM_r): (float, float)
 def get_PWMs_from_visual(lane_error_pix, dt, stop_marker_seen, PWM_l_prev, PWM_r_prev):
     # TODO: start and proceed at speed limit --- Maybe not here
@@ -48,7 +48,7 @@ def get_PWMs_from_visual(lane_error_pix, dt, stop_marker_seen, PWM_l_prev, PWM_r
     # TODO: use equation to determine delta_PWM (delta_PWM ~ theta_acceleration)
     delta_PWM = - K * theta - B * theta_velocity
 
-    # handle PWM <==> velocity stuff  
+    # handle PWM <==> velocity stuff
     vel_l_prev = convert_PWM_to_vel(PWM_l_prev)
     vel_r_prev = convert_PWM_to_vel(PWM_r_prev)
     delta_vel = convert_delta_PWM_to_vel(delta_PWM)
@@ -71,7 +71,7 @@ def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_enc
 
     stop_marker_seen = False
 
-    PWM_l_prev, PWM_r_prev = pass, pass
+    PWM_l_prev, PWM_r_prev = left_motor_prev, right_motor_prev
 
     PWM_l, PWM_r = get_PWMs_from_visual(error, delta_t, stop_marker_seen, PWM_l_prev, PWM_r_prev)
 
