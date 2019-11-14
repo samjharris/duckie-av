@@ -13,8 +13,9 @@ class Camera():
     def __init__(self, width=640, height=480):
         self.width, self.height = width, height
         self.lock = Lock()
-        self.cur_error = 0
+        # self.cur_error = 0
         self.should_stop = False
+        self.cur_frame = None
 
         # start a thread to start capturing video
         video_thread = Thread(target=self.start_capture)
@@ -44,7 +45,8 @@ class Camera():
 
                         rawCapture.truncate(0)
 
-                        self.process(f.array)
+                        # self.process(f.array)
+                        self.cur_frame = f.array
 
 
     def process(self, frame):
@@ -55,21 +57,15 @@ class Camera():
 
         # print(frame.shape, self.width*self.height)
 
-        #process image here
-        error, saw_red = get_pixel_error_from_image(frame)
+        if self.cur_frame is None:
+            return 0, True
+
+        error, saw_red = get_pixel_error_from_image(self.cur_frame)
         print("error: {}  saw red: {}".format(error, saw_red))
 
-        # set the error
-        self.lock.acquire()
-        self.cur_error = error
-        self.should_stop = saw_red
-        self.lock.release()
+        return error, saw_red
 
 
     def get_error(self):
-        self.lock.acquire()
-        error = self.cur_error
-        saw_red = self.should_stop
-        self.lock.release()
-        return error, saw_red
-
+        cur_error, should_stop = self.process(self.cur_frame)
+        return cur_error, should_stop
