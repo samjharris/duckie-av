@@ -14,7 +14,7 @@ ROBOT_MASS = 0.830 #
 YOKE_POINT = 5.0 #prev r_length
 
 # K of 0.5, B of 3 and I of 30 work well for straight
-K = 0.1  # spring constant
+K = 20.0  # spring constant
 B = 0.0  # damper constant
 I = 5.0  # length of torque arm
 

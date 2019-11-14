@@ -55,8 +55,8 @@ def get_PWMs_from_visual(lane_error_pix, dt, stop_marker_seen, PWM_l_prev, PWM_r
     delta_vel = convert_delta_PWM_to_vel(delta_PWM)
 
     # TODO: return PWMs
-    vel_l_new = vel_l_prev - delta_vel
-    vel_r_new = vel_r_prev + delta_vel
+    vel_l_new = vel_l_prev + delta_vel
+    vel_r_new = vel_r_prev - delta_vel
     PWM_l = convert_vel_to_PWM(vel_l_new)
     PWM_r = convert_vel_to_PWM(vel_r_new)
 
@@ -64,21 +64,21 @@ def get_PWMs_from_visual(lane_error_pix, dt, stop_marker_seen, PWM_l_prev, PWM_r
     PWM_l = np.clip(PWM_l, -400, 400)
     PWM_r = np.clip(PWM_r, -400, 400)
 
-    if True:
-        print("Visual Controller")
-        print("{:>22} : {}".format("lane_error_pix", lane_error_pix))
-        print("{:>22} : {}".format("dt", dt))
-        print("{:>22} : {}".format("PWM_l_prev", PWM_l_prev))
-        print("{:>22} : {}".format("PWM_r_prev", PWM_r_prev))
-        print("{:>22} : {}".format("delta_PWM", delta_PWM))
-        print("{:>22} : {}".format("vel_l_prev", vel_l_prev))
-        print("{:>22} : {}".format("vel_r_prev", vel_r_prev))
-        print("{:>22} : {}".format("delta_vel", delta_vel))
-        print("{:>22} : {}".format("vel_l_new", vel_l_new))
-        print("{:>22} : {}".format("vel_r_new", vel_r_new))
-        print("{:>22} : {}".format("PWM_l", PWM_l))
-        print("{:>22} : {}".format("PWM_r", PWM_r))
-        print("="*30)
+    # if True:
+    #     print("Visual Controller")
+    #     print("{:>22} : {}".format("lane_error_pix", lane_error_pix))
+    #     print("{:>22} : {}".format("dt", dt))
+    #     print("{:>22} : {}".format("PWM_l_prev", PWM_l_prev))
+    #     print("{:>22} : {}".format("PWM_r_prev", PWM_r_prev))
+    #     print("{:>22} : {}".format("delta_PWM", delta_PWM))
+    #     print("{:>22} : {}".format("vel_l_prev", vel_l_prev))
+    #     print("{:>22} : {}".format("vel_r_prev", vel_r_prev))
+    #     print("{:>22} : {}".format("delta_vel", delta_vel))
+    #     print("{:>22} : {}".format("vel_l_new", vel_l_new))
+    #     print("{:>22} : {}".format("vel_r_new", vel_r_new))
+    #     print("{:>22} : {}".format("PWM_l", PWM_l))
+    #     print("{:>22} : {}".format("PWM_r", PWM_r))
+    #     print("="*30)
         
     return PWM_l, PWM_r
 

@@ -26,7 +26,7 @@ with Serial(port=ports[0], baudrate=115200) as ser:
     def write_motors(left_motor, right_motor):
         global last_write, left_motor_prev, right_motor_prev
 
-        print(left_motor, right_motor)
+        # print(left_motor, right_motor)
 
         # assert type(left_motor) in [int, float, int32, float64], "motor input should be of type int, not {}".format(type(left_motor))
         # assert type(right_motor) in [int, float, int32, float64], "motor input should be of type int, not {}".format(type(right_motor))
@@ -93,8 +93,8 @@ with Serial(port=ports[0], baudrate=115200) as ser:
                         delta_right_encoder = right_encoder - right_encoder_previous_value
 
                         # ask the controller what to do
-                        print("{: >20}{}".format("left_motor_prev",left_motor_prev))
-                        print("{: >20}{}".format("right_motor_prev",right_motor_prev))
+                        # print("{: >20}{}".format("left_motor_prev",left_motor_prev))
+                        # print("{: >20}{}".format("right_motor_prev",right_motor_prev))
                         left_motor, right_motor = compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev)
                         left_encoder_previous_value, right_encoder_previous_value = left_encoder, right_encoder
 
