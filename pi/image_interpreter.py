@@ -106,9 +106,10 @@ def get_pixel_error_from_image(frame):
     redStrip = np.zeros((a.shape[0],a.shape[1]//4),dtype=a.dtype)
     for M in range(whiteStrip.shape[0]):
         for N in range(whiteStrip.shape[1]):
-            whiteStrip[M,N] = isWhite(RGBtoHSV(a[M,4*N]))
-            yellowStrip[M,N] = isYellow(RGBtoHSV(a[M,4*N]))
-            redStrip[M,N] = isRed(RGBtoHSV(a[M,4*N]))
+            pixel = RGBtoHSV(a[M,4*N])
+            whiteStrip[M,N] = isWhite(pixel)
+            yellowStrip[M,N] = isYellow(pixel)
+            redStrip[M,N] = isRed(pixel)
 
     # print(yellowStrip)
     # b = Image.fromarray(whiteStrip, 'L')
