@@ -72,3 +72,4 @@ class Camera():
         saw_red = self.should_stop
         self.lock.release()
         return error, saw_red
+

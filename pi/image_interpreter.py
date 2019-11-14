@@ -10,7 +10,7 @@ import numpy as np
 
 # variables
 crop_percentage = 0.05
-
+init_roi = False
 
 # single image process
 # link to images
@@ -18,7 +18,11 @@ parent_dir = os.path.dirname(os.getcwd())
 image_path = os.path.join(parent_dir, 'test_road_images/')
 
 
+
 def get_pixel_error_from_image(frame):
+    if(!init_roi):
+        init_roi = True
+
     image_in = Image.fromarray(frame)
     # numimg = np.array(image_in)
     # convert to hue
