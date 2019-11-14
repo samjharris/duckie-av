@@ -10,7 +10,7 @@ import numpy as np
 
 # variables
 crop_percentage = 0.05
-
+down_sample_steps = 8
 
 # single image process
 # link to images
@@ -18,7 +18,11 @@ parent_dir = os.path.dirname(os.getcwd())
 image_path = os.path.join(parent_dir, 'test_road_images/')
 
 
+
 def get_pixel_error_from_image(frame):
+    if(!init_roi):
+        init_roi = True
+
     image_in = Image.fromarray(frame)
     # numimg = np.array(image_in)
     # convert to hue
@@ -28,13 +32,15 @@ def get_pixel_error_from_image(frame):
 
     # look for specific range for different colors to define roi
     a = frame[height//2-(int(height*crop_percentage)):height//2+(int(height*crop_percentage)), : , :]
-
+    # print(a.shape)
     # # to display an image
     # b = Image.fromarray(a, 'HSV')
-    # #b = Image.fromarray(a[:,200:310,0], 'L')
-    # c = b.convert('RGB')
-    # c.save(image_path + 'strtA_crop15perc.jpg')
-    # c.show()
+# =============================================================================
+#     b = Image.fromarray(a[:,:], 'RGB')
+#     # c = b.convert('RGB')
+#     # c.save(image_path + 'strtA_crop15perc.jpg')
+#     b.show()
+# =============================================================================
 
     #convert one RGB pixel to HSV
     def RGBtoHSV(rgb):
@@ -80,11 +86,15 @@ def get_pixel_error_from_image(frame):
     #For yellow color a hue range from 51 degree to 60 degree has been defined
     def isYellow(hsv_color):
         h, s, v = hsv_color
-        return 255 if 40 <= h <= 60 else 0
+        if 30 <= h <= 60:
+            if 100 <= s <=255:
+                return 255
+            else:
+                return 0
+        else:
+            return 0
 
-    # b = Image.fromarray(yellowStrip, 'L')
-    # c = b.convert('RGB')
-    # c.show()
+    
 
     def isWhite(hsv_color):
         h, s, v = hsv_color
@@ -98,33 +108,50 @@ def get_pixel_error_from_image(frame):
 
     def isRed(hsv_color):
         h,s,v = hsv_color
-        return 255 if 240 <= h <= 255 else 0
+        if 240 <= h <= 255:
+            if 125 <= s <=255:
+                return 1
+            else:
+                return 0
+        else:
+            return 0
 
 
-    yellowStrip = np.zeros((a.shape[0],a.shape[1]//4),dtype=a.dtype)
-    whiteStrip = np.zeros((a.shape[0],a.shape[1]//4),dtype=a.dtype)
-    redStrip = np.zeros((a.shape[0],a.shape[1]//4),dtype=a.dtype)
+    yellowStrip = np.zeros((a.shape[0],a.shape[1]//down_sample_steps),dtype=a.dtype)
+    whiteStrip = np.zeros((a.shape[0],a.shape[1]//down_sample_steps),dtype=a.dtype)
+    redStrip = np.zeros((a.shape[0],a.shape[1]//down_sample_steps),dtype=a.dtype)
+# =============================================================================
+#     reducedImage = np.zeros((a.shape[0],a.shape[1]//4,a.shape[2]),dtype=a.dtype)
+# =============================================================================
     for M in range(whiteStrip.shape[0]):
         for N in range(whiteStrip.shape[1]):
-            pixel = RGBtoHSV(a[M,4*N])
+
+            pixel = RGBtoHSV(a[M,down_sample_steps*N])
             whiteStrip[M,N] = isWhite(pixel)
             yellowStrip[M,N] = isYellow(pixel)
             redStrip[M,N] = isRed(pixel)
 
-    # print(yellowStrip)
-    # b = Image.fromarray(whiteStrip, 'L')
-    # c = b.convert('RGB')
-    # c.show()
-
+# =============================================================================
+#     b = Image.fromarray(redStrip, 'L')
+#     c = b.convert('RGB')
+#     c.show()
+# =============================================================================
+# =============================================================================
+# 
+#     calculate the distance of lane center and image center
+# =============================================================================
     yelColSum = np.sum(yellowStrip, axis=0)
     yelEdge = np.argmax(yelColSum)
 
     whiColSum = np.sum(whiteStrip, axis=0)
     whiEdge = whiteStrip.shape[1] - np.argmax(np.flipud(whiColSum)) -1
 
-    laneCenter = np.mean([whiEdge,yelEdge])
-    imageCenter = whiteStrip.shape[1]//2
+    #print('yelEdge=',yelEdge,' WhiEdge=',whiEdge)
 
+    laneCenter = int(np.mean([whiEdge,yelEdge]))
+    imageCenter = whiteStrip.shape[1]//2
+ 
+    #print('ImCenter=',imageCenter,'  lCenter=',laneCenter)
     error = laneCenter - imageCenter
 
     redRowSum = np.sum(redStrip, axis = 1)
