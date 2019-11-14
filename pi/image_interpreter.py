@@ -73,6 +73,10 @@ def get_pixel_error_from_image(frame):
 
         return (int(h),int(s),int(v))
 
+    #check if a pixel is black
+    def isBlack(hsv_color):
+        return 1 if v < 20 else 0
+
     #For yellow color a hue range from 51 degree to 60 degree has been defined
     def isYellow(hsv_color):
         h, s, v = hsv_color
