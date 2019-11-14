@@ -36,6 +36,31 @@ def get_pixel_error_from_image(frame):
     # c.save(image_path + 'strtA_crop15perc.jpg')
     # c.show()
 
+    #convert one RGB pixel to HSV
+    def RGBtoHSV(r, g, b):
+        min = min(r,g,b)
+        max = max(r,g,b) 
+        h = 0
+        s = 0
+        v = max; 
+        delta = max - min; 
+        if(max != 0):
+            s = delta / max
+        else:
+            s = 0
+            h = -1
+            return (h,s,v)
+
+        if(r == max):
+            h = (g - b) / delta
+        elif(g == max):
+            h = 2 + (b - r) / delta;
+        else:
+            h = 4 + (r - g) / delta;
+        h *= 60
+        if(h < 0):
+            h += 360
+        return (h,s,v)
 
     #For yellow color a hue range from 51 degree to 60 degree has been defined
     def isYellow(hsv_color):
