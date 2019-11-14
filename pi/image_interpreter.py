@@ -15,12 +15,12 @@ crop_percentage = 0.1
 # single image process
 # link to images
 parent_dir = os.path.dirname(os.getcwd())
-image_path = os.path.join(parent_dir, 'test_road_images/')
+image_path = os.path.join(parent_dir, 'test_road_images\\')
 
 
 def get_pixel_error_from_image(frame):
     image_in = Image.fromarray(frame)
-
+    numimg = np.array(image_in)
     # convert to hue
     hsv = image_in.convert('HSV')
     pixel_val_hsv = np.array(hsv)
@@ -37,30 +37,38 @@ def get_pixel_error_from_image(frame):
     # c.show()
 
     #convert one RGB pixel to HSV
-    def RGBtoHSV(r, g, b):
-        min = min(r,g,b)
-        max = max(r,g,b) 
+    def RGBtoHSV(rgb):
+        r = rgb[0] / 255.0
+        g = rgb[1] / 255.0
+        b = rgb[2] / 255.0
+        mn = min(r,g,b)
+        mx = max(r,g,b) 
+        dc = mx - mn
         h = 0
         s = 0
-        v = max; 
-        delta = max - min; 
-        if(max != 0):
-            s = delta / max
+        v = 0
+        
+        #calculate Hue (unit: degrees)
+        if(dc == 0):
+            h = 0
+        elif(r == mx):
+            h = 60 * (((g - b)/dc) % 6)
+        elif(g == mx):
+            h = 60 * (((b - r)/dc) + 2)
         else:
-            s = 0
-            h = -1
-            return (h,s,v)
+            h = 60 * (((r - g)/dc) + 4)
 
-        if(r == max):
-            h = (g - b) / delta
-        elif(g == max):
-            h = 2 + (b - r) / delta;
+        #calculate Saturation (unit: pct)
+        if(mx == 0):
+            s = 0
         else:
-            h = 4 + (r - g) / delta;
-        h *= 60
-        if(h < 0):
-            h += 360
-        return (h,s,v)
+            s = dc / mx
+
+        #calculate Value (unit: pct)
+        v = mx
+
+        return (round(h,2),round(s,2),round(v,2))
+
 
     #For yellow color a hue range from 51 degree to 60 degree has been defined
     def isYellow(hsv_color):
@@ -139,7 +147,7 @@ def get_pixel_error_from_image(frame):
 
 if __name__ == "__main__":
     # read in image
-    image_in = Image.open(image_path + 'dist_to_red_15cm.png', 'r')
+    image_in = Image.open(image_path + 'frame1.png', 'r')
     rgb_frame = np.array(image_in)
     error = get_pixel_error_from_image(rgb_frame)
     print(error)
