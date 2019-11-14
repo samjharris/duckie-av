@@ -22,7 +22,7 @@ with Serial(port=ports[0], baudrate=115200) as ser:
     ser.flushInput()
 
     last_write = time()
-    left_motor_prev, right_motor_prev = convert_vel_to_PWM(10), convert_vel_to_PWM(10)
+    left_motor_prev, right_motor_prev = 0, 0
     def write_motors(left_motor, right_motor):
         global last_write, left_motor_prev, right_motor_prev
 
@@ -82,6 +82,7 @@ with Serial(port=ports[0], baudrate=115200) as ser:
                             start_time = time()
                             received_first_message = True
                             left_encoder_previous_value, right_encoder_previous_value = left_encoder, right_encoder
+                            left_motor_prev, right_motor_prev = convert_vel_to_PWM(10), convert_vel_to_PWM(10)
                             prev_t = 0
 
                         t = time() - start_time
