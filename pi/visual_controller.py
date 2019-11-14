@@ -5,10 +5,11 @@ from config import *
 import numpy as np
 from collections import deque
 from camera import Camera
+from time import sleep
 
 
 cam = Camera()
-
+sleep(2)
 
 previous_thetas = deque()
 previous_dts = deque()
