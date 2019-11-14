@@ -14,12 +14,12 @@ ROBOT_MASS = 0.830 #
 YOKE_POINT = 5 #prev r_length
 
 # K of 0.5, B of 3 and I of 30 work well for straight
-K = -0.6  # spring constant
-B = 3  # damper constant
+K = 0.1  # spring constant
+B = 0  # damper constant
 I = 5    # length of torque arm
 
-DIST_TO_ROI_CM = 10 # distance from bot to center of ROI
-PIX_PER_CM = 100 # pixels per cm in ROI
+DIST_TO_ROI_CM = 15 # distance from bot to center of ROI
+PIX_PER_CM = 131 / 20.25 # pixels per cm in ROI
 
 TIME_SLICE = 0.1 # fraction of a second; resolution of our function
 END_GOAL = 100 # goal is one meter measured in centimeters

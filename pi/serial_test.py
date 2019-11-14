@@ -7,6 +7,7 @@ from tqdm import tqdm
 # from new_closed_loop import compute_motor_values
 from visual_controller import compute_motor_values, cam
 from numpy import int32, float64
+from odometry_guided_feedback import convert_vel_to_PWM
 
 
 debug_mode = False
@@ -24,6 +25,8 @@ with Serial(port=ports[0], baudrate=115200) as ser:
     left_motor_prev, right_motor_prev = 0, 0
     def write_motors(left_motor, right_motor):
         global last_write, left_motor_prev, right_motor_prev
+
+        print(left_motor, right_motor)
 
         assert type(left_motor) in [int, float, int32, float64], "motor input should be of type int, not {}".format(type(left_motor))
         assert type(right_motor) in [int, float, int32, float64], "motor input should be of type int, not {}".format(type(right_motor))
@@ -79,6 +82,7 @@ with Serial(port=ports[0], baudrate=115200) as ser:
                             start_time = time()
                             received_first_message = True
                             left_encoder_previous_value, right_encoder_previous_value = left_encoder, right_encoder
+                            left_motor_prev, right_motor_prev = convert_vel_to_PWM(10), convert_vel_to_PWM(10)
                             prev_t = 0
 
                         t = time() - start_time
