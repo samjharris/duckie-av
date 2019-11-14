@@ -67,8 +67,19 @@ def get_pixel_error_from_image(frame):
         #calculate Value (unit: pct)
         v = mx
 
-        return (round(h,2),round(s,2),round(v,2))
+        h = h * (255.0/360)
+        s = s * (255.0)
+        v = v * (255.0)
 
+        return (int(h),int(s),int(v))
+
+    for i in range (0,10):
+        for j in range (0, 10):
+            real = pixel_val_hsv[i][j]
+            print(numimg[i][j], " - og")
+            act = RGBtoHSV(numimg[i][j])
+            print(real, " - real")
+            print(act, " - result")
 
     #For yellow color a hue range from 51 degree to 60 degree has been defined
     def isYellow(hsv_color):
