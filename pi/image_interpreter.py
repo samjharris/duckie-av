@@ -15,7 +15,7 @@ crop_percentage = 0.1
 # single image process
 # link to images
 parent_dir = os.path.dirname(os.getcwd())
-image_path = os.path.join(parent_dir, 'test_road_images\\')
+image_path = os.path.join(parent_dir, 'test_road_images/')
 
 
 def get_pixel_error_from_image(frame):
@@ -72,14 +72,6 @@ def get_pixel_error_from_image(frame):
         v = v * (255.0)
 
         return (int(h),int(s),int(v))
-
-    for i in range (0,10):
-        for j in range (0, 10):
-            real = pixel_val_hsv[i][j]
-            print(numimg[i][j], " - og")
-            act = RGBtoHSV(numimg[i][j])
-            print(real, " - real")
-            print(act, " - result")
 
     #For yellow color a hue range from 51 degree to 60 degree has been defined
     def isYellow(hsv_color):
