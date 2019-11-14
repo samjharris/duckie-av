@@ -37,25 +37,16 @@ def get_pixel_error_from_image(frame):
     # c.show()
 
 
-    #For yellow color a hue range from 51° to 60° has been defined
+    #For yellow color a hue range from 51 degree to 60 degree has been defined
     def isYellow(hsv_color):
         h, s, v = hsv_color
         return 1 if 35 <= h <= 40 else 0
 
 
     yellowStrip = np.zeros((a.shape[0],a.shape[1]//4),dtype=a.dtype)
-    for M in range(yellowStrip.shape[0]):
-        for N in range(yellowStrip.shape[1]):
-            yellowStrip[M,N] = isYellow(a[M,4*N])
-
     # b = Image.fromarray(yellowStrip, 'L')
     # c = b.convert('RGB')
     # c.show()
-
-    yelColSum = np.sum(yellowStrip, axis=0)
-    yelEdge = np.argmax(yelColSum)
-
-
 
     def isWhite(hsv_color):
         h, s, v = hsv_color
@@ -67,14 +58,24 @@ def get_pixel_error_from_image(frame):
         else:
             return 0
 
+    def isRed(hsv_color):
+        h,s,v = hsv_color
+        return 1 if 230 <= h <= 255 else 0
+
     whiteStrip = np.zeros((a.shape[0],a.shape[1]//4),dtype=a.dtype)
     for M in range(whiteStrip.shape[0]):
         for N in range(whiteStrip.shape[1]):
             whiteStrip[M,N] = isWhite(a[M,4*N])
+            yellowStrip[M,N] = isYellow(a[M,4*N])
+            redStrip[M,N] = isRed(a[M,4*N])
+
 
     # b = Image.fromarray(whiteStrip, 'L')
     # c = b.convert('RGB')
     # c.show()
+
+    yelColSum = np.sum(yellowStrip, axis=0)
+    yelEdge = np.argmax(yelColSum)
 
     whiColSum = np.sum(whiteStrip, axis=0)
     whiEdge = whiteStrip.shape[1] - np.argmax(np.flipud(whiColSum)) -1
@@ -84,8 +85,16 @@ def get_pixel_error_from_image(frame):
 
     error = laneCenter - imageCenter
 
+    redRowSum = np.sum(redStrip, axis = 1)
+
+
     # TODO: implement this part
     saw_red = False
+
+    if redRowSum[10] >= (0.4*redStrip.shape[1]):
+        saw_red = True
+
+
 
     return (error, saw_red)
 
@@ -105,7 +114,7 @@ def get_pixel_error_from_image(frame):
 
 if __name__ == "__main__":
     # read in image
-    image_in = Image.open(image_path + '20cmfromred_left_twocm_right_onehalfcm.jpg', 'r')
+    image_in = Image.open(image_path + 'dist_to_red_15cm.png', 'r')
     rgb_frame = np.array(image_in)
     error = get_pixel_error_from_image(rgb_frame)
     print(error)
