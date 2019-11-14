@@ -9,7 +9,7 @@ import PIL.Image as Image
 import numpy as np
 
 # variables
-crop_percentage = 0.1
+crop_percentage = 0.05
 
 
 # single image process
@@ -20,14 +20,14 @@ image_path = os.path.join(parent_dir, 'test_road_images/')
 
 def get_pixel_error_from_image(frame):
     image_in = Image.fromarray(frame)
-    numimg = np.array(image_in)
+    # numimg = np.array(image_in)
     # convert to hue
-    hsv = image_in.convert('HSV')
-    pixel_val_hsv = np.array(hsv)
-    height, width, depth = pixel_val_hsv.shape
+    # hsv = image_in.convert('HSV')
+    # pixel_val_hsv = np.array(hsv)
+    height, width, depth = frame.shape
 
     # look for specific range for different colors to define roi
-    a = pixel_val_hsv[height//2-(int(height*crop_percentage)):height//2+(int(height*crop_percentage)), : , :]
+    a = frame[height//2-(int(height*crop_percentage)):height//2+(int(height*crop_percentage)), : , :]
 
     # # to display an image
     # b = Image.fromarray(a, 'HSV')
@@ -76,10 +76,8 @@ def get_pixel_error_from_image(frame):
     #For yellow color a hue range from 51 degree to 60 degree has been defined
     def isYellow(hsv_color):
         h, s, v = hsv_color
-        return 1 if 35 <= h <= 40 else 0
+        return 255 if 40 <= h <= 60 else 0
 
-
-    yellowStrip = np.zeros((a.shape[0],a.shape[1]//4),dtype=a.dtype)
     # b = Image.fromarray(yellowStrip, 'L')
     # c = b.convert('RGB')
     # c.show()
@@ -88,7 +86,7 @@ def get_pixel_error_from_image(frame):
         h, s, v = hsv_color
         if 0 <= s <= 15:
             if 240 <= v <=255:
-                return 1
+                return 255
             else:
                 return 0
         else:
@@ -96,16 +94,19 @@ def get_pixel_error_from_image(frame):
 
     def isRed(hsv_color):
         h,s,v = hsv_color
-        return 1 if 230 <= h <= 255 else 0
+        return 255 if 240 <= h <= 255 else 0
 
+
+    yellowStrip = np.zeros((a.shape[0],a.shape[1]//4),dtype=a.dtype)
     whiteStrip = np.zeros((a.shape[0],a.shape[1]//4),dtype=a.dtype)
+    redStrip = np.zeros((a.shape[0],a.shape[1]//4),dtype=a.dtype)
     for M in range(whiteStrip.shape[0]):
         for N in range(whiteStrip.shape[1]):
-            whiteStrip[M,N] = isWhite(a[M,4*N])
-            yellowStrip[M,N] = isYellow(a[M,4*N])
-            redStrip[M,N] = isRed(a[M,4*N])
+            whiteStrip[M,N] = isWhite(RGBtoHSV(a[M,4*N]))
+            yellowStrip[M,N] = isYellow(RGBtoHSV(a[M,4*N]))
+            redStrip[M,N] = isRed(RGBtoHSV(a[M,4*N]))
 
-
+    # print(yellowStrip)
     # b = Image.fromarray(whiteStrip, 'L')
     # c = b.convert('RGB')
     # c.show()
@@ -150,7 +151,7 @@ def get_pixel_error_from_image(frame):
 
 if __name__ == "__main__":
     # read in image
-    image_in = Image.open(image_path + 'frame1.png', 'r')
+    image_in = Image.open(image_path + 'dist_to_red_15cm.png', 'r')
     rgb_frame = np.array(image_in)
     error = get_pixel_error_from_image(rgb_frame)
     print(error)
