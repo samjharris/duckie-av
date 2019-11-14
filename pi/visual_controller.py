@@ -71,9 +71,7 @@ def clear_visual_globals():
 
 def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev):
     PWM_l, PWM_r = 0, 0
-    error = cam.get_error()
-
-    stop_marker_seen = False
+    error, stop_marker_seen = cam.get_error()
 
     PWM_l_prev, PWM_r_prev = left_motor_prev, right_motor_prev
 

@@ -56,17 +56,19 @@ class Camera():
         # print(frame.shape, self.width*self.height)
 
         #process image here
-        error = get_pixel_error_from_image(frame)
-        print(error)
+        error, saw_red = get_pixel_error_from_image(frame)
+        print("error: {}  saw red: {}".format(error, saw_red))
 
         # set the error
         self.lock.acquire()
         self.cur_error = error
+        self.should_stop = saw_red
         self.lock.release()
 
 
     def get_error(self):
         self.lock.acquire()
         error = self.cur_error
+        saw_red = self.should_stop
         self.lock.release()
-        return error
+        return error, saw_red
