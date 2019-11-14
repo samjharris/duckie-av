@@ -31,10 +31,12 @@ def get_pixel_error_from_image(frame):
     # print(a.shape)
     # # to display an image
     # b = Image.fromarray(a, 'HSV')
-    b = Image.fromarray(a[:,:], 'RGB')
-    # c = b.convert('RGB')
-    # c.save(image_path + 'strtA_crop15perc.jpg')
-    b.show()
+# =============================================================================
+#     b = Image.fromarray(a[:,:], 'RGB')
+#     # c = b.convert('RGB')
+#     # c.save(image_path + 'strtA_crop15perc.jpg')
+#     b.show()
+# =============================================================================
 
     #convert one RGB pixel to HSV
     def RGBtoHSV(rgb):
@@ -72,6 +74,10 @@ def get_pixel_error_from_image(frame):
         v = v * (255.0)
 
         return (int(h),int(s),int(v))
+
+    #check if a pixel is black
+    def isBlack(hsv_color):
+        return 1 if v < 20 else 0
 
     #For yellow color a hue range from 51 degree to 60 degree has been defined
     def isYellow(hsv_color):
@@ -115,9 +121,12 @@ def get_pixel_error_from_image(frame):
 # =============================================================================
     for M in range(whiteStrip.shape[0]):
         for N in range(whiteStrip.shape[1]):
-            whiteStrip[M,N] = isWhite(RGBtoHSV(a[M,down_sample_steps*N]))
-            yellowStrip[M,N] = isYellow(RGBtoHSV(a[M,down_sample_steps*N]))
-            redStrip[M,N] = isRed(RGBtoHSV(a[M,down_sample_steps*N]))
+
+# =============================================================================
+#             whiteStrip[M,N] = isWhite(RGBtoHSV(a[M,down_sample_steps*N]))
+#             yellowStrip[M,N] = isYellow(RGBtoHSV(a[M,down_sample_steps*N]))
+#             redStrip[M,N] = isRed(RGBtoHSV(a[M,down_sample_steps*N]))
+# # =============================================================================
 # =============================================================================
 #             reducedImage[M,N]  =  (a[M,4*N])
 # =============================================================================
@@ -128,9 +137,17 @@ def get_pixel_error_from_image(frame):
 #     b.show()
 # =============================================================================
 
-    b = Image.fromarray(redStrip, 'L')
-    c = b.convert('RGB')
-    c.show()
+# =============================================================================
+#     b = Image.fromarray(redStrip, 'L')
+#     c = b.convert('RGB')
+#     c.show()
+# =============================================================================
+
+            pixel = RGBtoHSV(a[M,down_sample_steps*N])
+            whiteStrip[M,N] = isWhite(pixel)
+            yellowStrip[M,N] = isYellow(pixel)
+            redStrip[M,N] = isRed(pixel)
+
 
 
     yelColSum = np.sum(yellowStrip, axis=0)
@@ -139,12 +156,12 @@ def get_pixel_error_from_image(frame):
     whiColSum = np.sum(whiteStrip, axis=0)
     whiEdge = whiteStrip.shape[1] - np.argmax(np.flipud(whiColSum)) -1
 
-    print('yelEdge=',yelEdge,' WhiEdge=',whiEdge)
+    #print('yelEdge=',yelEdge,' WhiEdge=',whiEdge)
 
     laneCenter = int(np.mean([whiEdge,yelEdge]))
     imageCenter = whiteStrip.shape[1]//2
  
-    print('ImCenter=',imageCenter,'  lCenter=',laneCenter)
+    #print('ImCenter=',imageCenter,'  lCenter=',laneCenter)
     error = laneCenter - imageCenter
 
     redRowSum = np.sum(redStrip, axis = 1)
