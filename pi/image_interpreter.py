@@ -83,7 +83,11 @@ def get_pixel_error_from_image(frame):
     imageCenter = whiteStrip.shape[1]//2
 
     error = laneCenter - imageCenter
-    return error
+
+    # TODO: implement this part
+    saw_red = False
+
+    return (error, saw_red)
 
     # TODO:
     # take center of the image as reference point
@@ -105,5 +109,3 @@ if __name__ == "__main__":
     rgb_frame = np.array(image_in)
     error = get_pixel_error_from_image(rgb_frame)
     print(error)
-
-
