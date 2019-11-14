@@ -58,7 +58,7 @@ class Camera():
         # print(frame.shape, self.width*self.height)
 
         if self.cur_frame is None:
-            return 0, False
+            return 0, True
 
         error, saw_red = get_pixel_error_from_image(self.cur_frame)
         print("error: {}  saw red: {}".format(error, saw_red))
