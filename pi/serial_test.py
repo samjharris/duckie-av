@@ -28,18 +28,15 @@ with Serial(port=ports[0], baudrate=115200) as ser:
 
         print(left_motor, right_motor)
 
-        assert type(left_motor) in [int, float, int32, float64], "motor input should be of type int, not {}".format(type(left_motor))
-        assert type(right_motor) in [int, float, int32, float64], "motor input should be of type int, not {}".format(type(right_motor))
-        left_motor, right_motor = int(left_motor), int(right_motor)
+        # assert type(left_motor) in [int, float, int32, float64], "motor input should be of type int, not {}".format(type(left_motor))
+        # assert type(right_motor) in [int, float, int32, float64], "motor input should be of type int, not {}".format(type(right_motor))
 
         last_write = time()
-        to_write = struct.pack('hhc', left_motor, right_motor, b'A')
+        to_write = struct.pack('hhc', int(left_motor), (right_motor), b'A')
         if debug_mode:
             print("pi->arduino", left_motor, right_motor)
             # print("pi->arduino {:08b}".format(int(to_write.hex(),16))[:-8])
         ser.write(to_write)
-        print("{: >20}{}".format("left_motor_prev in func",left_motor_prev))
-        print("{: >20}{}".format("right_motor_prev in func",right_motor_prev))
         left_motor_prev, right_motor_prev = left_motor, right_motor
 
     start_time = 0
