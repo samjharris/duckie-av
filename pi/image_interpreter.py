@@ -122,34 +122,20 @@ def get_pixel_error_from_image(frame):
     for M in range(whiteStrip.shape[0]):
         for N in range(whiteStrip.shape[1]):
 
-# =============================================================================
-#             whiteStrip[M,N] = isWhite(RGBtoHSV(a[M,down_sample_steps*N]))
-#             yellowStrip[M,N] = isYellow(RGBtoHSV(a[M,down_sample_steps*N]))
-#             redStrip[M,N] = isRed(RGBtoHSV(a[M,down_sample_steps*N]))
-# # =============================================================================
-# =============================================================================
-#             reducedImage[M,N]  =  (a[M,4*N])
-# =============================================================================
-     # print(yellowStrip)
-# =============================================================================
-#     b = Image.fromarray(reducedImage, 'RGB')
-#     #c = b.convert('RGB')
-#     b.show()
-# =============================================================================
+            pixel = RGBtoHSV(a[M,down_sample_steps*N])
+            whiteStrip[M,N] = isWhite(pixel)
+            yellowStrip[M,N] = isYellow(pixel)
+            redStrip[M,N] = isRed(pixel)
 
 # =============================================================================
 #     b = Image.fromarray(redStrip, 'L')
 #     c = b.convert('RGB')
 #     c.show()
 # =============================================================================
-
-            pixel = RGBtoHSV(a[M,down_sample_steps*N])
-            whiteStrip[M,N] = isWhite(pixel)
-            yellowStrip[M,N] = isYellow(pixel)
-            redStrip[M,N] = isRed(pixel)
-
-
-
+# =============================================================================
+# 
+#     calculate the distance of lane center and image center
+# =============================================================================
     yelColSum = np.sum(yellowStrip, axis=0)
     yelEdge = np.argmax(yelColSum)
 
