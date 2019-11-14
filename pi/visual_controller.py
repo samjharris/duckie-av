@@ -48,14 +48,23 @@ def get_PWMs_from_visual(lane_error_pix, dt, stop_marker_seen, PWM_l_prev, PWM_r
     # TODO: use equation to determine delta_PWM (delta_PWM ~ theta_acceleration)
     delta_PWM = - K * theta - B * theta_velocity
 
+    print("delta_PWM: {}".format(delta_PWM))
+
     # handle PWM <==> velocity stuff
     vel_l_prev = convert_PWM_to_vel(PWM_l_prev)
     vel_r_prev = convert_PWM_to_vel(PWM_r_prev)
     delta_vel = convert_delta_PWM_to_vel(delta_PWM)
 
+    print("vel_l_prev: {}".format(vel_l_prev))
+    print("vel_r_prev: {}".format(vel_r_prev))
+    print("delta_vel: {}".format(delta_vel))
+
     # TODO: return PWMs
     PWM_l = convert_vel_to_PWM(vel_l_prev - delta_vel)
     PWM_r = convert_vel_to_PWM(vel_r_prev + delta_vel)
+
+    print("PWM_l: {}".format(PWM_l))
+    print("PWM_r: {}".format(PWM_r))
 
     # TODO: what is the right way to clamp these values?
     PWM_l = np.clip(PWM_l, -400, 400)
