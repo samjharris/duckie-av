@@ -100,7 +100,7 @@ def isRed(hsv_color):
 
 def get_pixel_error_from_image(frame):
     #t = time.time_ns()
-    image_in = Image.fromarray(frame)
+    #image_in = Image.fromarray(frame)
     height, width, depth = frame.shape
 
     # look for specific range for different colors to define roi
