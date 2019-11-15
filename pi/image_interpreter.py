@@ -198,7 +198,7 @@ def get_pixel_error_from_image(frame):
         print("Image Interpreter")
         print("{:>22} : {}".format("yelEdge", yelEdge))
         print("{:>22} : {}".format("whiEdge", whiEdge))
-        print("{:>22} : {}".format("imageCenter", ImageCenter))
+        print("{:>22} : {}".format("imageCenter", imageCenter))
         print("{:>22} : {}".format("laneCenter", laneCenter))
         print("{:>22} : {}".format("error", error))
         print("="*30)
