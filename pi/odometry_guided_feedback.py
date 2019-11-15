@@ -20,7 +20,7 @@ def convert_vel_to_PWM(velocity):
     if(velocity > 0):
         # positive function: VELOCITY = 0.1305(PWM) - 11.649, x-intercept =89.2644
         return (velocity - 11.649) / 0.1305
-    else if(velocity < 0):
+    elif(velocity < 0):
         # negative function: VELOCITY = 0.1238(PWM) + 10.545, x-intercept =-85.177
         return (velocity + 10.545) / 0.1238
     else:
@@ -30,7 +30,7 @@ def convert_PWM_to_vel(PWM):
     if PWM >  -MIN_PWM and PWM < MIN_PWM:
         #this is the deadzone, so the velocity should be 0
         return 0
-    else if(PWM > 0):
+    elif(PWM > 0):
         # positive function: VELOCITY = 0.1305(PWM) - 11.649, x-intercept =89.2644
         return (0.1305 * PWM) - 11.649
     else: #PWM < 0
