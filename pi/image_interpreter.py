@@ -44,12 +44,10 @@ def get_pixel_error_from_image(frame):
     # print(a.shape)
     # # to display an image
     # b = Image.fromarray(a, 'HSV')
-# =============================================================================
-#     b = Image.fromarray(a[:,:], 'RGB')
-#     # c = b.convert('RGB')
-#     # c.save(image_path + 'strtA_crop15perc.jpg')
-#     b.show()
-# =============================================================================
+    b = Image.fromarray(a[:,:], 'RGB')
+    # c = b.convert('RGB')
+    # c.save(image_path + 'strtA_crop15perc.jpg')
+    b.show()
 
     #convert one RGB pixel to HSV
     def RGBtoHSV(rgb):
@@ -172,7 +170,7 @@ def get_pixel_error_from_image(frame):
     imageCenter = 0
     # if both edges are visible
     # TODO: NOT FULLY TESTED YET!!!!
-    if yelEdge > 0 and whiEdge > 0:
+    if yelEdge > 0 and whiEdge < 79:
         # calculate lane center using both edge and image center using the white
         laneCenter = int(np.mean([whiEdge,yelEdge]))
         imageCenter = whiteStrip.shape[1]//2
@@ -180,12 +178,12 @@ def get_pixel_error_from_image(frame):
     # else if only one edge is visible
     else:
         # if only white is visible, calculate everything using white
-        if whiEdge > 0 and yelEdge == 0:
+        if whiEdge < 79 and yelEdge == 0:
             laneCenter = int(whiEdge - LANE_WIDTH_PIX / 2)
             imageCenter = whiteStrip.shape[1]//2
         # else if only yellow is visible, calculate everything using yellow
-        elif whiEdge == 0 and yelEdge > 0:
-            laneCenter = int(yelEdge - LANE_WIDTH_PIX / 2)
+        elif whiEdge == 79 and yelEdge > 0:
+            laneCenter = int(yelEdge + LANE_WIDTH_PIX / 2)
             imageCenter = yellowStrip.shape[1]//2
         # else both are invisible, stop?
     
@@ -199,7 +197,7 @@ def get_pixel_error_from_image(frame):
         saw_red = True
 
     #dt = time.time_ns()
-    if DEBUG_INFO_ON:
+    if 1:
         print("Image Interpreter")
         print("{:>22} : {}".format("yelEdge", yelEdge))
         print("{:>22} : {}".format("whiEdge", whiEdge))
@@ -226,7 +224,7 @@ def get_pixel_error_from_image(frame):
 
 if __name__ == "__main__":
     # read in image
-    image_in = Image.open(image_path + 'frame87.png', 'r')
+    image_in = Image.open(image_path + 'frame85.png', 'r')
     rgb_frame = np.array(image_in)
 
     error = get_pixel_error_from_image(rgb_frame)
