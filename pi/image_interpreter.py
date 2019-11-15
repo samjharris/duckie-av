@@ -126,21 +126,26 @@ def get_pixel_error_from_image(frame):
 # =============================================================================
 #     reducedImage = np.zeros((a.shape[0],a.shape[1]//4,a.shape[2]),dtype=a.dtype)
 # =============================================================================
-    # cnt = 0
+    cntYellow = 0
+    cntWhite = 0
     for M in range(whiteStrip.shape[0]):
         for N in range(whiteStrip.shape[1]):
-            pixel = RGBtoHSV(a[M,down_sample_steps*N]) #convert one RGB pixel to HSV
+            pixel = RGBtoHSV(a[M,down_sample_steps*N])
             #ignore black pixels 
             if(isBlack(pixel)):
                 continue
-            if(isYellow(pixel)):
+            #if(isWhite(pixel)):
+            if(cntWhite < 3 and isWhite(pixel)):
+                whiteStrip[M,N] = 255
+                cntWhite += 1
+                continue
+            #if(isYellow(pixel)):
+            if(cntWhite < 3 and isYellow(pixel)):
                 yellowStrip[M,N] = 255
+                cntYellow += 1
                 continue
             if(isRed(pixel)):
                 redStrip[M,N] = 1
-                continue
-            if(isWhite(pixel)):
-                whiteStrip[M,N] = 255
                 continue
 
 # =============================================================================
