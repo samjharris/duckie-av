@@ -28,6 +28,7 @@ def get_PWMs_from_visual(lane_error_pix, dt, stop_marker_seen, PWM_l_prev, PWM_r
 
     # TODO: stop on red boolean
     if stop_marker_seen:
+        PWM_l, PWM_r = 0, 0
         if DEBUG_INFO_ON:
             print("Visual Controller")
             print("{:>22} : {}".format("lane_error_pix", lane_error_pix))

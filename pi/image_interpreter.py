@@ -164,7 +164,6 @@ def get_pixel_error_from_image(frame):
 
     laneCenter = 0
     imageCenter = 0
-    print('yelEdge=',yelEdge,' WhiEdge=',whiEdge)
     # if both edges are visible
     # TODO: NOT FULLY TESTED YET!!!!
     if yelEdge > 0 and whiEdge > 0:
@@ -185,8 +184,6 @@ def get_pixel_error_from_image(frame):
         # else both are invisible, stop?
     
     error = laneCenter - imageCenter
-    print('ImCenter=',imageCenter,'  lCenter=',laneCenter) 
-    print('error= ', error)        
     # check if see red in front 
     saw_red = False
     
@@ -196,6 +193,14 @@ def get_pixel_error_from_image(frame):
         saw_red = True
 
     #dt = time.time_ns()
+    if DEBUG_INFO_ON:
+        print("Image Interpreter")
+        print("{:>22} : {}".format("yelEdge", yelEdge))
+        print("{:>22} : {}".format("whiEdge", whiEdge))
+        print("{:>22} : {}".format("imageCenter", ImageCenter))
+        print("{:>22} : {}".format("laneCenter", laneCenter))
+        print("{:>22} : {}".format("error", error))
+        print("="*30)
 
     return (error, saw_red)
 
