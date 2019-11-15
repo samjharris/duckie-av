@@ -28,7 +28,17 @@ def get_PWMs_from_visual(lane_error_pix, dt, stop_marker_seen, PWM_l_prev, PWM_r
 
     # TODO: stop on red boolean
     if stop_marker_seen:
-        return 0, 0
+        if DEBUG_INFO_ON:
+            print("Visual Controller")
+            print("{:>22} : {}".format("lane_error_pix", lane_error_pix))
+            print("{:>22} : {}".format("dt", dt))
+            print("{:>22} : {}".format("stop_marker_seen", stop_marker_seen))
+            print("{:>22} : {}".format("PWM_l_prev", PWM_l_prev))
+            print("{:>22} : {}".format("PWM_r_prev", PWM_r_prev))
+            print("{:>22} : {}".format("PWM_l", PWM_l))
+            print("{:>22} : {}".format("PWM_r", PWM_r))
+            print("="*30)
+        return PWM_l, PWM_r
 
     # TODO: translate pixel error from center of bot to center of lane to theta
     # tan(theta) = o/a = lane error in centimeters / dist from ROI center to bot center
@@ -64,21 +74,22 @@ def get_PWMs_from_visual(lane_error_pix, dt, stop_marker_seen, PWM_l_prev, PWM_r
     PWM_l = np.clip(PWM_l, -400, 400)
     PWM_r = np.clip(PWM_r, -400, 400)
 
-    # if True:
-    #     print("Visual Controller")
-    #     print("{:>22} : {}".format("lane_error_pix", lane_error_pix))
-    #     print("{:>22} : {}".format("dt", dt))
-    #     print("{:>22} : {}".format("PWM_l_prev", PWM_l_prev))
-    #     print("{:>22} : {}".format("PWM_r_prev", PWM_r_prev))
-    #     print("{:>22} : {}".format("delta_PWM", delta_PWM))
-    #     print("{:>22} : {}".format("vel_l_prev", vel_l_prev))
-    #     print("{:>22} : {}".format("vel_r_prev", vel_r_prev))
-    #     print("{:>22} : {}".format("delta_vel", delta_vel))
-    #     print("{:>22} : {}".format("vel_l_new", vel_l_new))
-    #     print("{:>22} : {}".format("vel_r_new", vel_r_new))
-    #     print("{:>22} : {}".format("PWM_l", PWM_l))
-    #     print("{:>22} : {}".format("PWM_r", PWM_r))
-    #     print("="*30)
+    if DEBUG_INFO_ON:
+        print("Visual Controller")
+        print("{:>22} : {}".format("lane_error_pix", lane_error_pix))
+        print("{:>22} : {}".format("dt", dt))
+        print("{:>22} : {}".format("stop_marker_seen", stop_marker_seen))
+        print("{:>22} : {}".format("PWM_l_prev", PWM_l_prev))
+        print("{:>22} : {}".format("PWM_r_prev", PWM_r_prev))
+        print("{:>22} : {}".format("delta_PWM", delta_PWM))
+        print("{:>22} : {}".format("vel_l_prev", vel_l_prev))
+        print("{:>22} : {}".format("vel_r_prev", vel_r_prev))
+        print("{:>22} : {}".format("delta_vel", delta_vel))
+        print("{:>22} : {}".format("vel_l_new", vel_l_new))
+        print("{:>22} : {}".format("vel_r_new", vel_r_new))
+        print("{:>22} : {}".format("PWM_l", PWM_l))
+        print("{:>22} : {}".format("PWM_r", PWM_r))
+        print("="*30)
         
     return PWM_l, PWM_r
 

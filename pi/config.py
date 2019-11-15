@@ -5,7 +5,7 @@
 CM_S_PWM = 0.15
 
 # minimum PWM required to move the robot
-MIN_PWM = 55.0 #prev min_pwm
+MIN_PWM = 100.0 #prev min_pwm
 
 # mass of the robot (kilograms)
 ROBOT_MASS = 0.830 #
@@ -31,3 +31,5 @@ CIRCLE_RADIUS = 30.0
 WHEEL_BASE = 16.5
 # BAUDRATE = 9600
 BAUDRATE = 115200
+
+DEBUG_INFO_ON = True

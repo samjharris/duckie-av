@@ -61,7 +61,7 @@ class Camera():
             return 0, True
 
         error, saw_red = get_pixel_error_from_image(self.cur_frame)
-        print("error: {}  saw red: {}".format(error, saw_red))
+        # print("error: {}  saw red: {}".format(error, saw_red))
 
         return error, saw_red
 
