@@ -82,6 +82,7 @@ with Serial(port=ports[0], baudrate=115200) as ser:
                             left_encoder_previous_value, right_encoder_previous_value = left_encoder, right_encoder
                             left_motor_prev, right_motor_prev = convert_vel_to_PWM(10), convert_vel_to_PWM(10)
                             prev_t = 0
+                            received_first_message = True
 
                         t = time() - start_time
                         delta_t = t - prev_t
@@ -99,11 +100,7 @@ with Serial(port=ports[0], baudrate=115200) as ser:
 
 
                         # do what the controller said to do
-                        if received_first_message:
-                            write_motors(left_motor, right_motor)
-
-                        if not received_first_message:
-                            received_first_message = True
+                        write_motors(left_motor, right_motor)
 
                         # pbar.update()  # only to measure communication delay
 
