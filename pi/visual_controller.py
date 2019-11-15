@@ -13,6 +13,7 @@ sleep(2)
 
 previous_thetas = deque()
 previous_dts = deque()
+stopping = False
 
 
 # takes
@@ -23,23 +24,7 @@ previous_dts = deque()
 #   stop_marker_seen: bool
 # returns
 #   (PWM_l, PWM_r): (float, float)
-def get_PWMs_from_visual(lane_error_pix, dt, stop_marker_seen, PWM_l_prev, PWM_r_prev):
-    # TODO: start and proceed at speed limit --- Maybe not here
-
-    # TODO: stop on red boolean
-    if stop_marker_seen:
-        PWM_l, PWM_r = 0, 0
-        if DEBUG_INFO_ON:
-            print("Visual Controller")
-            print("{:>22} : {}".format("lane_error_pix", lane_error_pix))
-            print("{:>22} : {}".format("dt", dt))
-            print("{:>22} : {}".format("stop_marker_seen", stop_marker_seen))
-            print("{:>22} : {}".format("PWM_l_prev", PWM_l_prev))
-            print("{:>22} : {}".format("PWM_r_prev", PWM_r_prev))
-            print("{:>22} : {}".format("PWM_l", PWM_l))
-            print("{:>22} : {}".format("PWM_r", PWM_r))
-            print("="*30)
-        return PWM_l, PWM_r
+def get_PWMs_from_visual(lane_error_pix, dt, PWM_l_prev, PWM_r_prev):
 
     # TODO: translate pixel error from center of bot to center of lane to theta
     # tan(theta) = o/a = lane error in centimeters / dist from ROI center to bot center
@@ -79,7 +64,6 @@ def get_PWMs_from_visual(lane_error_pix, dt, stop_marker_seen, PWM_l_prev, PWM_r
         print("Visual Controller")
         print("{:>22} : {}".format("lane_error_pix", lane_error_pix))
         print("{:>22} : {}".format("dt", dt))
-        print("{:>22} : {}".format("stop_marker_seen", stop_marker_seen))
         print("{:>22} : {}".format("PWM_l_prev", PWM_l_prev))
         print("{:>22} : {}".format("PWM_r_prev", PWM_r_prev))
         print("{:>22} : {}".format("delta_PWM", delta_PWM))
@@ -102,14 +86,31 @@ def clear_visual_globals():
 
 def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev):
     PWM_l, PWM_r = 0, 0
-    error, stop_marker_seen = cam.get_error()
+    lane_error_pix, stop_marker_seen = cam.get_error()
 
     PWM_l_prev, PWM_r_prev = left_motor_prev, right_motor_prev
 
-    PWM_l, PWM_r = get_PWMs_from_visual(error, delta_t, stop_marker_seen, PWM_l_prev, PWM_r_prev)
+    if stop_marker_seen or stopping:
+        if DEBUG_INFO_ON:
+            print("Visual compute motor values")
+            print("{:>22} : {}".format("lane_error_pix", lane_error_pix))
+            print("{:>22} : {}".format("dt", delta_t))
+            print("{:>22} : {}".format("stop_marker_seen", stop_marker_seen))
+            print("{:>22} : {}".format("PWM_l_prev", PWM_l_prev))
+            print("{:>22} : {}".format("PWM_r_prev", PWM_r_prev))
+            print("{:>22} : {}".format("PWM_l", PWM_l))
+            print("{:>22} : {}".format("PWM_r", PWM_r))
+            print("="*30)
+
+        PWM_l = convert_vel_to_PWM(convert_PWM_to_vel(PWM_l_prev) / 2)
+        PWM_r = convert_vel_to_PWM(convert_PWM_to_vel(PWM_r_prev) / 2)
+
+        return PWM_l, PWM_r
+
+    PWM_l, PWM_r = get_PWMs_from_visual(lane_error_pix, delta_t, PWM_l_prev, PWM_r_prev)
 
     return PWM_l, PWM_r
 
 
 def test():
-    return get_PWMs_from_visual(20, 0.1, False, 150, 150)
+    return get_PWMs_from_visual(20, 0.1, 150, 150)
