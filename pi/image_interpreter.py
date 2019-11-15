@@ -118,9 +118,9 @@ def get_pixel_error_from_image(frame):
     redStrip = np.zeros((a.shape[0],a.shape[1]//down_sample_steps),dtype=a.dtype)
 
 
-    if(not init_roi):
-       init_roi = True
-       yellow_roi, white_roi, red_roi = find_rois(a)
+    #if(not init_roi):
+    #   init_roi = True
+    #   yellow_roi, white_roi, red_roi = find_rois(a)
 
     
 # =============================================================================
@@ -140,7 +140,7 @@ def get_pixel_error_from_image(frame):
                 cntWhite += 1
                 continue
             #if(isYellow(pixel)):
-            if(cntWhite < 3 and isYellow(pixel)):
+            if(cntYellow < 3 and isYellow(pixel)):
                 yellowStrip[M,N] = 255
                 cntYellow += 1
                 continue
