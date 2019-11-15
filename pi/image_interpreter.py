@@ -200,7 +200,7 @@ def get_pixel_error_from_image(frame):
         saw_red = True
 
     #dt = time.time_ns()
-    if 1:
+    if DEBUG_INFO_ON:
         print("Image Interpreter")
         print("{:>22} : {}".format("yelEdge", yelEdge))
         print("{:>22} : {}".format("whiEdge", whiEdge))
