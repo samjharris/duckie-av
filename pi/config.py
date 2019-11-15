@@ -15,13 +15,13 @@ YOKE_POINT = 5.0 #prev r_length
 
 # K of 0.5, B of 3 and I of 30 work well for straight
 # K of 20.0, B of 0.0 work well for visual control
-K = 25.0  # spring constant
-B = 0.01  # damper constant
+K = 70.0  # spring constant
+B = 0.0  # damper constant
 I = 5.0  # length of torque arm
 
 DIST_TO_ROI_CM = 15.0 # distance from bot to center of ROI
 # LANE_WIDTH_PIX = 131.0
-LANE_WIDTH_PIX = 79.0 # based on default value of white edge
+LANE_WIDTH_PIX = 66.0 # based on experimental values
 LANE_WIDTH_CM = 20.25
 PIX_PER_CM = LANE_WIDTH_PIX / LANE_WIDTH_CM # pixels per cm in ROI
 

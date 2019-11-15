@@ -85,6 +85,8 @@ def clear_visual_globals():
 
 
 def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev):
+    global stopping
+
     PWM_l, PWM_r = 0, 0
     lane_error_pix, stop_marker_seen = cam.get_error()
 
@@ -104,6 +106,8 @@ def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_enc
 
         PWM_l = convert_vel_to_PWM(convert_PWM_to_vel(PWM_l_prev) / 2)
         PWM_r = convert_vel_to_PWM(convert_PWM_to_vel(PWM_r_prev) / 2)
+
+        stopping = True
 
         return PWM_l, PWM_r
 
