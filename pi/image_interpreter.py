@@ -176,11 +176,11 @@ def get_pixel_error_from_image(frame):
     else:
         # if only white is visible, calculate everything using white
         if whiEdge > 0 and yelEdge == 0:
-            laneCenter = int(np.mean([whiEdge,whiEdge]))
+            laneCenter = int(whiEdge - LANE_WIDTH_PIX / 2)
             imageCenter = whiteStrip.shape[1]//2
         # else if only yellow is visible, calculate everything using yellow
         elif whiEdge == 0 and yelEdge > 0:
-            laneCenter = int(np.mean([yelEdge,yelEdge]))
+            laneCenter = int(yelEdge - LANE_WIDTH_PIX / 2)
             imageCenter = yellowStrip.shape[1]//2
         # else both are invisible, stop?
     
