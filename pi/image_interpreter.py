@@ -162,19 +162,35 @@ def get_pixel_error_from_image(frame):
     whiColSum = np.sum(whiteStrip, axis=0)
     whiEdge = whiteStrip.shape[1] - np.argmax(np.flipud(whiColSum)) -1
 
-    #print('yelEdge=',yelEdge,' WhiEdge=',whiEdge)
-
-    laneCenter = int(np.mean([whiEdge,yelEdge]))
-    imageCenter = whiteStrip.shape[1]//2
- 
-    #print('ImCenter=',imageCenter,'  lCenter=',laneCenter)
+    laneCenter = 0
+    imageCenter = 0
+    print('yelEdge=',yelEdge,' WhiEdge=',whiEdge)
+    # if both edges are visible
+    # TODO: NOT FULLY TESTED YET!!!!
+    if yelEdge > 0 and whiEdge > 0:
+        # calculate lane center using both edge and image center using the white
+        laneCenter = int(np.mean([whiEdge,yelEdge]))
+        imageCenter = whiteStrip.shape[1]//2
+     
+    # else if only one edge is visible
+    else:
+        # if only white is visible, calculate everything using white
+        if whiEdge > 0 and yelEdge == 0:
+            laneCenter = int(np.mean([whiEdge,whiEdge]))
+            imageCenter = whiteStrip.shape[1]//2
+        # else if only yellow is visible, calculate everything using yellow
+        elif whiEdge == 0 and yelEdge > 0:
+            laneCenter = int(np.mean([yelEdge,yelEdge]))
+            imageCenter = yellowStrip.shape[1]//2
+        # else both are invisible, stop?
+    
     error = laneCenter - imageCenter
-
-    redRowSum = np.sum(redStrip, axis = 1)
-
-
-    # TODO: implement this part
+    print('ImCenter=',imageCenter,'  lCenter=',laneCenter) 
+    print('error= ', error)        
+    # check if see red in front 
     saw_red = False
+    
+    redRowSum = np.sum(redStrip, axis = 1)
 
     if redRowSum[10] >= (0.4*redStrip.shape[1]):
         saw_red = True
@@ -199,7 +215,7 @@ def get_pixel_error_from_image(frame):
 
 if __name__ == "__main__":
     # read in image
-    image_in = Image.open(image_path + 'frame1.png', 'r')
+    image_in = Image.open(image_path + 'frame87.png', 'r')
     rgb_frame = np.array(image_in)
 
     error = get_pixel_error_from_image(rgb_frame)
