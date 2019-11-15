@@ -7,6 +7,7 @@
 import os
 import PIL.Image as Image
 import numpy as np
+from config import *
 
 # testing imports
 #import time
