@@ -79,7 +79,6 @@ with Serial(port=ports[0], baudrate=115200) as ser:
 
                         if not received_first_message:
                             start_time = time()
-                            received_first_message = True
                             left_encoder_previous_value, right_encoder_previous_value = left_encoder, right_encoder
                             left_motor_prev, right_motor_prev = convert_vel_to_PWM(10), convert_vel_to_PWM(10)
                             prev_t = 0
@@ -96,7 +95,10 @@ with Serial(port=ports[0], baudrate=115200) as ser:
                         # print("{: >20}{}".format("left_motor_prev",left_motor_prev))
                         # print("{: >20}{}".format("right_motor_prev",right_motor_prev))
                         left_motor, right_motor = compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev)
-                        left_encoder_previous_value, right_encoder_previous_value = left_encoder, right_encoder
+
+                        if not received_first_message:
+                            left_encoder_previous_value, right_encoder_previous_value = left_encoder, right_encoder
+                            received_first_message = True
 
                         # do what the controller said to do
                         write_motors(left_motor, right_motor)
