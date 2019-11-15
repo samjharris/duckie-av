@@ -138,14 +138,19 @@ def get_pixel_error_from_image(frame):
     cnt = 0
     for M in range(whiteStrip.shape[0]):
         for N in range(whiteStrip.shape[1]):
-
             pixel = RGBtoHSV(a[M,down_sample_steps*N])
             #ignore black pixels 
             if(isBlack(pixel)):
                 continue
-            whiteStrip[M,N] = isWhite(pixel)
-            yellowStrip[M,N] = isYellow(pixel)
-            redStrip[M,N] = isRed(pixel)
+            if(isWhite(pixel)):
+                whiteStrip[M,N] = 255
+                continue
+            if(isYellow(pixel)):
+                yellowStrip[M,N] = 255
+                continue
+            if(isRed(pixel)):
+                redStrip[M,N] = 1
+                continue
 
 # =============================================================================
 #     b = Image.fromarray(redStrip, 'L')
