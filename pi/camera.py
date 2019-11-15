@@ -25,7 +25,7 @@ class Camera():
     def start_capture(self):
         with picamera.PiCamera() as camera:
             camera.resolution = (self.width, self.height)
-            # camera.framerate = 30
+            camera.framerate = 60
 
             # expose the camera properly
             sleep(2)
