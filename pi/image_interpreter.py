@@ -171,9 +171,14 @@ def get_pixel_error_from_image(frame):
     # if both edges are visible
     # TODO: NOT FULLY TESTED YET!!!!
     if yelEdge > 0 and whiEdge < 79:
-        # calculate lane center using both edge and image center using the white
-        laneCenter = int(np.mean([whiEdge,yelEdge]))
-        imageCenter = whiteStrip.shape[1]//2
+        if yelEdge < whiEdge:
+            # calculate lane center using both edge and image center using the white
+            laneCenter = int(np.mean([whiEdge,yelEdge]))
+            imageCenter = whiteStrip.shape[1]//2
+        else:
+            laneCenter = int(yelEdge + LANE_WIDTH_PIX / 2)
+            imageCenter = yellowStrip.shape[1]//2
+        
      
     # else if only one edge is visible
     else:
