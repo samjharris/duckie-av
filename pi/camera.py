@@ -1,13 +1,18 @@
+# CICS 503 Fall 2019 DuckieTown Group 4
+#
+# camera.py:
+# provides a class wrapping the picamera
+# module for use in our robot's capturing
+# and processing of images
+
+from config import *
 from tqdm import tqdm
 # import io
 from time import sleep
-from PIL import Image
 from threading import Lock, Thread
 import picamera
-import numpy as np
 import picamera.array
-from image_interpreter import get_pixel_error_from_image
-
+from image_processing import get_pixel_error_from_image
 
 class Camera():
     def __init__(self, width=640, height=480):
@@ -21,13 +26,11 @@ class Camera():
         video_thread = Thread(target=self.start_capture)
         video_thread.start()
 
-
     def start_capture(self):
         with picamera.PiCamera() as camera:
+            # properly set up the camera
             camera.resolution = (self.width, self.height)
             camera.framerate = 60
-
-            # expose the camera properly
             sleep(2)
             camera.shutter_speed = camera.exposure_speed
             camera.exposure_mode = 'off'
@@ -35,37 +38,18 @@ class Camera():
             camera.awb_mode = 'off'
             camera.awb_gains = g
 
+            # start capturing frames, continuously updating the current frame (self.cur_frame)
             with picamera.array.PiRGBArray(camera) as stream:
                     rawCapture = picamera.array.PiRGBArray(camera, size=(self.width, self.height))
                     stream = camera.capture_continuous(rawCapture, format="rgb", use_video_port=True)
-
                     for f in stream:
                         if self.should_stop:
                             break
-
                         rawCapture.truncate(0)
-
-                        # self.process(f.array)
                         self.cur_frame = f.array
 
-
-    def process(self, frame):
-        # from PIL import Image
-        # img = Image.fromarray(frame, 'RGB')
-        # img.save('my.png')
-        # img.show()
-
-        # print(frame.shape, self.width*self.height)
-
+    def get_error(self):
         if self.cur_frame is None:
             return 0, True
-
-        error, saw_red = get_pixel_error_from_image(self.cur_frame)
-        # print("error: {}  saw red: {}".format(error, saw_red))
-
-        return error, saw_red
-
-
-    def get_error(self):
-        cur_error, should_stop = self.process(self.cur_frame)
+        cur_error, should_stop = get_pixel_error_from_image(self.cur_frame)
         return cur_error, should_stop

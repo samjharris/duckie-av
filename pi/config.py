@@ -1,5 +1,7 @@
 # CICS 503 Fall 2019 DuckieTown Group 4
+#
 # config.py
+# useful global variables are declared here
 
 #cm/s/PWM
 CM_S_PWM = 0.15

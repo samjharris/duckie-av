@@ -1,13 +1,14 @@
-# This is the image interpreter for
-# CS 503 SP19 Duckie Town project Team 4
+# CICS 503 Fall 2019 DuckieTown Group 4
 #
-# Code to check lane following via vision.
+# image_processing.py:
+# provides functions for computing
+# pixel error-margins from images
+# captured by our robot
 
-
+from config import *
 import os
 import PIL.Image as Image
 import numpy as np
-from config import *
 
 # testing imports
 #import time

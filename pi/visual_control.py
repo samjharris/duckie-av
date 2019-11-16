@@ -1,12 +1,15 @@
-# using equation theta_2 = -K (theta - theta_ref) - B (theta_dot - theta_1_ref)
+# CICS 503 Fall 2019 DuckieTown Group 4
+#
+# visual_control.py:
+# provides visual control using the equation 
+# theta_2 = -K (theta - theta_ref) - B (theta_dot - theta_1_ref)
 # theta_dot = theta_(t+1) - theta_t
-from odometry_guided_feedback import convert_PWM_to_vel, convert_vel_to_PWM, convert_delta_PWM_to_vel
+
 from config import *
 import numpy as np
 from collections import deque
 from camera import Camera
 from time import sleep
-
 
 cam = Camera()
 sleep(2)
@@ -15,6 +18,33 @@ previous_thetas = deque()
 previous_dts = deque()
 stopping = False
 
+def convert_vel_to_PWM(velocity):
+    if(velocity > 0):
+        # positive function: VELOCITY = 0.1305(PWM) - 11.649, x-intercept =89.2644
+        return (velocity + 11.649) / 0.1305
+    elif(velocity < 0):
+        # negative function: VELOCITY = 0.1238(PWM) + 10.545, x-intercept =-85.177
+        return (velocity - 10.545) / 0.1238
+    else:
+        return 0
+
+def convert_PWM_to_vel(PWM):
+    if PWM > -MIN_PWM and PWM < MIN_PWM:
+        #this is the deadzone, so the velocity should be 0
+        return 0
+    elif(PWM > 0):
+        # positive function: VELOCITY = 0.1305(PWM) - 11.649, x-intercept =89.2644
+        return (0.1305 * PWM) - 11.649
+    else: #PWM < 0
+        # negative function: VELOCITY = 0.1238(PWM) + 10.545, x-intercept =-85.177
+        return (0.1238 * PWM) + 10.545
+
+def convert_delta_PWM_to_vel(delta_PWM):
+    if delta_PWM > 0:
+        delta_PWM += MIN_PWM
+    if delta_PWM < 0:
+        delta_PWM -= MIN_PWM
+    return convert_PWM_to_vel(delta_PWM)
 
 # takes
 #   PWM_l_prev: float,
@@ -78,11 +108,9 @@ def get_PWMs_from_visual(lane_error_pix, dt, PWM_l_prev, PWM_r_prev):
         
     return PWM_l, PWM_r
 
-
 def clear_visual_globals():
     previous_thetas.clear()
     previous_dts.clear()
-
 
 def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev):
     global stopping
@@ -114,7 +142,6 @@ def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_enc
     PWM_l, PWM_r = get_PWMs_from_visual(lane_error_pix, delta_t, PWM_l_prev, PWM_r_prev)
 
     return PWM_l, PWM_r
-
 
 def test():
     return get_PWMs_from_visual(20, 0.1, 150, 150)

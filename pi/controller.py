@@ -1,14 +1,18 @@
+# CICS 503 Fall 2019 DuckieTown Group 4
+#
+# controller.py:
+# handles the robot-driving logic flow and serial 
+# communications with our external hardware, i.e. 
+# Arduino Uno, camera, ultrasonic dist. sensor
+
+from config import *
 from serial import Serial
 from serial.tools.list_ports import comports as get_serial_ports
 import struct
 from time import sleep, time
 from tqdm import tqdm
-# from simple_command import compute_motor_values
-# from new_closed_loop import compute_motor_values
-from visual_controller import compute_motor_values, cam
 from numpy import int32, float64
-from odometry_guided_feedback import convert_vel_to_PWM
-
+from visual_control import compute_motor_values, convert_vel_to_PWM, cam
 
 debug_mode = False
 
