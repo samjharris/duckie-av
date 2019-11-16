@@ -17,20 +17,25 @@ import numpy as np
 #         (PWM_R_new, PWM_L_new) =
 #                         pair of motor control signals in the range [-400, 400]
 def convert_vel_to_PWM(velocity):
-    if velocity > 0:
-        return (velocity / CM_S_PWM) + MIN_PWM
-    elif velocity < 0:
-        return (velocity / CM_S_PWM) - MIN_PWM
+    if(velocity > 0):
+        # positive function: VELOCITY = 0.1305(PWM) - 11.649, x-intercept =89.2644
+        return (velocity + 11.649) / 0.1305
+    elif(velocity < 0):
+        # negative function: VELOCITY = 0.1238(PWM) + 10.545, x-intercept =-85.177
+        return (velocity - 10.545) / 0.1238
     else:
         return 0
 
 def convert_PWM_to_vel(PWM):
-    if PWM > 0:
-        return (PWM - MIN_PWM) * CM_S_PWM
-    elif PWM < 0:
-        return (PWM + MIN_PWM) * CM_S_PWM
-    else:
+    if PWM > -MIN_PWM and PWM < MIN_PWM:
+        #this is the deadzone, so the velocity should be 0
         return 0
+    elif(PWM > 0):
+        # positive function: VELOCITY = 0.1305(PWM) - 11.649, x-intercept =89.2644
+        return (0.1305 * PWM) - 11.649
+    else: #PWM < 0
+        # negative function: VELOCITY = 0.1238(PWM) + 10.545, x-intercept =-85.177
+        return (0.1238 * PWM) + 10.545
 
 def convert_delta_PWM_to_vel(delta_PWM):
     if delta_PWM > 0:

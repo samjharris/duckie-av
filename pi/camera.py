@@ -1,45 +1,71 @@
 from tqdm import tqdm
 # import io
 from time import sleep
+from PIL import Image
+from threading import Lock, Thread
 import picamera
 import numpy as np
 import picamera.array
-
-w, h = 640, 480
-# w, h = 320, 240
-
-def process(frame):
-    # from PIL import Image
-    # img = Image.fromarray(frame, 'RGB')
-    # img.save('my.png')
-    # img.show()
-
-    # print(frame.shape, w*h)
-    pass
+from image_interpreter import get_pixel_error_from_image
 
 
-with picamera.PiCamera() as camera:
-    camera.resolution = (w, h)
-    # camera.framerate = 30
+class Camera():
+    def __init__(self, width=640, height=480):
+        self.width, self.height = width, height
+        self.lock = Lock()
+        # self.cur_error = 0
+        self.should_stop = False
+        self.cur_frame = None
 
-    # expose the camera properly
-    sleep(2)
-    camera.shutter_speed = camera.exposure_speed
-    camera.exposure_mode = 'off'
-    g = camera.awb_gains
-    camera.awb_mode = 'off'
-    camera.awb_gains = g
+        # start a thread to start capturing video
+        video_thread = Thread(target=self.start_capture)
+        video_thread.start()
 
 
-    with picamera.array.PiRGBArray(camera) as stream:
-        with tqdm(total=1) as pbar:
+    def start_capture(self):
+        with picamera.PiCamera() as camera:
+            camera.resolution = (self.width, self.height)
+            camera.framerate = 60
 
-            rawCapture = picamera.array.PiRGBArray(camera, size=(w, h))
-            stream = camera.capture_continuous(rawCapture, format="rgb", use_video_port=True)
+            # expose the camera properly
+            sleep(2)
+            camera.shutter_speed = camera.exposure_speed
+            camera.exposure_mode = 'off'
+            g = camera.awb_gains
+            camera.awb_mode = 'off'
+            camera.awb_gains = g
 
-            for f in stream:
-                rawCapture.truncate(0)
-                process(f.array)
-                pbar.update()
+            with picamera.array.PiRGBArray(camera) as stream:
+                    rawCapture = picamera.array.PiRGBArray(camera, size=(self.width, self.height))
+                    stream = camera.capture_continuous(rawCapture, format="rgb", use_video_port=True)
 
-                break
+                    for f in stream:
+                        if self.should_stop:
+                            break
+
+                        rawCapture.truncate(0)
+
+                        # self.process(f.array)
+                        self.cur_frame = f.array
+
+
+    def process(self, frame):
+        # from PIL import Image
+        # img = Image.fromarray(frame, 'RGB')
+        # img.save('my.png')
+        # img.show()
+
+        # print(frame.shape, self.width*self.height)
+
+        if self.cur_frame is None:
+            return 0, True
+
+        error, saw_red = get_pixel_error_from_image(self.cur_frame)
+        # print("error: {}  saw red: {}".format(error, saw_red))
+
+        return error, saw_red
+
+
+    def get_error(self):
+        cur_error, should_stop = self.process(self.cur_frame)
+        return cur_error, should_stop
