@@ -27,26 +27,22 @@ class Camera():
         video_thread.start()
 
     def start_capture(self):
-        with picamera.PiCamera() as camera:
-            # properly set up the camera
-            camera.resolution = (self.width, self.height)
-            camera.framerate = 60
-            sleep(2)
-            camera.shutter_speed = camera.exposure_speed
-            camera.exposure_mode = 'off'
-            g = camera.awb_gains
-            camera.awb_mode = 'off'
-            camera.awb_gains = g
+        with tqdm(desc="camera") as pbar:
+            with picamera.PiCamera() as camera:
+                # properly set up the camera
+                camera.resolution = (self.width, self.height)
+                # camera.framerate = 60
 
-            # start capturing frames, continuously updating the current frame (self.cur_frame)
-            with picamera.array.PiRGBArray(camera) as stream:
-                    rawCapture = picamera.array.PiRGBArray(camera, size=(self.width, self.height))
-                    stream = camera.capture_continuous(rawCapture, format="rgb", use_video_port=True)
-                    for f in stream:
-                        if self.should_stop:
-                            break
-                        rawCapture.truncate(0)
-                        self.cur_frame = f.array
+                # start capturing frames, continuously updating the current frame (self.cur_frame)
+                with picamera.array.PiRGBArray(camera) as stream:
+                        rawCapture = picamera.array.PiRGBArray(camera, size=(self.width, self.height))
+                        stream = camera.capture_continuous(rawCapture, format="rgb", use_video_port=True)
+                        for f in stream:
+                            if self.should_stop:
+                                break
+                            rawCapture.truncate(0)
+                            self.cur_frame = f.array
+                            # pbar.update()  # only to measure framerate
 
     def get_error(self):
         if self.cur_frame is None:

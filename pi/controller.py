@@ -50,7 +50,7 @@ with Serial(port=ports[0], baudrate=115200) as ser:
 
     bytes_buffer = b""
     buffer_i = 0
-    with tqdm(total=1) as pbar:
+    with tqdm(desc="serial") as pbar:
         while True:
             try:
                 if ser.in_waiting > 0:

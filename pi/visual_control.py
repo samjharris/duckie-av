@@ -11,6 +11,7 @@ from collections import deque
 from camera import Camera
 from time import sleep
 
+
 cam = Camera()
 sleep(2)
 
