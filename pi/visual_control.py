@@ -57,11 +57,62 @@ def convert_delta_PWM_to_vel(delta_PWM):
 #   (PWM_l, PWM_r): (float, float)
 def get_PWMs_from_visual(lane_error_pix, dt, PWM_l_prev, PWM_r_prev):
 
+    # # TODO: translate pixel error from center of bot to center of lane to theta
+    # # tan(theta) = o/a = lane error in centimeters / dist from ROI center to bot center
+    # # theta = arctan(lane error in centimeters / dist from ROI center to bot center)
+    # lane_error_cm = lane_error_pix / PIX_PER_CM
+    # theta = np.arctan2(lane_error_cm, DIST_TO_ROI_CM)
+
+    # # TODO: store past thetas and calculate moving average theta_dot
+    # previous_thetas.append(theta)
+    # previous_dts.append(dt)
+    # if len(previous_thetas) > 1:
+    #     previous_thetas.popleft()
+    #     previous_dts.popleft()
+    # avg_theta = sum(previous_thetas) / len(previous_thetas)
+    # # TODO: better calculation: computer theta vel for each dt and then average
+    # theta_velocity = avg_theta / sum(previous_dts)
+
+    # # TODO: use equation to determine delta_PWM (delta_PWM ~ theta_acceleration)
+    # delta_PWM = - K * theta - B * theta_velocity
+
+    # # handle PWM <==> velocity stuff
+    # vel_l_prev = convert_PWM_to_vel(PWM_l_prev)
+    # vel_r_prev = convert_PWM_to_vel(PWM_r_prev)
+    # delta_vel = convert_delta_PWM_to_vel(delta_PWM)
+
+    # # TODO: return PWMs
+    # vel_l_new = vel_l_prev + delta_vel
+    # vel_r_new = vel_r_prev - delta_vel
+    # PWM_l = convert_vel_to_PWM(vel_l_new)
+    # PWM_r = convert_vel_to_PWM(vel_r_new)
+
+    # # TODO: what is the right way to clamp these values?
+    # PWM_l = np.clip(PWM_l, -400, 400)
+    # PWM_r = np.clip(PWM_r, -400, 400)
+
+    # if DEBUG_INFO_ON:
+    #     print("Visual Controller")
+    #     print("{:>22} : {}".format("lane_error_pix", lane_error_pix))
+    #     print("{:>22} : {}".format("dt", dt))
+    #     print("{:>22} : {}".format("PWM_l_prev", PWM_l_prev))
+    #     print("{:>22} : {}".format("PWM_r_prev", PWM_r_prev))
+    #     print("{:>22} : {}".format("delta_PWM", delta_PWM))
+    #     print("{:>22} : {}".format("vel_l_prev", vel_l_prev))
+    #     print("{:>22} : {}".format("vel_r_prev", vel_r_prev))
+    #     print("{:>22} : {}".format("delta_vel", delta_vel))
+    #     print("{:>22} : {}".format("vel_l_new", vel_l_new))
+    #     print("{:>22} : {}".format("vel_r_new", vel_r_new))
+    #     print("{:>22} : {}".format("PWM_l", PWM_l))
+    #     print("{:>22} : {}".format("PWM_r", PWM_r))
+    #     print("="*30)
+
+
+
     # TODO: translate pixel error from center of bot to center of lane to theta
     # tan(theta) = o/a = lane error in centimeters / dist from ROI center to bot center
     # theta = arctan(lane error in centimeters / dist from ROI center to bot center)
-    lane_error_cm = lane_error_pix / PIX_PER_CM
-    theta = np.arctan2(lane_error_cm, DIST_TO_ROI_CM)
+    theta = -lane_error_pix / PIX_PER_CM
 
     # TODO: store past thetas and calculate moving average theta_dot
     previous_thetas.append(theta)
@@ -76,20 +127,14 @@ def get_PWMs_from_visual(lane_error_pix, dt, PWM_l_prev, PWM_r_prev):
     # TODO: use equation to determine delta_PWM (delta_PWM ~ theta_acceleration)
     delta_PWM = - K * theta - B * theta_velocity
 
-    # handle PWM <==> velocity stuff
-    vel_l_prev = convert_PWM_to_vel(PWM_l_prev)
-    vel_r_prev = convert_PWM_to_vel(PWM_r_prev)
-    delta_vel = convert_delta_PWM_to_vel(delta_PWM)
-
     # TODO: return PWMs
-    vel_l_new = vel_l_prev + delta_vel
-    vel_r_new = vel_r_prev - delta_vel
-    PWM_l = convert_vel_to_PWM(vel_l_new)
-    PWM_r = convert_vel_to_PWM(vel_r_new)
+    PWM_l = PWM_l_prev + delta_PWM
+    PWM_r = PWM_r_prev - delta_PWM
 
     # TODO: what is the right way to clamp these values?
     PWM_l = np.clip(PWM_l, -400, 400)
     PWM_r = np.clip(PWM_r, -400, 400)
+
 
     if DEBUG_INFO_ON:
         print("Visual Controller")
@@ -98,14 +143,10 @@ def get_PWMs_from_visual(lane_error_pix, dt, PWM_l_prev, PWM_r_prev):
         print("{:>22} : {}".format("PWM_l_prev", PWM_l_prev))
         print("{:>22} : {}".format("PWM_r_prev", PWM_r_prev))
         print("{:>22} : {}".format("delta_PWM", delta_PWM))
-        print("{:>22} : {}".format("vel_l_prev", vel_l_prev))
-        print("{:>22} : {}".format("vel_r_prev", vel_r_prev))
-        print("{:>22} : {}".format("delta_vel", delta_vel))
-        print("{:>22} : {}".format("vel_l_new", vel_l_new))
-        print("{:>22} : {}".format("vel_r_new", vel_r_new))
         print("{:>22} : {}".format("PWM_l", PWM_l))
         print("{:>22} : {}".format("PWM_r", PWM_r))
         print("="*30)
+
         
     return PWM_l, PWM_r
 
@@ -123,7 +164,8 @@ def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_enc
 
     if stop_marker_seen or stopping:
         if DEBUG_INFO_ON:
-            print("Visual compute motor values")
+            print("Compute motor values (visual)")
+            print("{:>22} : {}".format("stopping", stopping))
             print("{:>22} : {}".format("lane_error_pix", lane_error_pix))
             print("{:>22} : {}".format("dt", delta_t))
             print("{:>22} : {}".format("stop_marker_seen", stop_marker_seen))
