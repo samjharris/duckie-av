@@ -97,7 +97,7 @@ def isBlackVectorized(hsv_image):
     return hsv_image[:,:,2] <= 102
 
 def isYellowVectorized(hsv_image):
-    return (hsv_image[:,:,1] >= 100) & (30 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 120)
+    return (hsv_image[:,:,1] >= 50) & (30 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 120)
 
 def isWhiteVectorized(hsv_image):
     return (hsv_image[:,:,1] <= 50) & (hsv_image[:,:,2] >= 220)
@@ -174,13 +174,13 @@ def get_pixel_error_from_image(frame):
     yellowStrip[isYellowVectorized(hsvStrip)] = 255
     redStrip[isRedVectorized(hsvStrip)] = 255
 
-    # # display image
-    # Image.fromarray(a, 'RGB').convert('RGB').save(image_path + 'test_rgb.jpg')
-    # Image.fromarray(hsvStrip, 'HSV').convert('RGB').save(image_path + 'test_hsv.jpg')
-    # Image.fromarray(whiteStrip, 'L').convert('RGB').save(image_path + 'test_white.jpg')
-    # Image.fromarray(yellowStrip, 'L').convert('RGB').save(image_path + 'test_yellow.jpg')
-    # Image.fromarray(redStrip, 'L').convert('RGB').save(image_path + 'test_red.jpg')
-    # print("done")
+    # display image
+    Image.fromarray(a, 'RGB').convert('RGB').save(image_path + 'test_rgb.jpg')
+    Image.fromarray(hsvStrip, 'HSV').convert('RGB').save(image_path + 'test_hsv.jpg')
+    Image.fromarray(whiteStrip, 'L').convert('RGB').save(image_path + 'test_white.jpg')
+    Image.fromarray(yellowStrip, 'L').convert('RGB').save(image_path + 'test_yellow.jpg')
+    Image.fromarray(redStrip, 'L').convert('RGB').save(image_path + 'test_red.jpg')
+    print("done")
 
 
 
@@ -202,10 +202,14 @@ def get_pixel_error_from_image(frame):
     percentage_white = np.sum(whiColSum) / np.prod(whiColSum.shape)
     percentage_yellow = np.sum(yelColSum) / np.prod(yelColSum.shape)
     percentage_red = np.sum(redColSum) / np.prod(redColSum.shape)
+    
+    print("percentage_white", percentage_white)
+    print("percentage_yellow", percentage_yellow)
+    print("percentage_red", percentage_red)
 
     image_center = whiteStrip.shape[1] // 2
 
-    saw_red = percentage_red > 0.2
+    saw_red = percentage_red > 0.5
     saw_white = percentage_white > 0.1
     saw_yellow = percentage_yellow > 0.1
 
@@ -214,7 +218,7 @@ def get_pixel_error_from_image(frame):
     elif saw_white and not saw_yellow:
         lane_center = int(whiEdge - LANE_WIDTH_PIX / 2)
     elif not saw_white and saw_yellow:
-        lane_center = int(whiEdge - LANE_WIDTH_PIX / 2)
+        lane_center = int(yelEdge + LANE_WIDTH_PIX / 2)
     else:
         # we saw neither white nor yellow
         lane_center = image_center
@@ -280,6 +284,9 @@ def get_pixel_error_from_image(frame):
         print("{:>22} : {}".format("error", error))
         print("{:>22} : {}".format("saw_red", saw_red))
         print("="*30)
+
+    
+    saw_red = False
 
     return (error, saw_red)
 

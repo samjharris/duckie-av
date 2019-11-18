@@ -160,7 +160,8 @@ def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_enc
     PWM_l, PWM_r = 0, 0
     lane_error_pix, stop_marker_seen = cam.get_error()
 
-    PWM_l_prev, PWM_r_prev = left_motor_prev, right_motor_prev
+    # PWM_l_prev, PWM_r_prev = left_motor_prev, right_motor_prev
+    PWM_l_prev, PWM_r_prev = convert_vel_to_PWM(10), convert_vel_to_PWM(10)
 
     if stop_marker_seen or stopping:
         if DEBUG_INFO_ON:
@@ -175,8 +176,10 @@ def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_enc
             print("{:>22} : {}".format("PWM_r", PWM_r))
             print("="*30)
 
-        PWM_l = convert_vel_to_PWM(convert_PWM_to_vel(PWM_l_prev) / 2)
-        PWM_r = convert_vel_to_PWM(convert_PWM_to_vel(PWM_r_prev) / 2)
+        # PWM_l = convert_vel_to_PWM(convert_PWM_to_vel(PWM_l_prev) / 2)
+        # PWM_r = convert_vel_to_PWM(convert_PWM_to_vel(PWM_r_prev) / 2)
+        PWM_l = PWM_l_prev / 2
+        PWM_r = PWM_r_prev / 2
 
         stopping = True
 
