@@ -100,7 +100,7 @@ def isYellowVectorized(hsv_image):
     return (hsv_image[:,:,1] >= 100) & (30 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 120)
 
 def isWhiteVectorized(hsv_image):
-    return (hsv_image[:,:,1] <= 15) & (hsv_image[:,:,2] >= 240)
+    return (hsv_image[:,:,1] <= 50) & (hsv_image[:,:,2] >= 220)
 
 def isRedVectorized(hsv_image):
     return (hsv_image[:,:,1] >= 125) & (hsv_image[:,:,0] >= 240)
@@ -174,13 +174,13 @@ def get_pixel_error_from_image(frame):
     yellowStrip[isYellowVectorized(hsvStrip)] = 255
     redStrip[isRedVectorized(hsvStrip)] = 255
 
-    # display image
-    Image.fromarray(a, 'RGB').convert('RGB').save(image_path + 'test_rgb.jpg')
-    Image.fromarray(hsvStrip, 'HSV').convert('RGB').save(image_path + 'test_hsv.jpg')
-    Image.fromarray(whiteStrip, 'L').convert('RGB').save(image_path + 'test_white.jpg')
-    Image.fromarray(yellowStrip, 'L').convert('RGB').save(image_path + 'test_yellow.jpg')
-    Image.fromarray(redStrip, 'L').convert('RGB').save(image_path + 'test_red.jpg')
-    print("done")
+    # # display image
+    # Image.fromarray(a, 'RGB').convert('RGB').save(image_path + 'test_rgb.jpg')
+    # Image.fromarray(hsvStrip, 'HSV').convert('RGB').save(image_path + 'test_hsv.jpg')
+    # Image.fromarray(whiteStrip, 'L').convert('RGB').save(image_path + 'test_white.jpg')
+    # Image.fromarray(yellowStrip, 'L').convert('RGB').save(image_path + 'test_yellow.jpg')
+    # Image.fromarray(redStrip, 'L').convert('RGB').save(image_path + 'test_red.jpg')
+    # print("done")
 
 
 
@@ -189,11 +189,17 @@ def get_pixel_error_from_image(frame):
 #     calculate the distance of lane center and image center
 # =============================================================================
 
+    # print(yellowStrip.shape)
     yelColSum = np.sum(yellowStrip, axis=0)
     yelEdge = np.argmax(yelColSum)
 
     whiColSum = np.sum(whiteStrip, axis=0)
     whiEdge = whiteStrip.shape[1] - np.argmax(np.flipud(whiColSum)) -1
+
+    # print(yelColSum)
+    # print(whiColSum)
+    # print("="*15)
+
 
     laneCenter = 0
     imageCenter = 0
