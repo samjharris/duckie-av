@@ -172,15 +172,15 @@ def get_pixel_error_from_image(frame):
     # blackStrip[isBlackVectorized(hsvStrip)] = 255
     whiteStrip[isWhiteVectorized(hsvStrip)] = 255
     yellowStrip[isYellowVectorized(hsvStrip)] = 255
-    redStrip[isRedVectorized(hsvStrip)] = 1
+    redStrip[isRedVectorized(hsvStrip)] = 255
 
-    # # display image
-    # Image.fromarray(a, 'RGB').convert('RGB').save(image_path + 'test_rgb.jpg')
-    # Image.fromarray(hsvStrip, 'HSV').convert('RGB').save(image_path + 'test_hsv.jpg')
-    # Image.fromarray(whiteStrip, 'L').convert('RGB').save(image_path + 'test_white.jpg')
-    # Image.fromarray(yellowStrip, 'L').convert('RGB').save(image_path + 'test_yellow.jpg')
-    # Image.fromarray(redStrip, 'L').convert('RGB').save(image_path + 'test_red.jpg')
-    # print("done")
+    # display image
+    Image.fromarray(a, 'RGB').convert('RGB').save(image_path + 'test_rgb.jpg')
+    Image.fromarray(hsvStrip, 'HSV').convert('RGB').save(image_path + 'test_hsv.jpg')
+    Image.fromarray(whiteStrip, 'L').convert('RGB').save(image_path + 'test_white.jpg')
+    Image.fromarray(yellowStrip, 'L').convert('RGB').save(image_path + 'test_yellow.jpg')
+    Image.fromarray(redStrip, 'L').convert('RGB').save(image_path + 'test_red.jpg')
+    print("done")
 
 
 
@@ -244,9 +244,22 @@ def get_pixel_error_from_image(frame):
 
 
 if __name__ == "__main__":
-    # read in image
-    image_in = Image.open(image_path + 'dist_to_red_15cm.png', 'r')
-    rgb_frame = np.array(image_in)
+    # # read in image
+    # image_in = Image.open(image_path + 'dist_to_red_15cm.png', 'r')
+    # rgb_frame = np.array(image_in)
+    # error = get_pixel_error_from_image(rgb_frame)
+    # print(error)
 
-    error = get_pixel_error_from_image(rgb_frame)
-    print(error)
+
+    import picamera, time
+    with picamera.PiCamera() as camera:
+        w, h = 640, 480
+        camera.resolution = (w, h)
+        camera.framerate = 24
+        time.sleep(2)
+        rgb_frame = np.empty((h, w, 3), dtype=np.uint8)
+        camera.capture(rgb_frame, 'rgb')
+        error = get_pixel_error_from_image(rgb_frame)
+        print(error)
+
+
