@@ -174,13 +174,13 @@ def get_pixel_error_from_image(frame):
     yellowStrip[isYellowVectorized(hsvStrip)] = 255
     redStrip[isRedVectorized(hsvStrip)] = 255
 
-    # # display image
-    # Image.fromarray(a, 'RGB').convert('RGB').save(image_path + 'test_rgb.jpg')
-    # Image.fromarray(hsvStrip, 'HSV').convert('RGB').save(image_path + 'test_hsv.jpg')
-    # Image.fromarray(whiteStrip, 'L').convert('RGB').save(image_path + 'test_white.jpg')
-    # Image.fromarray(yellowStrip, 'L').convert('RGB').save(image_path + 'test_yellow.jpg')
-    # Image.fromarray(redStrip, 'L').convert('RGB').save(image_path + 'test_red.jpg')
-    # print("done")
+    # display image
+    Image.fromarray(a, 'RGB').convert('RGB').save(image_path + 'test_rgb.jpg')
+    Image.fromarray(hsvStrip, 'HSV').convert('RGB').save(image_path + 'test_hsv.jpg')
+    Image.fromarray(whiteStrip, 'L').convert('RGB').save(image_path + 'test_white.jpg')
+    Image.fromarray(yellowStrip, 'L').convert('RGB').save(image_path + 'test_yellow.jpg')
+    Image.fromarray(redStrip, 'L').convert('RGB').save(image_path + 'test_red.jpg')
+    print("done")
 
 
 
@@ -189,61 +189,96 @@ def get_pixel_error_from_image(frame):
 #     calculate the distance of lane center and image center
 # =============================================================================
 
-    # print(yellowStrip.shape)
+    
     yelColSum = np.sum(yellowStrip, axis=0)
     yelEdge = np.argmax(yelColSum)
 
     whiColSum = np.sum(whiteStrip, axis=0)
-    whiEdge = whiteStrip.shape[1] - np.argmax(np.flipud(whiColSum)) -1
+    whiEdge = np.argmax(whiColSum)
 
-    # print(yelColSum)
-    # print(whiColSum)
-    # print("="*15)
+    redColSum = np.sum(redStrip, axis=0)
 
 
-    laneCenter = 0
-    imageCenter = 0
-    # if both edges are visible
-    # TODO: NOT FULLY TESTED YET!!!!
-    if yelEdge > 0 and whiEdge < 79:
-        if yelEdge < whiEdge:
-            # calculate lane center using both edge and image center using the white
-            laneCenter = int(np.mean([whiEdge,yelEdge]))
-            imageCenter = whiteStrip.shape[1]//2
-        else:
-            laneCenter = int(yelEdge + LANE_WIDTH_PIX / 2)
-            imageCenter = yellowStrip.shape[1]//2
+    percentage_white = np.sum(whiColSum) / np.prod(whiColSum.shape)
+    percentage_yellow = np.sum(yelColSum) / np.prod(yelColSum.shape)
+    percentage_red = np.sum(redColSum) / np.prod(redColSum.shape)
+
+    image_center = whiteStrip.shape[1] // 2
+
+    saw_red = percentage_red > 0.2
+    saw_white = percentage_white > 0.1
+    saw_yellow = percentage_yellow > 0.1
+
+    if saw_white and saw_yellow:
+        lane_center = np.mean([yelEdge, whiEdge])
+    elif saw_white and not saw_yellow:
+        lane_center = int(whiEdge - LANE_WIDTH_PIX / 2)
+    elif not saw_white and saw_yellow:
+        lane_center = int(whiEdge - LANE_WIDTH_PIX / 2)
+    else:
+        # we saw neither white nor yellow
+        lane_center = image_center
+    
+    error = image_center - lane_center
+
+    # # print(yellowStrip.shape)
+    # yelColSum = np.sum(yellowStrip, axis=0)
+    # yelEdge = np.argmax(yelColSum)
+
+    # whiColSum = np.sum(whiteStrip, axis=0)
+    # whiEdge = whiteStrip.shape[1] - np.argmax(np.flipud(whiColSum)) - 1
+
+    # # print(yelColSum)
+    # # print(whiColSum)
+    # # print("="*15)
+
+
+    # laneCenter = 0
+    # imageCenter = 0
+    # # if both edges are visible
+    # # TODO: NOT FULLY TESTED YET!!!!
+    # if yelEdge > 0 and whiEdge < 79:
+    #     if yelEdge < whiEdge:
+    #         # calculate lane center using both edge and image center using the white
+    #         laneCenter = int(np.mean([whiEdge,yelEdge]))
+    #         imageCenter = whiteStrip.shape[1]//2
+    #     else:
+    #         laneCenter = int(yelEdge + LANE_WIDTH_PIX / 2)
+    #         imageCenter = yellowStrip.shape[1]//2
         
      
-    # else if only one edge is visible
-    else:
-        # if only white is visible, calculate everything using white
-        if whiEdge < 79 and yelEdge == 0:
-            laneCenter = int(whiEdge - LANE_WIDTH_PIX / 2)
-            imageCenter = whiteStrip.shape[1]//2
-        # else if only yellow is visible, calculate everything using yellow
-        elif whiEdge == 79 and yelEdge > 0:
-            laneCenter = int(yelEdge + LANE_WIDTH_PIX / 2)
-            imageCenter = yellowStrip.shape[1]//2
-        # else both are invisible, stop?
+    # # else if only one edge is visible
+    # else:
+    #     # if only white is visible, calculate everything using white
+    #     if whiEdge < 79 and yelEdge == 0:
+    #         laneCenter = int(whiEdge - LANE_WIDTH_PIX / 2)
+    #         imageCenter = whiteStrip.shape[1]//2
+    #     # else if only yellow is visible, calculate everything using yellow
+    #     elif whiEdge == 79 and yelEdge > 0:
+    #         laneCenter = int(yelEdge + LANE_WIDTH_PIX / 2)
+    #         imageCenter = yellowStrip.shape[1]//2
+    #     # else both are invisible, stop?
     
-    error = laneCenter - imageCenter
-    # check if see red in front 
-    saw_red = False
+    # error = laneCenter - imageCenter
+    # # check if see red in front 
+    # saw_red = False
     
-    redRowSum = np.sum(redStrip, axis = 1)
+    # redRowSum = np.sum(redStrip, axis=1)
 
-    if redRowSum[10] >= (0.4*redStrip.shape[1]):
-        saw_red = True
+    # if redRowSum[10] >= (0.4*redStrip.shape[1]):
+    #     saw_red = True
 
     #dt = time.time_ns()
     if DEBUG_INFO_ON:
         print("Image Interpreter")
         print("{:>22} : {}".format("yelEdge", yelEdge))
         print("{:>22} : {}".format("whiEdge", whiEdge))
-        print("{:>22} : {}".format("imageCenter", imageCenter))
-        print("{:>22} : {}".format("laneCenter", laneCenter))
+        # print("{:>22} : {}".format("imageCenter", imageCenter))
+        # print("{:>22} : {}".format("laneCenter", laneCenter))
+        print("{:>22} : {}".format("image_center", image_center))
+        print("{:>22} : {}".format("lane_center", lane_center))
         print("{:>22} : {}".format("error", error))
+        print("{:>22} : {}".format("saw_red", saw_red))
         print("="*30)
 
     return (error, saw_red)
@@ -265,7 +300,8 @@ if __name__ == "__main__":
         time.sleep(2)
         rgb_frame = np.empty((h, w, 3), dtype=np.uint8)
         camera.capture(rgb_frame, 'rgb')
-        error = get_pixel_error_from_image(rgb_frame)
-        print(error)
+        error, saw_red = get_pixel_error_from_image(rgb_frame)
+        print(error, "px error")
+        print(error / PIX_PER_CM, "cm error")
 
 
