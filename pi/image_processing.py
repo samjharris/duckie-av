@@ -174,13 +174,13 @@ def get_pixel_error_from_image(frame):
     yellowStrip[isYellowVectorized(hsvStrip)] = 255
     redStrip[isRedVectorized(hsvStrip)] = 255
 
-    # display image
-    Image.fromarray(a, 'RGB').convert('RGB').save(image_path + 'test_rgb.jpg')
-    Image.fromarray(hsvStrip, 'HSV').convert('RGB').save(image_path + 'test_hsv.jpg')
-    Image.fromarray(whiteStrip, 'L').convert('RGB').save(image_path + 'test_white.jpg')
-    Image.fromarray(yellowStrip, 'L').convert('RGB').save(image_path + 'test_yellow.jpg')
-    Image.fromarray(redStrip, 'L').convert('RGB').save(image_path + 'test_red.jpg')
-    print("done")
+    # # display image
+    # Image.fromarray(a, 'RGB').convert('RGB').save(image_path + 'test_rgb.jpg')
+    # Image.fromarray(hsvStrip, 'HSV').convert('RGB').save(image_path + 'test_hsv.jpg')
+    # Image.fromarray(whiteStrip, 'L').convert('RGB').save(image_path + 'test_white.jpg')
+    # Image.fromarray(yellowStrip, 'L').convert('RGB').save(image_path + 'test_yellow.jpg')
+    # Image.fromarray(redStrip, 'L').convert('RGB').save(image_path + 'test_red.jpg')
+    # print("done")
 
 
 
@@ -219,7 +219,7 @@ def get_pixel_error_from_image(frame):
         # we saw neither white nor yellow
         lane_center = image_center
     
-    error = image_center - lane_center
+    error = lane_center - image_center
 
     # # print(yellowStrip.shape)
     # yelColSum = np.sum(yellowStrip, axis=0)
