@@ -97,7 +97,7 @@ def isBlackVectorized(hsv_image):
     return hsv_image[:,:,2] <= 102
 
 def isYellowVectorized(hsv_image):
-    return (hsv_image[:,:,1] >= 50) & (30 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 120)
+    return (hsv_image[:,:,1] >= 150) & (30 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 50)
 
 def isWhiteVectorized(hsv_image):
     return (hsv_image[:,:,1] <= 50) & (hsv_image[:,:,2] >= 220)
@@ -170,6 +170,7 @@ def get_pixel_error_from_image(frame):
 
     # print(hsvStrip[:4,:4,:])
     # blackStrip[isBlackVectorized(hsvStrip)] = 255
+    
     whiteStrip[isWhiteVectorized(hsvStrip)] = 255
     yellowStrip[isYellowVectorized(hsvStrip)] = 255
     redStrip[isRedVectorized(hsvStrip)] = 255
@@ -194,7 +195,7 @@ def get_pixel_error_from_image(frame):
     yelEdge = np.argmax(yelColSum)
 
     whiColSum = np.sum(whiteStrip, axis=0)
-    whiEdge = np.argmax(whiColSum)
+    whiEdge = whiteStrip.shape[1] - np.argmax(np.flipud(whiColSum)) - 1
 
     redColSum = np.sum(redStrip, axis=0)
 
@@ -210,18 +211,54 @@ def get_pixel_error_from_image(frame):
     image_center = whiteStrip.shape[1] // 2
 
     saw_red = percentage_red > 0.5
-    saw_white = percentage_white > 0.1
-    saw_yellow = percentage_yellow > 0.1
+# =============================================================================
+#     saw_white = percentage_white > 0.1
+#     saw_yellow = percentage_yellow > 0.1
+# =============================================================================
 
-    if saw_white and saw_yellow:
-        lane_center = np.mean([yelEdge, whiEdge])
-    elif saw_white and not saw_yellow:
-        lane_center = int(whiEdge - LANE_WIDTH_PIX / 2)
-    elif not saw_white and saw_yellow:
-        lane_center = int(yelEdge + LANE_WIDTH_PIX / 2)
+
+
+    if yelEdge > 0 and whiEdge < 79:
+        if yelEdge < whiEdge:
+            # calculate lane center using both edge and image center using the white
+            lane_center = int(np.mean([whiEdge,yelEdge]))
+            image_center = whiteStrip.shape[1]//2
+            
+                
+        else:
+            lane_center = int(yelEdge + LANE_WIDTH_PIX / 2)
+            image_center = yellowStrip.shape[1]//2
+        
+            
+            
+         
+        # # else if only one edge is visible
     else:
-        # we saw neither white nor yellow
-        lane_center = image_center
+        # if only white is visible, calculate everything using white
+        if whiEdge < 79 and yelEdge == 0:
+            lane_center = int(whiEdge - LANE_WIDTH_PIX / 2)
+            image_center = whiteStrip.shape[1]//2
+        # else if only yellow is visible, calculate everything using yellow
+        elif whiEdge == 79 and yelEdge > 0:
+            lane_center = int(yelEdge + LANE_WIDTH_PIX / 2)
+            image_center = yellowStrip.shape[1]//2
+
+
+
+
+
+
+# =============================================================================
+#     if saw_white and saw_yellow:
+#         lane_center = int(np.mean([yelEdge, whiEdge]))
+#     elif saw_white and not saw_yellow:
+#         lane_center = int(whiEdge - LANE_WIDTH_PIX / 2)
+#     elif not saw_white and saw_yellow:
+#         lane_center = int(yelEdge + LANE_WIDTH_PIX / 2)
+#     else:
+#         # we saw neither white nor yellow
+#         lane_center = image_center
+# =============================================================================
     
     error = lane_center - image_center
 
@@ -241,26 +278,7 @@ def get_pixel_error_from_image(frame):
     # imageCenter = 0
     # # if both edges are visible
     # # TODO: NOT FULLY TESTED YET!!!!
-    # if yelEdge > 0 and whiEdge < 79:
-    #     if yelEdge < whiEdge:
-    #         # calculate lane center using both edge and image center using the white
-    #         laneCenter = int(np.mean([whiEdge,yelEdge]))
-    #         imageCenter = whiteStrip.shape[1]//2
-    #     else:
-    #         laneCenter = int(yelEdge + LANE_WIDTH_PIX / 2)
-    #         imageCenter = yellowStrip.shape[1]//2
-        
-     
-    # # else if only one edge is visible
-    # else:
-    #     # if only white is visible, calculate everything using white
-    #     if whiEdge < 79 and yelEdge == 0:
-    #         laneCenter = int(whiEdge - LANE_WIDTH_PIX / 2)
-    #         imageCenter = whiteStrip.shape[1]//2
-    #     # else if only yellow is visible, calculate everything using yellow
-    #     elif whiEdge == 79 and yelEdge > 0:
-    #         laneCenter = int(yelEdge + LANE_WIDTH_PIX / 2)
-    #         imageCenter = yellowStrip.shape[1]//2
+    
     #     # else both are invisible, stop?
     
     # error = laneCenter - imageCenter
@@ -292,23 +310,26 @@ def get_pixel_error_from_image(frame):
 
 
 if __name__ == "__main__":
+    
     # # read in image
-    # image_in = Image.open(image_path + 'dist_to_red_15cm.png', 'r')
-    # rgb_frame = np.array(image_in)
-    # error = get_pixel_error_from_image(rgb_frame)
-    # print(error)
+    image_in = Image.open(image_path + 'frame94.png', 'r')
+    rgb_frame = np.array(image_in)
+    error = get_pixel_error_from_image(rgb_frame)
+    print(error)
 
 
-    import picamera, time
-    with picamera.PiCamera() as camera:
-        w, h = 640, 480
-        camera.resolution = (w, h)
-        camera.framerate = 24
-        time.sleep(2)
-        rgb_frame = np.empty((h, w, 3), dtype=np.uint8)
-        camera.capture(rgb_frame, 'rgb')
-        error, saw_red = get_pixel_error_from_image(rgb_frame)
-        print(error, "px error")
-        print(error / PIX_PER_CM, "cm error")
-
+# =============================================================================
+#     import picamera, time
+#     with picamera.PiCamera() as camera:
+#         w, h = 640, 480
+#         camera.resolution = (w, h)
+#         camera.framerate = 24
+#         time.sleep(2)
+#         rgb_frame = np.empty((h, w, 3), dtype=np.uint8)
+#         camera.capture(rgb_frame, 'rgb')
+#         error, saw_red = get_pixel_error_from_image(rgb_frame)
+#         print(error, "px error")
+#         print(error / PIX_PER_CM, "cm error")
+# 
+# =============================================================================
 
