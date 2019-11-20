@@ -18,6 +18,7 @@ sleep(2)
 previous_thetas = deque()
 previous_dts = deque()
 stopping = False
+pwm_total = convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT) + convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT)
 
 def convert_vel_to_PWM(velocity):
     if(velocity > 0):
@@ -118,7 +119,7 @@ def get_PWMs_from_visual(lane_error_pix, dt, PWM_l_prev, PWM_r_prev):
     # store past thetas and calculate moving average theta_dot
     previous_thetas.append(theta)
     previous_dts.append(dt)
-    if len(previous_thetas) > 1:
+    if len(previous_thetas) > 2:
         previous_thetas.popleft()
         previous_dts.popleft()
     avg_theta = sum(previous_thetas) / len(previous_thetas)
@@ -164,8 +165,8 @@ def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_enc
     lane_error_pix, stop_marker_seen = cam.get_error()
 
     # TODO: Alex B., check this
-    # PWM_l_prev, PWM_r_prev = left_motor_prev, right_motor_prev
-    PWM_l_prev, PWM_r_prev = convert_vel_to_PWM(10), convert_vel_to_PWM(10)
+    PWM_l_prev, PWM_r_prev = left_motor_prev, right_motor_prev
+    # PWM_l_prev, PWM_r_prev = convert_vel_to_PWM(10), convert_vel_to_PWM(10)
 
     if stop_marker_seen or stopping:
         if DEBUG_INFO_ON:
@@ -192,6 +193,7 @@ def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_enc
     PWM_l, PWM_r = get_PWMs_from_visual(lane_error_pix, delta_t, PWM_l_prev, PWM_r_prev)
 
     return PWM_l, PWM_r
+
 
 def test():
     return get_PWMs_from_visual(20, 0.1, 150, 150)
