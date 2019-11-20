@@ -1,7 +1,7 @@
 # CICS 503 Fall 2019 DuckieTown Group 4
 #
 # visual_control.py:
-# provides visual control using the equation 
+# provides visual control using the equation
 # theta_2 = -K (theta - theta_ref) - B (theta_dot - theta_1_ref)
 # theta_dot = theta_(t+1) - theta_t
 
@@ -57,23 +57,23 @@ def convert_delta_PWM_to_vel(delta_PWM):
 #   (PWM_l, PWM_r): (float, float)
 def get_PWMs_from_visual(lane_error_pix, dt, PWM_l_prev, PWM_r_prev):
 
-    # # TODO: translate pixel error from center of bot to center of lane to theta
+    # # translate pixel error from center of bot to center of lane to theta
     # # tan(theta) = o/a = lane error in centimeters / dist from ROI center to bot center
     # # theta = arctan(lane error in centimeters / dist from ROI center to bot center)
     # lane_error_cm = lane_error_pix / PIX_PER_CM
     # theta = np.arctan2(lane_error_cm, DIST_TO_ROI_CM)
 
-    # # TODO: store past thetas and calculate moving average theta_dot
+    # # store past thetas and calculate moving average theta_dot
     # previous_thetas.append(theta)
     # previous_dts.append(dt)
     # if len(previous_thetas) > 1:
     #     previous_thetas.popleft()
     #     previous_dts.popleft()
     # avg_theta = sum(previous_thetas) / len(previous_thetas)
-    # # TODO: better calculation: computer theta vel for each dt and then average
+    # # better calculation: computer theta vel for each dt and then average
     # theta_velocity = avg_theta / sum(previous_dts)
 
-    # # TODO: use equation to determine delta_PWM (delta_PWM ~ theta_acceleration)
+    # # use equation to determine delta_PWM (delta_PWM ~ theta_acceleration)
     # delta_PWM = - K * theta - B * theta_velocity
 
     # # handle PWM <==> velocity stuff
@@ -81,13 +81,13 @@ def get_PWMs_from_visual(lane_error_pix, dt, PWM_l_prev, PWM_r_prev):
     # vel_r_prev = convert_PWM_to_vel(PWM_r_prev)
     # delta_vel = convert_delta_PWM_to_vel(delta_PWM)
 
-    # # TODO: return PWMs
+    # # return PWMs
     # vel_l_new = vel_l_prev + delta_vel
     # vel_r_new = vel_r_prev - delta_vel
     # PWM_l = convert_vel_to_PWM(vel_l_new)
     # PWM_r = convert_vel_to_PWM(vel_r_new)
 
-    # # TODO: what is the right way to clamp these values?
+    # # what is the right way to clamp these values?
     # PWM_l = np.clip(PWM_l, -400, 400)
     # PWM_r = np.clip(PWM_r, -400, 400)
 
@@ -109,29 +109,32 @@ def get_PWMs_from_visual(lane_error_pix, dt, PWM_l_prev, PWM_r_prev):
 
 
 
-    # TODO: translate pixel error from center of bot to center of lane to theta
+    # translate pixel error from center of bot to center of lane to theta
     # tan(theta) = o/a = lane error in centimeters / dist from ROI center to bot center
     # theta = arctan(lane error in centimeters / dist from ROI center to bot center)
+    # TODO: Alex B., check this
     theta = -lane_error_pix / PIX_PER_CM
 
-    # TODO: store past thetas and calculate moving average theta_dot
+    # store past thetas and calculate moving average theta_dot
     previous_thetas.append(theta)
     previous_dts.append(dt)
     if len(previous_thetas) > 1:
         previous_thetas.popleft()
         previous_dts.popleft()
     avg_theta = sum(previous_thetas) / len(previous_thetas)
-    # TODO: better calculation: computer theta vel for each dt and then average
+    # better calculation: computer theta vel for each dt and then average
     theta_velocity = avg_theta / sum(previous_dts)
 
-    # TODO: use equation to determine delta_PWM (delta_PWM ~ theta_acceleration)
+    # use equation to determine delta_PWM (delta_PWM ~ theta_acceleration)
+    # TODO: Alex B., check this
     delta_PWM = - K * theta - B * theta_velocity
 
-    # TODO: return PWMs
+    # return PWMs
+    # TODO: Alex B., check this
     PWM_l = PWM_l_prev + delta_PWM
     PWM_r = PWM_r_prev - delta_PWM
 
-    # TODO: what is the right way to clamp these values?
+    # make sure that we send something valid to the motors
     PWM_l = np.clip(PWM_l, -400, 400)
     PWM_r = np.clip(PWM_r, -400, 400)
 
@@ -147,7 +150,7 @@ def get_PWMs_from_visual(lane_error_pix, dt, PWM_l_prev, PWM_r_prev):
         print("{:>22} : {}".format("PWM_r", PWM_r))
         print("="*30)
 
-        
+
     return PWM_l, PWM_r
 
 def clear_visual_globals():
@@ -160,13 +163,13 @@ def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_enc
     PWM_l, PWM_r = 0, 0
     lane_error_pix, stop_marker_seen = cam.get_error()
 
+    # TODO: Alex B., check this
     # PWM_l_prev, PWM_r_prev = left_motor_prev, right_motor_prev
     PWM_l_prev, PWM_r_prev = convert_vel_to_PWM(10), convert_vel_to_PWM(10)
 
     if stop_marker_seen or stopping:
         if DEBUG_INFO_ON:
-            print("Compute motor values (visual)")
-            print("{:>22} : {}".format("stopping", stopping))
+            print("Stopping On Red")
             print("{:>22} : {}".format("lane_error_pix", lane_error_pix))
             print("{:>22} : {}".format("dt", delta_t))
             print("{:>22} : {}".format("stop_marker_seen", stop_marker_seen))
@@ -176,6 +179,7 @@ def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_enc
             print("{:>22} : {}".format("PWM_r", PWM_r))
             print("="*30)
 
+        # TODO: may need to stop more suddenly for the green LEDs
         # PWM_l = convert_vel_to_PWM(convert_PWM_to_vel(PWM_l_prev) / 2)
         # PWM_r = convert_vel_to_PWM(convert_PWM_to_vel(PWM_r_prev) / 2)
         PWM_l = PWM_l_prev / 2

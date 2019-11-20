@@ -25,8 +25,8 @@ DIST_TO_ROI_CM = 15.0 # distance from bot to center of ROI
 # LANE_WIDTH_PIX = 131.0
 LANE_WIDTH_PIX = 66.0 # based on experimental values
 LANE_WIDTH_CM = 20.25
-# PIX_PER_CM = LANE_WIDTH_PIX / LANE_WIDTH_CM # pixels per cm in ROI
-PIX_PER_CM = 2.4489795918367343
+PIX_PER_CM = LANE_WIDTH_PIX / LANE_WIDTH_CM # pixels per cm in ROI
+# PIX_PER_CM = 2.4489795918367343
 
 TIME_SLICE = 0.1 # fraction of a second; resolution of our function
 END_GOAL = 100.0 # goal is one meter measured in centimeters

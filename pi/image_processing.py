@@ -9,284 +9,100 @@ from config import *
 import os
 import PIL.Image as Image
 import numpy as np
-from colorsys import rgb_to_hsv
 
-
-# testing imports
-#import time
 
 # variables
 crop_percentage = 0.05
 down_sample_steps = 8
+min_percentage_red_threshold = 0.5  # TODO: tune this value
 
-# single image process
-# link to images
 parent_dir = os.path.dirname(os.getcwd())
 image_path = os.path.join(parent_dir, 'test_road_images/')
 #image_path = os.path.join(parent_dir, 'test_road_images\\')
 
 
-# https://stackoverflow.com/a/38059401/2230446
-def rgb_to_hsv_vectorized(img): # img with BGR format
-    maxc = img.max(-1)
-    minc = img.min(-1)
-
-    out = np.zeros(img.shape)
-    out[:,:,2] = maxc
-    out[:,:,1] = (maxc-minc) / maxc
-
-    divs = (maxc[...,None] - img)/ ((maxc-minc+1)[...,None])
-    cond1 = divs[...,0] - divs[...,1]
-    cond2 = 2.0 + divs[...,2] - divs[...,0]
-    h = 4.0 + divs[...,1] - divs[...,2]
-    h[img[...,2]==maxc] = cond1[img[...,2]==maxc]
-    h[img[...,1]==maxc] = cond2[img[...,1]==maxc]
-    out[:,:,0] = (h/6.0) % 1.0
-
-    out[minc == maxc,:2] = 0
-    return out
-
-def RGBtoHSV(rgb):
-    h, s, v = rgb_to_hsv(*(rgb/255))
-    h, s, v = int(255*h), int(255*s), int(255*v)
-    return h, s, v
-
-
-# #check if a pixel is black
-# def isBlack(hsv_color):
-#     h, s, v = hsv_color
-#     # from testing various sample images, black 
-#     # seems to be v<40%, so 40% * 255 =  102 
-#     if v < 102:
-#         return 1
-#     return 0
-
-# #For yellow color a hue range from 51 degree to 60 degree has been defined
-# def isYellow(hsv_color):
-#     h, s, v = hsv_color
-#     if 30 <= h <= 60:
-#         if 100 <= s <=255:
-#             return 255
-#         else:
-#             return 0
-#     else:
-#         return 0
-
-# def isWhite(hsv_color):
-#     h, s, v = hsv_color
-#     if 0 <= s <= 15:
-#         if 240 <= v <=255:
-#             return 255
-#         else:
-#             return 0
-#     else:
-#         return 0
-
-# def isRed(hsv_color):
-#     h,s,v = hsv_color
-#     if 240 <= h <= 255:
-#         if 125 <= s <=255:
-#             return 1
-#         else:
-#             return 0
-#     else:
-#         return 0
-
-
-def isBlackVectorized(hsv_image):
-    return hsv_image[:,:,2] <= 102
-
-def isYellowVectorized(hsv_image):
+def is_yellow_vectorized(hsv_image):
     return (hsv_image[:,:,1] >= 50) & (30 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 120)
 
-def isWhiteVectorized(hsv_image):
+def is_white_vectorized(hsv_image):
     return (hsv_image[:,:,1] <= 50) & (hsv_image[:,:,2] >= 220)
 
-def isRedVectorized(hsv_image):
+def is_red_vectorized(hsv_image):
     return (hsv_image[:,:,1] >= 125) & (hsv_image[:,:,0] >= 240)
 
 
 def get_pixel_error_from_image(frame):
-    #t = time.time_ns()
     height, width, depth = frame.shape
 
     # crop a horizontal strip from the center
-    a = frame[height//2-int(height*crop_percentage):height//2+int(height*crop_percentage), ::down_sample_steps , :]
+    rgb_strip = frame[height//2-int(height*crop_percentage):height//2+int(height*crop_percentage), ::down_sample_steps , :]
+
+    # convert the strip to hsv
+    hsv_strip = np.array(Image.fromarray(rgb_strip).convert('HSV'))
 
 
-    # yellowStrip = np.zeros((a.shape[0],a.shape[1]//down_sample_steps),dtype=a.dtype)
-    # whiteStrip = np.zeros((a.shape[0],a.shape[1]//down_sample_steps),dtype=a.dtype)
-    # redStrip = np.zeros((a.shape[0],a.shape[1]//down_sample_steps),dtype=a.dtype)
+    yellow_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
+    white_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
+    red_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
 
 
-    # cntYellow = 0
-    # cntWhite = 0
-    # for M in range(whiteStrip.shape[0]):
-    #     for N in range(whiteStrip.shape[1]):
+    white_strip[is_white_vectorized(hsv_strip)] = 255
+    yellow_strip[is_yellow_vectorized(hsv_strip)] = 255
+    red_strip[is_red_vectorized(hsv_strip)] = 255
 
-    #         pixel = RGBtoHSV(a[M,down_sample_steps*N])
-    #         #ignore black pixels 
-    #         if(isBlack(pixel)):
-    #             continue
-    #         #if(isWhite(pixel)):
-    #         if(cntWhite < 3 and isWhite(pixel)):
-    #             whiteStrip[M,N] = 255
-    #             cntWhite += 1
-    #             continue
-    #         # if(isYellow(pixel)):
-    #         if(cntYellow < 3 and isYellow(pixel)):
-    #             yellowStrip[M,N] = 255
-    #             cntYellow += 1
-    #             continue
-    #         if(isRed(pixel)):
-    #             redStrip[M,N] = 1
-    #             continue
-
-    # hsvStrip = RGBtoHSV(a[:,::down_sample_steps])
-    # hsv_output = rgb_to_hsv_vectorized(a)
-    # hsv_output = np.array(Image.fromarray(a).convert('HSV'))
-    hsvStrip = np.array(Image.fromarray(a).convert('HSV'))
-    # print(hsv_output[:,:,0].min(), hsv_output[:,:,0].max())
-    # print(hsv_output[:,:,1].min(), hsv_output[:,:,1].max())
-    # print(hsv_output[:,:,2].min(), hsv_output[:,:,2].max())
-    # print(hsv_output[8:20,8:20,0])
-
-    # hsvStrip = (hsv_output*255).astype(np.uint8)
-    # hsvStrip[:,:,0] = 255-hsvStrip[:,:,0]
-    # hsvStrip[:,:,2] = 255-hsvStrip[:,:,2]
-
-
-    # blackStrip = np.zeros((hsvStrip.shape[0],hsvStrip.shape[1]), dtype=hsvStrip.dtype)
-    yellowStrip = np.zeros((hsvStrip.shape[0],hsvStrip.shape[1]), dtype=hsvStrip.dtype)
-    whiteStrip = np.zeros((hsvStrip.shape[0],hsvStrip.shape[1]), dtype=hsvStrip.dtype)
-    redStrip = np.zeros((hsvStrip.shape[0],hsvStrip.shape[1]), dtype=hsvStrip.dtype)
-
-
-    # # to display an image
-    # b = Image.fromarray(hsvStrip[:,:,0], 'L')
-    # c = b.convert('RGB')
-    # c.save(image_path + 'test.jpg')
+    # # write images to files for debugging (turn off when not debugging)
+    # Image.fromarray(a, 'RGB').convert('RGB').save(image_path + 'test_rgb.jpg')
+    # Image.fromarray(hsv_strip, 'HSV').convert('RGB').save(image_path + 'test_hsv.jpg')
+    # Image.fromarray(white_strip, 'L').convert('RGB').save(image_path + 'test_white.jpg')
+    # Image.fromarray(yellow_strip, 'L').convert('RGB').save(image_path + 'test_yellow.jpg')
+    # Image.fromarray(red_strip, 'L').convert('RGB').save(image_path + 'test_red.jpg')
     # print("done")
-
-    # print(hsvStrip[:4,:4,:])
-    # blackStrip[isBlackVectorized(hsvStrip)] = 255
-    whiteStrip[isWhiteVectorized(hsvStrip)] = 255
-    yellowStrip[isYellowVectorized(hsvStrip)] = 255
-    redStrip[isRedVectorized(hsvStrip)] = 255
-
-    # display image
-    Image.fromarray(a, 'RGB').convert('RGB').save(image_path + 'test_rgb.jpg')
-    Image.fromarray(hsvStrip, 'HSV').convert('RGB').save(image_path + 'test_hsv.jpg')
-    Image.fromarray(whiteStrip, 'L').convert('RGB').save(image_path + 'test_white.jpg')
-    Image.fromarray(yellowStrip, 'L').convert('RGB').save(image_path + 'test_yellow.jpg')
-    Image.fromarray(redStrip, 'L').convert('RGB').save(image_path + 'test_red.jpg')
-    print("done")
 
 
 
 # =============================================================================
-# 
+#
 #     calculate the distance of lane center and image center
 # =============================================================================
 
-    
-    yelColSum = np.sum(yellowStrip, axis=0)
-    yelEdge = np.argmax(yelColSum)
 
-    whiColSum = np.sum(whiteStrip, axis=0)
-    whiEdge = np.argmax(whiColSum)
+    yel_col_sum = np.sum(yellow_strip, axis=0)
+    yel_edge = np.argmax(yel_col_sum)
 
-    redColSum = np.sum(redStrip, axis=0)
+    whi_col_sum = np.sum(white_strip, axis=0)
+    whi_edge = len(whi_col_sum) - np.argmax(np.flipud(whi_col_sum)) -1
 
 
-    percentage_white = np.sum(whiColSum) / np.prod(whiColSum.shape)
-    percentage_yellow = np.sum(yelColSum) / np.prod(yelColSum.shape)
-    percentage_red = np.sum(redColSum) / np.prod(redColSum.shape)
-    
-    print("percentage_white", percentage_white)
-    print("percentage_yellow", percentage_yellow)
-    print("percentage_red", percentage_red)
+    percentage_red = np.sum(red_strip) / np.prod(red_strip.shape)
+    saw_red = percentage_red > min_percentage_red_threshold
+    # print("percentage_red", percentage_red)
 
-    image_center = whiteStrip.shape[1] // 2
+    saw_white = (whi_edge != len(whi_col_sum)-1)
+    saw_yellow = (yel_edge != 0)
 
-    saw_red = percentage_red > 0.5
-    saw_white = percentage_white > 0.1
-    saw_yellow = percentage_yellow > 0.1
+    image_center = white_strip.shape[1] // 2
 
     if saw_white and saw_yellow:
-        lane_center = np.mean([yelEdge, whiEdge])
+        lane_center = np.mean([yel_edge, whi_edge])
     elif saw_white and not saw_yellow:
-        lane_center = int(whiEdge - LANE_WIDTH_PIX / 2)
+        lane_center = whi_edge - LANE_WIDTH_PIX // 2
     elif not saw_white and saw_yellow:
-        lane_center = int(yelEdge + LANE_WIDTH_PIX / 2)
+        lane_center = yel_edge + LANE_WIDTH_PIX // 2
     else:
         # we saw neither white nor yellow
         lane_center = image_center
-    
+
     error = lane_center - image_center
 
-    # # print(yellowStrip.shape)
-    # yelColSum = np.sum(yellowStrip, axis=0)
-    # yelEdge = np.argmax(yelColSum)
-
-    # whiColSum = np.sum(whiteStrip, axis=0)
-    # whiEdge = whiteStrip.shape[1] - np.argmax(np.flipud(whiColSum)) - 1
-
-    # # print(yelColSum)
-    # # print(whiColSum)
-    # # print("="*15)
-
-
-    # laneCenter = 0
-    # imageCenter = 0
-    # # if both edges are visible
-    # # TODO: NOT FULLY TESTED YET!!!!
-    # if yelEdge > 0 and whiEdge < 79:
-    #     if yelEdge < whiEdge:
-    #         # calculate lane center using both edge and image center using the white
-    #         laneCenter = int(np.mean([whiEdge,yelEdge]))
-    #         imageCenter = whiteStrip.shape[1]//2
-    #     else:
-    #         laneCenter = int(yelEdge + LANE_WIDTH_PIX / 2)
-    #         imageCenter = yellowStrip.shape[1]//2
-        
-     
-    # # else if only one edge is visible
-    # else:
-    #     # if only white is visible, calculate everything using white
-    #     if whiEdge < 79 and yelEdge == 0:
-    #         laneCenter = int(whiEdge - LANE_WIDTH_PIX / 2)
-    #         imageCenter = whiteStrip.shape[1]//2
-    #     # else if only yellow is visible, calculate everything using yellow
-    #     elif whiEdge == 79 and yelEdge > 0:
-    #         laneCenter = int(yelEdge + LANE_WIDTH_PIX / 2)
-    #         imageCenter = yellowStrip.shape[1]//2
-    #     # else both are invisible, stop?
-    
-    # error = laneCenter - imageCenter
-    # # check if see red in front 
-    # saw_red = False
-    
-    # redRowSum = np.sum(redStrip, axis=1)
-
-    # if redRowSum[10] >= (0.4*redStrip.shape[1]):
-    #     saw_red = True
-
-    #dt = time.time_ns()
     if DEBUG_INFO_ON:
-        print("Image Interpreter")
-        print("{:>22} : {}".format("yelEdge", yelEdge))
-        print("{:>22} : {}".format("whiEdge", whiEdge))
-        # print("{:>22} : {}".format("imageCenter", imageCenter))
-        # print("{:>22} : {}".format("laneCenter", laneCenter))
+        print("Image Processing")
+        print("{:>22} : {}".format("yel_edge", yel_edge))
+        print("{:>22} : {}".format("whi_edge", whi_edge))
         print("{:>22} : {}".format("image_center", image_center))
         print("{:>22} : {}".format("lane_center", lane_center))
         print("{:>22} : {}".format("error", error))
         print("{:>22} : {}".format("saw_red", saw_red))
         print("="*30)
-
-    
-    saw_red = False
 
     return (error, saw_red)
 
@@ -310,5 +126,3 @@ if __name__ == "__main__":
         error, saw_red = get_pixel_error_from_image(rgb_frame)
         print(error, "px error")
         print(error / PIX_PER_CM, "cm error")
-
-

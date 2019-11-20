@@ -14,6 +14,7 @@ import picamera
 import picamera.array
 from image_processing import get_pixel_error_from_image
 
+
 class Camera():
     def __init__(self, width=640, height=480):
         self.width, self.height = width, height
@@ -34,7 +35,7 @@ class Camera():
                 # camera.framerate = 60
 
                 # start capturing frames, continuously updating the current frame (self.cur_frame)
-                with picamera.array.PiRGBArray(camera) as stream:
+                with picamera.array.PiRGBArray(camera) as stream:  #TODO: this line should probably be deleted
                         rawCapture = picamera.array.PiRGBArray(camera, size=(self.width, self.height))
                         stream = camera.capture_continuous(rawCapture, format="rgb", use_video_port=True)
                         for f in stream:
