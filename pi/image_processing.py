@@ -22,7 +22,7 @@ image_path = os.path.join(parent_dir, 'test_road_images/')
 
 
 def is_yellow_vectorized(hsv_image):
-    return (hsv_image[:,:,1] >= 50) & (30 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 120)
+    return (hsv_image[:,:,1] >= 150) & (30 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 50)
 
 def is_white_vectorized(hsv_image):
     return (hsv_image[:,:,1] <= 50) & (hsv_image[:,:,2] >= 220)
@@ -66,10 +66,10 @@ def get_pixel_error_from_image(frame):
 # =============================================================================
 
 
-    yel_col_sum = np.sum(yellow_strip, axis=0)
+    yel_col_sum = np.sum(yellow_strip, axis=0) > 0
     yel_edge = np.argmax(yel_col_sum)
 
-    whi_col_sum = np.sum(white_strip, axis=0)
+    whi_col_sum = np.sum(white_strip, axis=0) > 0
     whi_edge = len(whi_col_sum) - np.argmax(np.flipud(whi_col_sum)) -1
 
 
@@ -108,6 +108,7 @@ def get_pixel_error_from_image(frame):
 
 
 if __name__ == "__main__":
+
     # # read in image
     # image_in = Image.open(image_path + 'dist_to_red_15cm.png', 'r')
     # rgb_frame = np.array(image_in)
