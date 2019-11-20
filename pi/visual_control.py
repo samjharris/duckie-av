@@ -112,7 +112,7 @@ def get_PWMs_from_visual(lane_error_pix, dt, PWM_l_prev, PWM_r_prev):
     # store past thetas and calculate moving average theta_dot
     previous_thetas.append(theta)
     previous_dts.append(dt)
-    if len(previous_thetas) > 2:
+    if len(previous_thetas) > THETA_VEL_WINDOW:
         previous_thetas.popleft()
         previous_dts.popleft()
     avg_theta = sum(previous_thetas) / len(previous_thetas)
@@ -128,7 +128,7 @@ def get_PWMs_from_visual(lane_error_pix, dt, PWM_l_prev, PWM_r_prev):
     vel_l = convert_PWM_to_vel(PWM_l_prev) + delta_vel
     vel_r = convert_PWM_to_vel(PWM_r_prev) - delta_vel
     PWM_l = convert_vel_to_PWM(vel_l)
-    PWM_l = convert_vel_to_PWM(vel_r)
+    PWM_r = convert_vel_to_PWM(vel_r)
 
     # make sure that we send something valid to the motors
     PWM_l = np.clip(PWM_l, -400, 400)

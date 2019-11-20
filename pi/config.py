@@ -21,6 +21,7 @@ YOKE_POINT = 5.0 #prev r_length
 K = 30.0  # spring constant
 B = 0.0  # damper constant
 I = 5.0  # length of torque arm
+THETA_VEL_WINDOW = 2
 
 DIST_TO_ROI_CM = 15.0 # distance from bot to center of ROI
 # LANE_WIDTH_PIX = 131.0
