@@ -22,13 +22,16 @@ image_path = os.path.join(parent_dir, 'test_road_images/')
 
 
 def is_yellow_vectorized(hsv_image):
-    return (hsv_image[:,:,1] >= 150) & (30 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 50)
+    return (hsv_image[:,:,1] >= 50) & (30 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 50)
 
 def is_white_vectorized(hsv_image):
     return (hsv_image[:,:,1] <= 50) & (hsv_image[:,:,2] >= 220)
 
 def is_red_vectorized(hsv_image):
     return (hsv_image[:,:,1] >= 125) & (hsv_image[:,:,0] >= 240)
+
+def is_green_vectorized(hsv_image):
+    return (hsv_image[:,:,2] >= 100) & (60 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 170)
 
 
 def get_pixel_error_from_image(frame):
@@ -41,22 +44,31 @@ def get_pixel_error_from_image(frame):
     hsv_strip = np.array(Image.fromarray(rgb_strip).convert('HSV'))
 
 
-    yellow_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
-    white_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
-    red_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
+    white_mask = is_white_vectorized(hsv_strip)
+    yellow_mask = is_yellow_vectorized(hsv_strip)
+    red_mask = is_red_vectorized(hsv_strip)
+    green_mask = is_green_vectorized(hsv_strip)
 
 
-    white_strip[is_white_vectorized(hsv_strip)] = 255
-    yellow_strip[is_yellow_vectorized(hsv_strip)] = 255
-    red_strip[is_red_vectorized(hsv_strip)] = 255
+    if DEBUG_INFO_ON:
+        yellow_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
+        white_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
+        red_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
+        green_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
 
-    # # write images to files for debugging (turn off when not debugging)
-    # Image.fromarray(a, 'RGB').convert('RGB').save(image_path + 'test_rgb.jpg')
-    # Image.fromarray(hsv_strip, 'HSV').convert('RGB').save(image_path + 'test_hsv.jpg')
-    # Image.fromarray(white_strip, 'L').convert('RGB').save(image_path + 'test_white.jpg')
-    # Image.fromarray(yellow_strip, 'L').convert('RGB').save(image_path + 'test_yellow.jpg')
-    # Image.fromarray(red_strip, 'L').convert('RGB').save(image_path + 'test_red.jpg')
-    # print("done")
+        # write images to files for debugging (turn off when not debugging)
+        white_strip[white_mask] = 255
+        yellow_strip[yellow_mask] = 255
+        red_strip[red_mask] = 255
+        green_strip[green_mask] = 255
+
+        Image.fromarray(rgb_strip, 'RGB').convert('RGB').save(image_path + 'test_rgb.jpg')
+        Image.fromarray(hsv_strip[:,:,0], 'L').convert('RGB').save(image_path + 'test_hsv.jpg')
+        Image.fromarray(white_strip, 'L').convert('RGB').save(image_path + 'test_white.jpg')
+        Image.fromarray(yellow_strip, 'L').convert('RGB').save(image_path + 'test_yellow.jpg')
+        Image.fromarray(red_strip, 'L').convert('RGB').save(image_path + 'test_red.jpg')
+        Image.fromarray(green_strip, 'L').convert('RGB').save(image_path + 'test_green.jpg')
+        print("saved images to files")
 
 
 
@@ -66,21 +78,21 @@ def get_pixel_error_from_image(frame):
 # =============================================================================
 
 
-    yel_col_sum = np.sum(yellow_strip, axis=0) > 0
-    yel_edge = np.argmax(yel_col_sum)
+    yel_col_sum = np.sum(yellow_mask, axis=0)
+    yel_edge = len(yel_col_sum) - np.argmax(np.flipud(yel_col_sum)) - 1
 
-    whi_col_sum = np.sum(white_strip, axis=0) > 0
-    whi_edge = len(whi_col_sum) - np.argmax(np.flipud(whi_col_sum)) -1
+    whi_col_sum = np.sum(white_mask, axis=0)
+    whi_edge = np.argmax(whi_col_sum)
 
-
-    percentage_red = np.sum(red_strip) / np.prod(red_strip.shape)
+    percentage_white = np.sum(white_mask) / np.prod(white_mask.shape)
+    percentage_yellow = np.sum(yellow_mask) / np.prod(yellow_mask.shape)
+    percentage_red = np.sum(red_mask) / np.prod(red_mask.shape)
+    
     saw_red = percentage_red > min_percentage_red_threshold
-    # print("percentage_red", percentage_red)
+    saw_white = (whi_edge != 0) and percentage_white > 0.01
+    saw_yellow = (yel_edge != len(yel_col_sum)-1) and percentage_yellow > 0.01
 
-    saw_white = (whi_edge != len(whi_col_sum)-1)
-    saw_yellow = (yel_edge != 0)
-
-    image_center = white_strip.shape[1] // 2
+    image_center = white_mask.shape[1] // 2
 
     if saw_white and saw_yellow:
         lane_center = np.mean([yel_edge, whi_edge])
@@ -96,6 +108,11 @@ def get_pixel_error_from_image(frame):
 
     if DEBUG_INFO_ON:
         print("Image Processing")
+        print("{:>22} : {}".format("percentage_white", percentage_white))
+        print("{:>22} : {}".format("percentage_yellow", percentage_yellow))
+        print("{:>22} : {}".format("percentage_red", percentage_red))
+        print("{:>22} : {}".format("saw_white", saw_white))
+        print("{:>22} : {}".format("saw_yellow", saw_yellow))
         print("{:>22} : {}".format("yel_edge", yel_edge))
         print("{:>22} : {}".format("whi_edge", whi_edge))
         print("{:>22} : {}".format("image_center", image_center))
@@ -103,6 +120,8 @@ def get_pixel_error_from_image(frame):
         print("{:>22} : {}".format("error", error))
         print("{:>22} : {}".format("saw_red", saw_red))
         print("="*30)
+
+    saw_red = False
 
     return (error, saw_red)
 
@@ -126,4 +145,7 @@ if __name__ == "__main__":
         camera.capture(rgb_frame, 'rgb')
         error, saw_red = get_pixel_error_from_image(rgb_frame)
         print(error, "px error")
+        x = 2.6153846153846154
+        print("PIX_PER_CM", PIX_PER_CM)
+
         print(error / PIX_PER_CM, "cm error")

@@ -113,7 +113,7 @@ def get_PWMs_from_visual(lane_error_pix, dt, PWM_l_prev, PWM_r_prev):
     # tan(theta) = o/a = lane error in centimeters / dist from ROI center to bot center
     # theta = arctan(lane error in centimeters / dist from ROI center to bot center)
     # TODO: Alex B., check this
-    theta = -lane_error_pix / PIX_PER_CM
+    theta = lane_error_pix / PIX_PER_CM
 
     # store past thetas and calculate moving average theta_dot
     previous_thetas.append(theta)
