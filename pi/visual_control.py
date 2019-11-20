@@ -18,7 +18,7 @@ sleep(2)
 previous_thetas = deque()
 previous_dts = deque()
 stopping = False
-pwm_total = convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT) + convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT)
+# pwm_total = convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT) + convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT)
 
 def convert_vel_to_PWM(velocity):
     if(velocity > 0):
@@ -40,13 +40,6 @@ def convert_PWM_to_vel(PWM):
     else: #PWM < 0
         # negative function: VELOCITY = 0.1238(PWM) + 10.545, x-intercept =-85.177
         return (0.1238 * PWM) + 10.545
-
-def convert_delta_PWM_to_vel(delta_PWM):
-    if delta_PWM > 0:
-        delta_PWM += MIN_PWM
-    if delta_PWM < 0:
-        delta_PWM -= MIN_PWM
-    return convert_PWM_to_vel(delta_PWM)
 
 # takes
 #   PWM_l_prev: float,
@@ -128,12 +121,14 @@ def get_PWMs_from_visual(lane_error_pix, dt, PWM_l_prev, PWM_r_prev):
 
     # use equation to determine delta_PWM (delta_PWM ~ theta_acceleration)
     # TODO: Alex B., check this
-    delta_PWM = - K * theta - B * theta_velocity
+    delta_vel = - K * theta - B * theta_velocity
 
     # return PWMs
     # TODO: Alex B., check this
-    PWM_l = PWM_l_prev + delta_PWM
-    PWM_r = PWM_r_prev - delta_PWM
+    vel_l = convert_PWM_to_vel(PWM_l_prev) + delta_vel
+    vel_r = convert_PWM_to_vel(PWM_r_prev) - delta_vel
+    PWM_l = convert_vel_to_PWM(vel_l)
+    PWM_l = convert_vel_to_PWM(vel_r)
 
     # make sure that we send something valid to the motors
     PWM_l = np.clip(PWM_l, -400, 400)
@@ -146,7 +141,9 @@ def get_PWMs_from_visual(lane_error_pix, dt, PWM_l_prev, PWM_r_prev):
         print("{:>22} : {}".format("dt", dt))
         print("{:>22} : {}".format("PWM_l_prev", PWM_l_prev))
         print("{:>22} : {}".format("PWM_r_prev", PWM_r_prev))
-        print("{:>22} : {}".format("delta_PWM", delta_PWM))
+        print("{:>22} : {}".format("theta", theta))
+        print("{:>22} : {}".format("theta_velocity", theta_velocity))
+        print("{:>22} : {}".format("delta_vel", delta_vel))
         print("{:>22} : {}".format("PWM_l", PWM_l))
         print("{:>22} : {}".format("PWM_r", PWM_r))
         print("="*30)
