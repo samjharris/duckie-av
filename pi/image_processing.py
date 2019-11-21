@@ -127,8 +127,6 @@ def get_pixel_error_from_image(frame, turn_direction):
         print("{:>22} : {}".format("saw_red", saw_red))
         print("="*30)
 
-    saw_red = False
-
     return (error, saw_red)
 
 
@@ -149,7 +147,7 @@ if __name__ == "__main__":
         time.sleep(2)
         rgb_frame = np.empty((h, w, 3), dtype=np.uint8)
         camera.capture(rgb_frame, 'rgb')
-        error, saw_red = get_pixel_error_from_image(rgb_frame)
+        error, saw_red = get_pixel_error_from_image(rgb_frame, TURN_DIRECTION)
         print(error, "px error")
         x = 2.6153846153846154
         print("PIX_PER_CM", PIX_PER_CM)
