@@ -49,7 +49,7 @@ def convert_PWM_to_vel(PWM):
 #   stop_marker_seen: bool
 # returns
 #   (PWM_l, PWM_r): (float, float)
-def get_PWMs_from_visual(lane_error_pix, dt, PWM_l_prev, PWM_r_prev):
+def get_PWMs_from_visual(lane_error_pix, dt, PWM_l_prev, PWM_r_prev, turn_direction):
 
     # # translate pixel error from center of bot to center of lane to theta
     # # tan(theta) = o/a = lane error in centimeters / dist from ROI center to bot center

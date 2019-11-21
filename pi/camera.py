@@ -45,8 +45,8 @@ class Camera():
                             self.cur_frame = f.array
                             # pbar.update()  # only to measure framerate
 
-    def get_error(self):
+    def get_error(self, turn_direction):
         if self.cur_frame is None:
             return 0, True
-        cur_error, should_stop = get_pixel_error_from_image(self.cur_frame)
+        cur_error, should_stop = get_pixel_error_from_image(self.cur_frame, turn_direction)
         return cur_error, should_stop
