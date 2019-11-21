@@ -155,11 +155,11 @@ def clear_visual_globals():
     previous_thetas.clear()
     previous_dts.clear()
 
-def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev):
+def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev, turn_direction):
     global stopping
 
     PWM_l, PWM_r = 0, 0
-    lane_error_pix, stop_marker_seen = cam.get_error()
+    lane_error_pix, stop_marker_seen = cam.get_error(turn_direction)
 
     # TODO: Alex B., check this
     # PWM_l_prev, PWM_r_prev = left_motor_prev, right_motor_prev
@@ -187,7 +187,7 @@ def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_enc
 
         return PWM_l, PWM_r
 
-    PWM_l, PWM_r = get_PWMs_from_visual(lane_error_pix, delta_t, PWM_l_prev, PWM_r_prev)
+    PWM_l, PWM_r = get_PWMs_from_visual(lane_error_pix, delta_t, PWM_l_prev, PWM_r_prev, turn_direction)
 
     return PWM_l, PWM_r
 

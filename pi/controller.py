@@ -15,6 +15,7 @@ from numpy import int32, float64
 from visual_control import compute_motor_values, convert_vel_to_PWM, cam
 
 debug_mode = False
+turn_direction = TURN_DIRECTION
 
 # connect to the open serial port
 ports = [p[0] for p in get_serial_ports()]
@@ -98,7 +99,7 @@ with Serial(port=ports[0], baudrate=115200) as ser:
                         # ask the controller what to do
                         # print("{: >20}{}".format("left_motor_prev",left_motor_prev))
                         # print("{: >20}{}".format("right_motor_prev",right_motor_prev))
-                        left_motor, right_motor = compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev)
+                        left_motor, right_motor = compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev, turn_direction)
                         left_encoder_previous_value, right_encoder_previous_value = left_encoder, right_encoder
 
 

@@ -34,7 +34,7 @@ def is_green_vectorized(hsv_image):
     return (hsv_image[:,:,2] >= 100) & (60 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 170)
 
 
-def get_pixel_error_from_image(frame):
+def get_pixel_error_from_image(frame, turn_direction):
     height, width, depth = frame.shape
 
     # crop a horizontal strip from the center
@@ -95,26 +95,20 @@ def get_pixel_error_from_image(frame):
 
     image_center = white_mask.shape[1] // 2
 
-    if saw_white and saw_yellow:
-<<<<<<< HEAD
-        lane_center = np.mean([yelEdge, whiEdge])
-        # if whiColSum > yelColSum:
-        #     image_center = whiteStrip.shape[1] // 2
-        #     lane_center = np.mean([yelEdge, whiEdge])
-        # else:
-            # image_center = yellowStrip.shape[1] // 2
-        #     lane_center = yelEdge + LANE_WIDTH_PIX / 2
-
-=======
-        lane_center = np.mean([yel_edge, whi_edge])
->>>>>>> 31bfbdf8f12705ac1ede0986a48786f49f44e57e
-    elif saw_white and not saw_yellow:
-        lane_center = whi_edge - WHITE_OFFSET_PIX
-    elif not saw_white and saw_yellow:
-        lane_center = yel_edge + YELLOW_OFFSET_PIX
+    if turn_direction == "left":
+        if saw_white:
+            lane_center = whi_edge - WHITE_OFFSET_PIX
+        elif not saw_white and saw_yellow:
+            lane_center = yel_edge + LANE_WIDTH_PIX - WHITE_OFFSET_PIX
+        else:
+            lane_center = image_center
     else:
-        # we saw neither white nor yellow
-        lane_center = image_center
+        if saw_yellow:
+            lane_center = yel_edge + YELLOW_OFFSET_PIX
+        elif not saw_yellow and saw_white:
+            lane_center = whi_edge - LANE_WIDTH_PIX + YELLOW_OFFSET_PIX
+        else:
+            lane_center = image_center
 
     error = lane_center - image_center
 
