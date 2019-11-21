@@ -162,8 +162,8 @@ def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_enc
     lane_error_pix, stop_marker_seen = cam.get_error()
 
     # TODO: Alex B., check this
-    PWM_l_prev, PWM_r_prev = left_motor_prev, right_motor_prev
-    # PWM_l_prev, PWM_r_prev = convert_vel_to_PWM(10), convert_vel_to_PWM(10)
+    # PWM_l_prev, PWM_r_prev = left_motor_prev, right_motor_prev
+    PWM_l_prev, PWM_r_prev = convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT), convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT)
 
     if stop_marker_seen or stopping:
         if DEBUG_INFO_ON:

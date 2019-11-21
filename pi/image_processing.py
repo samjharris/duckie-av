@@ -38,7 +38,8 @@ def get_pixel_error_from_image(frame):
     height, width, depth = frame.shape
 
     # crop a horizontal strip from the center
-    rgb_strip = frame[height//2-int(height*crop_percentage):height//2+int(height*crop_percentage), ::down_sample_steps , :]
+    # rgb_strip = frame[height//2-int(height*crop_percentage):height//2+int(height*crop_percentage), ::down_sample_steps , :]
+    rgb_strip = frame[height//2 + STRIP_LOCATION*int(height*crop_percentage):height//2+(STRIP_LOCATION + 2) * int(height*crop_percentage), ::down_sample_steps , :]
 
     # convert the strip to hsv
     hsv_strip = np.array(Image.fromarray(rgb_strip).convert('HSV'))
@@ -97,9 +98,9 @@ def get_pixel_error_from_image(frame):
     if saw_white and saw_yellow:
         lane_center = np.mean([yel_edge, whi_edge])
     elif saw_white and not saw_yellow:
-        lane_center = whi_edge - LANE_WIDTH_PIX // 2
+        lane_center = whi_edge - WHITE_OFFSET_PIX
     elif not saw_white and saw_yellow:
-        lane_center = yel_edge + LANE_WIDTH_PIX // 2
+        lane_center = yel_edge + YELLOW_OFFSET_PIX
     else:
         # we saw neither white nor yellow
         lane_center = image_center

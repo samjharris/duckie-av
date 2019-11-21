@@ -18,8 +18,8 @@ YOKE_POINT = 5.0 #prev r_length
 # K of 0.5, B of 3 and I of 30 work well for straight
 # K of 20.0, B of 0.0 work well for visual control
 # K = 3.0  # spring constant
-K = 30.0  # spring constant
-B = 0.0  # damper constant
+K = 1.85  # spring constant
+B = 0.00  # damper constant
 I = 5.0  # length of torque arm
 THETA_VEL_WINDOW = 2
 
@@ -28,7 +28,10 @@ DIST_TO_ROI_CM = 15.0 # distance from bot to center of ROI
 LANE_WIDTH_PIX = 55.0 # based on experimental values
 LANE_WIDTH_CM = 20.25
 PIX_PER_CM = LANE_WIDTH_PIX / LANE_WIDTH_CM # pixels per cm in ROI
+WHITE_OFFSET_PIX = 16
+YELLOW_OFFSET_PIX = 25
 
+STRIP_LOCATION = 6
 
 TIME_SLICE = 0.1 # fraction of a second; resolution of our function
 END_GOAL = 100.0 # goal is one meter measured in centimeters
@@ -41,4 +44,4 @@ WHEEL_BASE = 16.5
 # BAUDRATE = 9600
 BAUDRATE = 115200
 
-DEBUG_INFO_ON = True
+DEBUG_INFO_ON = False
