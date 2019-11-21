@@ -3,7 +3,6 @@
 # path_planner.py:
 # plans paths using BFS.
 
-import os
 
 #graph key: node 1 = n01, node 2 = n02, etc. 
 #           "R" = right turn at intersection
@@ -115,10 +114,11 @@ def plan_path(nodes):
 
 if __name__ == "__main__":
     # sample test paths:
-    #p = ["n01, n02, n03"]
-    #p = ["n01"]
-    #p = ["n04"]
-    p = ["n08","n01","n06","n05","n12","n11","n01","n03","n08"]
+    # path_string = "1 2 3"
+    # path_string = "8 1 6 5 12 11 1 3 8"
+    path_string = "10 12"
+
+    p = ["n{:0>2}".format(int(x)) for x in path_string.split()]
     stack = plan_path(p)
     for elem in stack:
         print(elem," ")
