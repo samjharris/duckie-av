@@ -215,6 +215,13 @@ def get_pixel_error_from_image(frame):
 
     if saw_white and saw_yellow:
         lane_center = np.mean([yelEdge, whiEdge])
+        # if whiColSum > yelColSum:
+        #     image_center = whiteStrip.shape[1] // 2
+        #     lane_center = np.mean([yelEdge, whiEdge])
+        # else:
+            # image_center = yellowStrip.shape[1] // 2
+        #     lane_center = yelEdge + LANE_WIDTH_PIX / 2
+
     elif saw_white and not saw_yellow:
         lane_center = int(whiEdge - LANE_WIDTH_PIX / 2)
     elif not saw_white and saw_yellow:
