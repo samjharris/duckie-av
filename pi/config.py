@@ -28,7 +28,7 @@ DIST_TO_ROI_CM = 15.0 # distance from bot to center of ROI
 LANE_WIDTH_PIX = 55.0 # based on experimental values
 LANE_WIDTH_CM = 20.25
 PIX_PER_CM = LANE_WIDTH_PIX / LANE_WIDTH_CM # pixels per cm in ROI
-WHITE_OFFSET_PIX = 16
+WHITE_OFFSET_PIX = 20
 YELLOW_OFFSET_PIX = 25
 
 STRIP_LOCATION = 6
