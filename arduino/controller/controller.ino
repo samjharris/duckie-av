@@ -4,6 +4,9 @@
 #include "DualMC33926MotorShield.h"
 DualMC33926MotorShield md;
 
+#define PING_PIN 11 //USDS signal pin (one of the few digital GPIOs not used by MC3392)
+#define DISTANCE_THRESHOLD 20 //Object detection threshold within which to halt (in cms)
+
 // We assume that the two back encoders plugged into the interrupt pins
 // Note: interrupt pin 0 is actually pin 2
 // Note: interrupt pin 1 is actually pin 3
@@ -18,6 +21,11 @@ volatile short right_encoder_counter = 0;
 const int encoder_debounce_time = 10;
 volatile long last_update_left;
 volatile long last_update_right;
+
+//PING sensor variables
+volatile long ping_duration = 0;
+volatile long ping_distance = 0;
+bool halting = false;
 
 // used for serial communication
 union ShortsOrBytes
@@ -99,10 +107,34 @@ void setup() {
   last_update_right = millis();
 }
 
-
+//send out a PING chirp
+void chirp(){
+  pinMode(PING_PIN, OUTPUT);
+  digitalWrite(PING_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(PING_PIN, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(PING_PIN, LOW);
+}
 void loop() {
+  //detect objects
+  chirp();
+  pinMode(PING_PIN, INPUT);
+  ping_duration = pulseIn(PING_PIN, HIGH);
+  ping_distance = ping_duration / 29 / 2;
+  if(ping_distance <= DISTANCE_THRESHOLD){
+    halting = true;
+  }else if(halting && ping_distance > DISTANCE_THRESHOLD){
+    halting = false;
+  }
+
+  if(halting){
+    md.setM1Speed(0);
+    md.setM2Speed(0);
+  }
+  
   // receive motor commands
-  if(Serial.available()) {
+  if(Serial.available() && !halting) {
     char newChar = Serial.read();
 
     // read in motor command bytes
