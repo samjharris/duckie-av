@@ -1,16 +1,21 @@
+# CICS 503 Fall 2019 DuckieTown Group 4
+#
+# controller.py:
+# handles the robot-driving logic flow and serial 
+# communications with our external hardware, i.e. 
+# Arduino Uno, camera, ultrasonic dist. sensor
+
+from config import *
 from serial import Serial
 from serial.tools.list_ports import comports as get_serial_ports
 import struct
 from time import sleep, time
 from tqdm import tqdm
-# from simple_command import compute_motor_values
-# from new_closed_loop import compute_motor_values
-from visual_controller import compute_motor_values, cam
 from numpy import int32, float64
-from odometry_guided_feedback import convert_vel_to_PWM
-
+from visual_control import compute_motor_values, convert_vel_to_PWM, cam
 
 debug_mode = False
+turn_direction = TURN_DIRECTION
 
 # connect to the open serial port
 ports = [p[0] for p in get_serial_ports()]
@@ -43,10 +48,9 @@ with Serial(port=ports[0], baudrate=115200) as ser:
     received_first_message = False
     left_encoder_previous_value, right_encoder_previous_value = 0, 0
 
-
     bytes_buffer = b""
     buffer_i = 0
-    with tqdm(total=1) as pbar:
+    with tqdm(desc="serial") as pbar:
         while True:
             try:
                 if ser.in_waiting > 0:
@@ -80,7 +84,7 @@ with Serial(port=ports[0], baudrate=115200) as ser:
                         if not received_first_message:
                             start_time = time()
                             left_encoder_previous_value, right_encoder_previous_value = left_encoder, right_encoder
-                            left_motor_prev, right_motor_prev = convert_vel_to_PWM(10), convert_vel_to_PWM(10)
+                            left_motor_prev, right_motor_prev = convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT), convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT)
                             prev_t = 0
                             received_first_message = True
 
@@ -95,7 +99,7 @@ with Serial(port=ports[0], baudrate=115200) as ser:
                         # ask the controller what to do
                         # print("{: >20}{}".format("left_motor_prev",left_motor_prev))
                         # print("{: >20}{}".format("right_motor_prev",right_motor_prev))
-                        left_motor, right_motor = compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev)
+                        left_motor, right_motor = compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev, turn_direction)
                         left_encoder_previous_value, right_encoder_previous_value = left_encoder, right_encoder
 
 
@@ -107,7 +111,8 @@ with Serial(port=ports[0], baudrate=115200) as ser:
                 else:
                     curr_time = time()
                     if curr_time - last_write > 0.01:
-                        write_motors(0, 0)
+                        # write_motors(0, 0)
+                        write_motors(left_motor_prev, right_motor_prev)
                         sleep(0.01)
 
             except KeyboardInterrupt:
