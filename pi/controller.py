@@ -9,13 +9,13 @@ from config import *
 from serial import Serial
 from serial.tools.list_ports import comports as get_serial_ports
 import struct
-from time import sleep, time
-from tqdm import tqdm
-from numpy import int32, float64
+from time import time
 from visual_control import compute_motor_values, convert_vel_to_PWM, cam
+from path_planner import plan_path
 
 debug_mode = False
 turn_direction = TURN_DIRECTION
+
 
 # connect to the open serial port
 ports = [p[0] for p in get_serial_ports()]
@@ -23,31 +23,96 @@ ports = [p[0] for p in get_serial_ports()]
 if len(ports) == 0:
     print("Error, couldn't find any open ports")
     exit()
-with Serial(port=ports[0], baudrate=115200) as ser:
-    ser.flushInput()
 
-    last_write = time()
-    left_motor_prev, right_motor_prev = 0, 0
-    def write_motors(left_motor, right_motor):
-        global last_write, left_motor_prev, right_motor_prev
+#create the serial connection object
+ser = Serial(port=ports[0], baudrate=115200)
+ser.flushInput()
 
-        # print(left_motor, right_motor)
+#ser.close()
 
-        # assert type(left_motor) in [int, float, int32, float64], "motor input should be of type int, not {}".format(type(left_motor))
-        # assert type(right_motor) in [int, float, int32, float64], "motor input should be of type int, not {}".format(type(right_motor))
+last_write = time()
+start_time = 0
+received_first_message = False
 
+# Previous motor PWM values
+l_motor_prev = 0 
+r_motor_prev = 0
+
+# Previous encoder tick values
+l_encod_prev = 0 
+r_encod_prev = 0
+
+#IDEA: to resume after error mid-run, have the option of running the controller.py
+#script with a file. When you run with CLI, you input a path and on Ctrl+C the path and
+#current position is writen to an output file. Then we can reposition the bot and run:
+# ">python controller.py progress.txt" to pick back where we left off.
+
+# Get the user input path
+path_input = input("Enter a list of nodes to traverse:")
+instructions, full_path = plan_path(path_input)
+
+# This variable will hold the last node we successfully reached
+current_node = full_path[0]
+
+# TODO: MORE SETUP
+
+# Okay, setup is done. Here are some helper functions which handle the heavy lifting:
+def waitForGreen():
+    #Don't care how you do it, just wait for a green light
+    return
+
+def traverseIntersection(instruction, ser):
+    #Somehow, get across that intersection
+    return
+
+def traverseStraightaway(instruction, ser):
+    #TODO
+    return
+
+def write_motors(left_motor, right_motor, ser):
+        global last_write, l_motor_prev, r_motor_prev
         last_write = time()
         to_write = struct.pack('hhc', int(left_motor), int(right_motor), b'A')
-        if debug_mode:
-            print("pi->arduino", left_motor, right_motor)
-            # print("pi->arduino {:08b}".format(int(to_write.hex(),16))[:-8])
         ser.write(to_write)
-        left_motor_prev, right_motor_prev = left_motor, right_motor
+        l_motor_prev, r_motor_prev = left_motor, right_motor
+        return
 
-    start_time = 0
-    received_first_message = False
-    left_encoder_previous_value, right_encoder_previous_value = 0, 0
+# Now, time for the control-loop:
 
+# While we still have work to do
+while instructions:
+    # Pop the next instruction off the stack
+    instruction = instructions.pop(0)
+
+    # First, wait for a green light:
+    waitForGreen()
+
+    # Then, execute the current instruction:
+    ## TURN (providing the instruction, serial-object):
+    traverseIntersection(instruction, ser)
+    ## Then DRIVE...
+    ### (We need to know the side of the road to hug)
+    if(instruction == "L"):
+        curve = "wide"  # We are going to be taking a wide turn, so hug the white
+    elif(instruction == "R"):
+        curve = "sharp" # We are going to be taking a sharp turn, so hug the yellow
+    else:#instruction == "S"
+        curve = "wide"  # We are going straight, so might as well stay away from other cars
+    ## ...(providing the curve-type, serial-object):
+    traverseStraightaway(curve, ser) #*this funciton should only return when we arrive at a stop light
+
+#Sam todo:
+#-Remove read junk & encoder junk from visual control & control loop below
+#-Implement traverseStraightaway
+
+#Anyone else todo:
+#-Implement traverseIntersection
+#-Implement waitForGreen()
+
+
+
+#gutted old-code: (still picking this apart)
+'''
     bytes_buffer = b""
     buffer_i = 0
     with tqdm(desc="serial") as pbar:
@@ -123,3 +188,4 @@ with Serial(port=ports[0], baudrate=115200) as ser:
                     break
                 except SystemExit:
                     break
+'''
