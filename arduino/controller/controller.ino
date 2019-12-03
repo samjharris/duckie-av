@@ -26,6 +26,7 @@ volatile long last_update_right;
 volatile long ping_duration = 0;
 volatile long ping_distance = 0;
 bool halting = false;
+int count = 0;
 
 // used for serial communication
 union ShortsOrBytes
@@ -119,7 +120,6 @@ void chirp(){
 
 void loop() {
   //detect objects
-  count = 0;
   if(count % 10 == 0) { // check every 1/10 of time
     chirp();
     pinMode(PING_PIN, INPUT);
