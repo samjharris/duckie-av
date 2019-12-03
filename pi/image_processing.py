@@ -15,6 +15,7 @@ import numpy as np
 crop_percentage = 0.05
 down_sample_steps = 8
 min_percentage_red_threshold = 0.5  # TODO: tune this value
+min_percentage_green_threshold = 0.01 #TODO: tune this value
 
 parent_dir = os.path.dirname(os.getcwd())
 image_path = os.path.join(parent_dir, 'test_road_images/')
@@ -31,7 +32,7 @@ def is_red_vectorized(hsv_image):
     return (hsv_image[:,:,1] >= 125) & (hsv_image[:,:,0] >= 240)
 
 def is_green_vectorized(hsv_image):
-    return (hsv_image[:,:,2] >= 100) & (60 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 170)
+    return (hsv_image[:,:,2] >= 100) & (60 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 170) | ((hsv_image[:,:,1] <= 50)&(hsv_image[:,:,2] >= 220))
 
 
 def get_pixel_error_from_image(frame, turn_direction):
@@ -40,28 +41,33 @@ def get_pixel_error_from_image(frame, turn_direction):
     # crop a horizontal strip from the center
     # rgb_strip = frame[height//2-int(height*crop_percentage):height//2+int(height*crop_percentage), ::down_sample_steps , :]
     rgb_strip = frame[height//2 + STRIP_LOCATION*int(height*crop_percentage):height//2+(STRIP_LOCATION + 2) * int(height*crop_percentage), ::down_sample_steps , :]
-
+    gLED_strip = frame[height//2 + 4*int(height*crop_percentage):height//2+(4 + 5) * int(height*crop_percentage), 100:540 , :]
+    gLED_strip = gLED_strip[::2,::2,:]
+    
+    
+    
     # convert the strip to hsv
     hsv_strip = np.array(Image.fromarray(rgb_strip).convert('HSV'))
-
+    gLED_strip_hsv = np.array(Image.fromarray(gLED_strip).convert('HSV'))
 
     white_mask = is_white_vectorized(hsv_strip)
     yellow_mask = is_yellow_vectorized(hsv_strip)
     red_mask = is_red_vectorized(hsv_strip)
-    green_mask = is_green_vectorized(hsv_strip)
+    green_mask = (is_green_vectorized(gLED_strip_hsv))
 
 
     if DEBUG_INFO_ON:
         yellow_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
         white_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
         red_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
-        green_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
+        green_strip = np.zeros((gLED_strip_hsv.shape[0],gLED_strip_hsv.shape[1]), dtype=hsv_strip.dtype)
 
         # write images to files for debugging (turn off when not debugging)
         white_strip[white_mask] = 255
         yellow_strip[yellow_mask] = 255
         red_strip[red_mask] = 255
         green_strip[green_mask] = 255
+        
 
         Image.fromarray(rgb_strip, 'RGB').convert('RGB').save(image_path + 'test_rgb.jpg')
         Image.fromarray(hsv_strip[:,:,0], 'L').convert('RGB').save(image_path + 'test_hsv.jpg')
@@ -69,6 +75,7 @@ def get_pixel_error_from_image(frame, turn_direction):
         Image.fromarray(yellow_strip, 'L').convert('RGB').save(image_path + 'test_yellow.jpg')
         Image.fromarray(red_strip, 'L').convert('RGB').save(image_path + 'test_red.jpg')
         Image.fromarray(green_strip, 'L').convert('RGB').save(image_path + 'test_green.jpg')
+        Image.fromarray(gLED_strip, 'RGB').convert('RGB').save(image_path + 'test_gLED.jpg')
         print("saved images to files")
 
 
@@ -88,10 +95,18 @@ def get_pixel_error_from_image(frame, turn_direction):
     percentage_white = np.sum(white_mask) / np.prod(white_mask.shape)
     percentage_yellow = np.sum(yellow_mask) / np.prod(yellow_mask.shape)
     percentage_red = np.sum(red_mask) / np.prod(red_mask.shape)
+    percentage_green = np.sum(green_mask)/np.prod(green_mask.shape)
+    
+    
     
     saw_red = percentage_red > min_percentage_red_threshold
     saw_white = (whi_edge != 0) and percentage_white > 0.01
     saw_yellow = (yel_edge != len(yel_col_sum)-1) and percentage_yellow > 0.01
+    if saw_red:
+        saw_green = percentage_green > min_percentage_green_threshold
+    else:
+        saw_green = False
+    
 
     image_center = white_mask.shape[1] // 2
 
@@ -117,6 +132,7 @@ def get_pixel_error_from_image(frame, turn_direction):
         print("{:>22} : {}".format("percentage_white", percentage_white))
         print("{:>22} : {}".format("percentage_yellow", percentage_yellow))
         print("{:>22} : {}".format("percentage_red", percentage_red))
+        print("{:>22} : {}".format("percentage_green", percentage_green))
         print("{:>22} : {}".format("saw_white", saw_white))
         print("{:>22} : {}".format("saw_yellow", saw_yellow))
         print("{:>22} : {}".format("yel_edge", yel_edge))
@@ -127,16 +143,18 @@ def get_pixel_error_from_image(frame, turn_direction):
         print("{:>22} : {}".format("saw_red", saw_red))
         print("="*30)
 
-    return (error, saw_red)
+    return (error, saw_red, saw_green)
 
 
 if __name__ == "__main__":
 
     # # read in image
-    # image_in = Image.open(image_path + 'dist_to_red_15cm.png', 'r')
-    # rgb_frame = np.array(image_in)
-    # error = get_pixel_error_from_image(rgb_frame)
-    # print(error)
+# =============================================================================
+#     image_in = Image.open(image_path + 'Green_test_rgb.jpg', 'r')
+#     rgb_frame = np.array(image_in)
+#     error = get_pixel_error_from_image(rgb_frame, 'left')
+#     print(error)
+# =============================================================================
 
 
     import picamera, time
@@ -153,3 +171,4 @@ if __name__ == "__main__":
         print("PIX_PER_CM", PIX_PER_CM)
 
         print(error / PIX_PER_CM, "cm error")
+
