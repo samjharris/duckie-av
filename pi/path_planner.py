@@ -79,7 +79,7 @@ def fill_steps(nA,nB):
 # takes:
 #   list of nodes
 # returns:
-#   stack of instructions
+#   stack of instructions followed by a full path (of nodes to visit)
 #
 #this function takes a list, made up
 #of some start node, some end node, and
@@ -110,7 +110,7 @@ def plan_path(nodes):
                 step = elem[1]
         instructions.append(step)
 
-    return instructions
+    return instructions, full_nodes_list
 
 if __name__ == "__main__":
     # sample test paths:
