@@ -116,17 +116,24 @@ void chirp(){
   delayMicroseconds(5);
   digitalWrite(PING_PIN, LOW);
 }
+
 void loop() {
   //detect objects
-  chirp();
-  pinMode(PING_PIN, INPUT);
-  ping_duration = pulseIn(PING_PIN, HIGH);
-  ping_distance = ping_duration / 29 / 2;
-  if(ping_distance <= DISTANCE_THRESHOLD){
-    halting = true;
-  }else if(halting && ping_distance > DISTANCE_THRESHOLD){
-    halting = false;
+  count = 0;
+  if(count % 10 == 0) { // check every 1/10 of time
+    chirp();
+    pinMode(PING_PIN, INPUT);
+    ping_duration = pulseIn(PING_PIN, HIGH);
+    ping_distance = ping_duration / 29 / 2;
+    if(ping_distance <= DISTANCE_THRESHOLD){
+      halting = true;
+    }else if(halting && ping_distance > DISTANCE_THRESHOLD){
+      halting = false;
+    }
+
   }
+
+  count++;
 
   if(halting){
     md.setM1Speed(0);
