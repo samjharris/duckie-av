@@ -31,8 +31,12 @@ graph = { "n01" : [["n04","L"],["n12","S"]], #e.g.: from n01, we can go
 #
 #just a simple function to parse our input
 def input_helper(nodes):
+
     #TODO: parse input into a list
     nodes_list = nodes #sample path
+    if(nodes_list < 2):
+        print("You have already arrived at your destination. Try adding a longer path")
+        exit()
     return nodes_list
 
 #function fill_steps:
