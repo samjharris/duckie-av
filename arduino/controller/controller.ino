@@ -120,17 +120,23 @@ void chirp(){
 
 void loop() {
   //detect objects
-  if(count % 10 == 0) { // check every 1/10 of time
+  if(count % 10 == 0) { // check every 10th time
     chirp();
     pinMode(PING_PIN, INPUT);
-    ping_duration = pulseIn(PING_PIN, HIGH);
+    ping_duration = pulseIn(PING_PIN, HIGH, 3500);
     ping_distance = ping_duration / 29 / 2;
     if(ping_distance <= DISTANCE_THRESHOLD){
       halting = true;
+      // ping_duration = 0;
     }else if(halting && ping_distance > DISTANCE_THRESHOLD){
       halting = false;
     }
 
+    // Serial.print(0);
+    // Serial.print("\t");
+    // Serial.print(4000);
+    // Serial.print("\t");
+    // Serial.println(ping_duration);
   }
 
   count++;
