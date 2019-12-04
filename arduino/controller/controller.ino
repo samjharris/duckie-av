@@ -23,8 +23,8 @@ volatile long last_update_left;
 volatile long last_update_right;
 
 //PING sensor variables
-volatile long ping_duration = 0;
-volatile long ping_distance = 0;
+volatile short ping_duration = 0;
+volatile short ping_distance = 0;
 bool halting = false;
 int count = 0;
 
@@ -39,7 +39,7 @@ union ShortsOrBytes
 };
 char motorBufferIndex = 0;
 char motorBuffer[4];
-char encoderBuffer[8];
+char encoderBuffer[10];
 
 
 // called when either of the motors fails
@@ -120,7 +120,7 @@ void chirp(){
 
 void loop() {
   //detect objects
-  if(count % 30 == 0) { // check every 10th time
+  if(count % 30 == 0) { // check every 30th time
     chirp();
     pinMode(PING_PIN, INPUT);
     ping_duration = pulseIn(PING_PIN, HIGH, 3500);
@@ -142,10 +142,10 @@ void loop() {
 
   count++;
 
-  if(halting){
-    md.setM1Speed(0);
-    md.setM2Speed(0);
-  }
+  // if(halting){
+  //   md.setM1Speed(0);
+  //   md.setM2Speed(0);
+  // }
   
   // receive motor commands
   if(Serial.available() && !halting) {
@@ -189,8 +189,10 @@ void loop() {
       encoderBuffer[3] = highByte(temp_left_encoder_counter);
       encoderBuffer[4] = lowByte(temp_right_encoder_counter);
       encoderBuffer[5] = highByte(temp_right_encoder_counter);
-      encoderBuffer[6] = 0xCA;
-      encoderBuffer[7] = 0xFE;
+      encoderBuffer[6] = lowByte(ping_distance);
+      encoderBuffer[7] = highByte(ping_distance);
+      encoderBuffer[8] = 0xCA;
+      encoderBuffer[9] = 0xFE;
       
       // send the encoder values over serial
       Serial.write(encoderBuffer, sizeof(encoderBuffer));
