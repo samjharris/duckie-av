@@ -125,10 +125,11 @@ void loop() {
     pinMode(PING_PIN, INPUT);
     ping_duration = pulseIn(PING_PIN, HIGH, 3500);
     ping_distance = ping_duration / 29 / 2;
-    if(ping_distance <= DISTANCE_THRESHOLD){
+    bool did_timeout = (ping_duration == 0);
+    bool is_close = (ping_distance <= DISTANCE_THRESHOLD);
+    if(is_close && !did_timeout){
       halting = true;
-      // ping_duration = 0;
-    }else if(halting && ping_distance > DISTANCE_THRESHOLD){
+    } else {
       halting = false;
     }
 
