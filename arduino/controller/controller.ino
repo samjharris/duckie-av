@@ -120,7 +120,7 @@ void chirp(){
 
 void loop() {
   //detect objects
-  if(count % 10 == 0) { // check every 10th time
+  if(count % 30 == 0) { // check every 10th time
     chirp();
     pinMode(PING_PIN, INPUT);
     ping_duration = pulseIn(PING_PIN, HIGH, 3500);
