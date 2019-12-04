@@ -2,6 +2,7 @@
 #
 # config.py
 # useful global variables are declared here
+import numpy as np
 
 #cm/s/PWM
 CM_S_PWM = 0.15
@@ -24,6 +25,11 @@ I = 5.0  # length of torque arm
 THETA_VEL_WINDOW = 2
 ENCODER_VEL_WINDOW = 100
 # ENCODER_VEL_WINDOW = 30
+
+# Open Loop Intersection Distances
+DIST_FROM_STOP_LINE = 30
+STRAIGHT_DIST = DIST_FROM_STOP_LINE + 44
+LEFT_TURN_DIST = DIST_FROM_STOP_LINE + 26
 
 DIST_TO_ROI_CM = 15.0 # distance from bot to center of ROI
 # LANE_WIDTH_PIX = 131.0
@@ -51,6 +57,7 @@ CIRCLE_RADIUS = 30.0
 CM_PER_TICK = 22.0/26.0
 
 WHEEL_BASE = 16.5
+QUARTER_TURN = WHEEL_BASE * np.pi / 4
 # BAUDRATE = 9600
 BAUDRATE = 115200
 
