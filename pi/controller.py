@@ -9,13 +9,63 @@ from config import *
 from serial import Serial
 from serial.tools.list_ports import comports as get_serial_ports
 import struct
-from time import time
-from visual_control import compute_motor_values, convert_vel_to_PWM, cam
+from time import time, sleep
+from visual_control import visual_compute_motor_values, convert_vel_to_PWM, cam
+from open_control import open_compute_motor_values
 from path_planner import plan_path
 
-debug_mode = False
-turn_direction = TURN_DIRECTION
+class Controller():
+    def __init__(self, instructions, full_path):
+        #Control type: 0 for visual, 1 for open, 2 for stopped
+        self.control_type == 0
+        
+        self.instructions = instructions
+        self.full_path = full_path
 
+        # turn_type: 0 for left, 1 for right, 2 for straight
+        self.instruction = 0 
+        # hug: 0 for white, 1 for yellow
+        self.hug = 0
+        # prev_hug: 0 for white, 1 for yellow
+        self.prev_hug = 0
+        #self.cur_node = full_path[0]
+        #self.nxt_node = full_path[1]
+
+    def computer_motor_values(self, t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev):
+        l_motor = 0
+        r_motor = 0 
+        
+        saw_red = False
+        saw_green = False
+        done = False
+
+        #compute motor valuesS
+        if(self.control_type == 0): #visual control
+            l_motor,r_motor,saw_red,saw_green = visual_compute_motor_values(t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev, self.hug)
+        elif(self.control_type == 1): #open-loop control
+            l_motor,r_motor,done = open_compute_motor_values(self.prev_hug, self.instruction, l_encod, r_encod, delta_l_encod, delta_r_encod)
+        else: #we are "stopped"
+            l_motor,r_motor = 0, 0
+            return l_motor, r_motor
+        
+        #update state
+        if saw_red:
+            if not instructions: #no more instructions, we are done
+                self.control_type = 2
+                return l_motor, r_motor
+            if saw_green:
+                self.control_type = 1
+                self.instruction = instructions.pop(0)
+                self.prev_hug = self.hug
+                self.hug = 0 #TODO
+            stop
+            pass
+        elif done:
+            self.control_type = 1
+
+        return l_motor, r_motor
+
+debug_mode = False
 
 # connect to the open serial port
 ports = [p[0] for p in get_serial_ports()]
@@ -28,56 +78,108 @@ if len(ports) == 0:
 ser = Serial(port=ports[0], baudrate=115200)
 ser.flushInput()
 
-#ser.close()
 
 last_write = time()
-start_time = 0
 received_first_message = False
 
-# Previous motor PWM values
-l_motor_prev = 0 
-r_motor_prev = 0
+# Previous motor PWM values (initialized to an estimate, to avoid buggy startup behavior)
+l_motor = 0
+l_motor_prev = convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT)
+r_motor = 0
+r_motor_prev = convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT)
 
-# Previous encoder tick values
+# Encoder tick values
+l_encod = 0
 l_encod_prev = 0 
+r_encod = 0
 r_encod_prev = 0
-
-#IDEA: to resume after error mid-run, have the option of running the controller.py
-#script with a file. When you run with CLI, you input a path and on Ctrl+C the path and
-#current position is writen to an output file. Then we can reposition the bot and run:
-# ">python controller.py progress.txt" to pick back where we left off.
 
 # Get the user input path
 path_input = input("Enter a list of nodes to traverse:")
 instructions, full_path = plan_path(path_input)
+# Instantiate our controller
+cont = Controller(instructions, full_path)
 
-# This variable will hold the last node we successfully reached
-current_node = full_path[0]
-
-# TODO: MORE SETUP
-
-# Okay, setup is done. Here are some helper functions which handle the heavy lifting:
-def waitForGreen():
-    #Don't care how you do it, just wait for a green light
-    return
-
-def traverseIntersection(instruction, ser):
-    #Somehow, get across that intersection
-    return
-
-def traverseStraightaway(instruction, ser):
-    #TODO
-    return
-
-def write_motors(left_motor, right_motor, ser):
-        global last_write, l_motor_prev, r_motor_prev
-        last_write = time()
-        to_write = struct.pack('hhc', int(left_motor), int(right_motor), b'A')
-        ser.write(to_write)
-        l_motor_prev, r_motor_prev = left_motor, right_motor
-        return
+# These variables will hold the incoming serial data
+bytes_buffer = b""
+buffer_i = 0
 
 # Now, time for the control-loop:
+while True:
+    try:
+        if ser.in_waiting > 0:
+            new_byte = ser.read()
+            # wait until we have recieved consecutive data
+            # in the format: [DEADxxxxxxxxCAFE]
+            if len(bytes_buffer) == 0 and new_byte != b'\xde':
+                bytes_buffer = b""
+                continue
+            if len(bytes_buffer) == 1 and new_byte != b'\xad':
+                bytes_buffer = b""
+                continue
+            if len(bytes_buffer) == 6 and new_byte != b'\xca':
+                bytes_buffer = b""
+                continue
+            if len(bytes_buffer) == 7 and new_byte != b'\xfe':
+                bytes_buffer = b""
+                continue
+            #accept this byte as valid
+            bytes_buffer += new_byte
+
+            if len(bytes_buffer) == 8:
+                # extract the encoder values
+                l_encod, r_encod = struct.unpack('<hh', bytes_buffer[2:6])
+                bytes_buffer = b""
+
+                if not received_first_message:
+                    start_time = time()
+                    l_encod_prev, r_encod_prev = l_encod, r_encod
+                    t_prev = 0
+                    received_first_message = True
+
+                t = time() - start_time
+                delta_t = t - t_prev
+                t_prev = t
+
+                # compute the encoder deltas
+                delta_l_encod = l_encod - l_encod_prev
+                delta_r_encod = r_encod - r_encod_prev
+
+                # ask the controller what to do
+                l_motor, r_motor = cont.compute_motor_values(t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev)
+                
+                # do what the controller said to do
+                to_write = struct.pack('hhc', int(l_motor), int(r_motor), b'A')
+                ser.write(to_write)
+                last_write = time()
+                
+                # now, the current values are the previous
+                l_motor_prev = l_motor
+                l_motor_prev = r_motor
+                l_encod_prev = l_encod
+                r_encod_prev = r_encod
+
+            else:
+                if time() - last_write > 0.01:
+                    to_write = struct.pack('hhc', int(l_motor_prev), int(r_motor_prev), b'A')
+                    ser.write(to_write)
+                    last_write = time()
+                    sleep(0.01)
+        pass
+    except KeyboardInterrupt:
+        print('Interrupted with ctrl+c')
+        try:
+            cam.should_stop = True
+            to_write = struct.pack('hhc', 0, 0, b'A')
+            ser.write(to_write)
+            ser.close()
+            break
+        except SystemExit:
+            break
+#Clean-up
+ser.close()
+
+
 
 # While we still have work to do
 while instructions:
@@ -111,81 +213,7 @@ while instructions:
 
 
 
-#gutted old-code: (still picking this apart)
-'''
-    bytes_buffer = b""
-    buffer_i = 0
-    with tqdm(desc="serial") as pbar:
-        while True:
-            try:
-                if ser.in_waiting > 0:
-                    new_byte = ser.read()
-                    #print(bytes_buffer, " -> ", len(bytes_buffer))
-                    # wait until we have recieved consecutive data
-                    # in the format: [DEADxxxxxxxxCAFE]
-                    if len(bytes_buffer) == 0 and new_byte != b'\xde':
-                        bytes_buffer = b""
-                        continue
-                    if len(bytes_buffer) == 1 and new_byte != b'\xad':
-                        bytes_buffer = b""
-                        continue
-                    if len(bytes_buffer) == 6 and new_byte != b'\xca':
-                        bytes_buffer = b""
-                        continue
-                    if len(bytes_buffer) == 7 and new_byte != b'\xfe':
-                        bytes_buffer = b""
-                        continue
-
-                    bytes_buffer += new_byte
-
-                    if len(bytes_buffer) == 8:
-                        # extract the encoder values
-                        left_encoder, right_encoder = struct.unpack('<hh', bytes_buffer[2:6])
-                        if debug_mode:
-                            print("arduino->pi encoder values (l,r): ", "(", left_encoder, ") (" , right_encoder,")")
-                            # print("arduino->pi {:08b}".format(int(bytes_buffer.hex(),16)))
-                        bytes_buffer = b""
-
-                        if not received_first_message:
-                            start_time = time()
-                            left_encoder_previous_value, right_encoder_previous_value = left_encoder, right_encoder
-                            left_motor_prev, right_motor_prev = convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT), convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT)
-                            prev_t = 0
-                            received_first_message = True
-
-                        t = time() - start_time
-                        delta_t = t - prev_t
-                        prev_t = t
-
-                        # compute the encoder deltas
-                        delta_left_encoder = left_encoder - left_encoder_previous_value
-                        delta_right_encoder = right_encoder - right_encoder_previous_value
-
-                        # ask the controller what to do
-                        # print("{: >20}{}".format("left_motor_prev",left_motor_prev))
-                        # print("{: >20}{}".format("right_motor_prev",right_motor_prev))
-                        left_motor, right_motor = compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev, turn_direction)
-                        left_encoder_previous_value, right_encoder_previous_value = left_encoder, right_encoder
+                    
 
 
-                        # do what the controller said to do
-                        write_motors(left_motor, right_motor)
-
-                        # pbar.update()  # only to measure communication delay
-
-                else:
-                    curr_time = time()
-                    if curr_time - last_write > 0.01:
-                        # write_motors(0, 0)
-                        write_motors(left_motor_prev, right_motor_prev)
-                        sleep(0.01)
-
-            except KeyboardInterrupt:
-                print('Interrupted with ctrl+c')
-                try:
-                    cam.should_stop = True
-                    write_motors(0, 0)
-                    break
-                except SystemExit:
-                    break
-'''
+            
