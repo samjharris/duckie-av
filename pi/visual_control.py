@@ -159,7 +159,7 @@ def clear_visual_globals():
 prev_t = 0
 prev_encoder_sum = 0
 
-def compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev, turn_direction):
+def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev, turn_direction):
     global stopping, adjusted_speed, prev_t, prev_encoder_sum
 
     PWM_l, PWM_r = 0, 0
