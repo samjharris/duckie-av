@@ -127,7 +127,7 @@ def get_pixel_error_from_image(frame, turn_direction):
         print("{:>22} : {}".format("saw_red", saw_red))
         print("="*30)
 
-    return (error, saw_red)
+    return (error, saw_red, SAW_GREEN)
 
 
 if __name__ == "__main__":
