@@ -12,7 +12,9 @@ import struct
 from time import sleep, time
 from tqdm import tqdm
 from numpy import int32, float64
-from visual_control import compute_motor_values, convert_vel_to_PWM, cam
+# from visual_control import compute_motor_values, convert_vel_to_PWM, cam
+from visual_control import convert_vel_to_PWM, cam
+from open_loop import compute_motor_values
 
 debug_mode = False
 turn_direction = TURN_DIRECTION
