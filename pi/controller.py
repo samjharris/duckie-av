@@ -17,7 +17,7 @@ from path_planner import plan_path
 class Controller():
     def __init__(self, instructions, full_path):
         #Control type: 0 for visual, 1 for open, 2 for stopped
-        self.control_type == 1 #start in open
+        self.control_type == 0 #start in visual (we will see red), then wait for geen
         
         self.instructions = instructions
         self.full_path = full_path
