@@ -17,7 +17,7 @@ from path_planner import plan_path
 class Controller():
     def __init__(self, instructions, full_path):
         #Control type: 0 for visual, 1 for open, 2 for stopped
-        self.control_type == CONTROL_VISUAL #start in visual (we will see red), then wait for geen
+        self.control_type = CONTROL_VISUAL #start in visual (we will see red), then wait for geen
         
         self.instructions = instructions
         self.full_path = full_path
@@ -57,9 +57,9 @@ class Controller():
                 self.control_type = CONTROL_OPEN
                 self.instruction = instructions.pop(0)
                 self.prev_hug = self.hug
-                if self.instruction == 'R':
+                if self.instruction == TURN_R:
                     self.hug = HUG_YELLOW #Right, hug yellow
-                elif self.instruction == 'L':
+                elif self.instruction == TURN_L:
                     self.hug = HUG_WHITE #Left, hug white
                 else:
                     self.hug = self.prev_hug #Straight, hug the same as before
@@ -131,12 +131,8 @@ if __name__ == "__main__":
                 if len(bytes_buffer) == 10:
                     # extract the encoder values
                     # extract the encoder values, and ping_distance (0 means nothing detected)
-                    left_encoder, right_encoder, ping_distance = 
                     
                     l_encod, r_encod, ping_distance = struct.unpack('<hhh', bytes_buffer[2:8])
-                    if debug_mode:
-                        print("arduino->pi encoder values (l,r): ", "(", left_encoder, ") (" , right_encoder,") (", ping_distance, ")")
-                        # print("arduino->pi {:08b}".format(int(bytes_buffer.hex(),16)))
                     bytes_buffer = b""
 
                     if not received_first_message:
