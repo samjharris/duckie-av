@@ -31,7 +31,7 @@ class Controller():
         #self.cur_node = full_path[0]
         #self.nxt_node = full_path[1]
 
-    def computer_motor_values(self, t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev):
+    def compute_motor_values(self, t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev):
         l_motor = 0
         r_motor = 0 
         
