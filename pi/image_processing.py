@@ -15,6 +15,7 @@ import numpy as np
 crop_percentage = 0.05
 down_sample_steps = 8
 min_percentage_red_threshold = 0.5  # TODO: tune this value
+min_percentage_green_threshold = 0.01 #TODO: tune this value
 
 parent_dir = os.path.dirname(os.getcwd())
 image_path = os.path.join(parent_dir, 'test_road_images/')
@@ -40,22 +41,25 @@ def get_pixel_error_from_image(frame, hug):
     # crop a horizontal strip from the center
     # rgb_strip = frame[height//2-int(height*crop_percentage):height//2+int(height*crop_percentage), ::down_sample_steps , :]
     rgb_strip = frame[height//2 + STRIP_LOCATION*int(height*crop_percentage):height//2+(STRIP_LOCATION + 2) * int(height*crop_percentage), ::down_sample_steps , :]
+    gLED_strip = frame[height//2 + 4*int(height*crop_percentage):height//2+(4 + 5) * int(height*crop_percentage), 100:540 , :]
+    gLED_strip = gLED_strip[::2,::2,:]
+
 
     # convert the strip to hsv
     hsv_strip = np.array(Image.fromarray(rgb_strip).convert('HSV'))
-
+    gLED_strip_hsv = np.array(Image.fromarray(gLED_strip).convert('HSV'))
 
     white_mask = is_white_vectorized(hsv_strip)
     yellow_mask = is_yellow_vectorized(hsv_strip)
     red_mask = is_red_vectorized(hsv_strip)
-    green_mask = is_green_vectorized(hsv_strip)
+    green_mask = (is_green_vectorized(gLED_strip_hsv))
 
 
     if DEBUG_INFO_ON:
         yellow_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
         white_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
         red_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
-        green_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
+        green_strip = np.zeros((gLED_strip_hsv.shape[0],gLED_strip_hsv.shape[1]), dtype=hsv_strip.dtype)
 
         # write images to files for debugging (turn off when not debugging)
         white_strip[white_mask] = 255
@@ -88,11 +92,16 @@ def get_pixel_error_from_image(frame, hug):
     percentage_white = np.sum(white_mask) / np.prod(white_mask.shape)
     percentage_yellow = np.sum(yellow_mask) / np.prod(yellow_mask.shape)
     percentage_red = np.sum(red_mask) / np.prod(red_mask.shape)
+    percentage_green = np.sum(green_mask)/np.prod(green_mask.shape)
     
     saw_red = percentage_red > min_percentage_red_threshold
     saw_white = (whi_edge != 0) and percentage_white > 0.01
     saw_yellow = (yel_edge != len(yel_col_sum)-1) and percentage_yellow > 0.01
-
+    if saw_red:
+        saw_green = percentage_green > min_percentage_green_threshold
+    else:
+        saw_green = False
+        
     image_center = white_mask.shape[1] // 2
 
     if hug == HUG_WHITE:
@@ -125,6 +134,7 @@ def get_pixel_error_from_image(frame, hug):
         print("{:>22} : {}".format("lane_center", lane_center))
         print("{:>22} : {}".format("error", error))
         print("{:>22} : {}".format("saw_red", saw_red))
+        print("{:>22} : {}".format("saw_green", saw_green))
         print("="*30)
 
     return (error, saw_red, SAW_GREEN)
