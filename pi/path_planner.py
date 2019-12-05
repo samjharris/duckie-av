@@ -3,23 +3,24 @@
 # path_planner.py:
 # plans paths using BFS.
 
+from config import TURN_L, TURN_R, TURN_S
 
 #graph key: node 1 = n01, node 2 = n02, etc. 
 #           "R" = right turn at intersection
 #           "L" = left turn at intersection
 #           "S" = straight at intersection
-graph = { "n01" : [["n04","L"],["n12","S"]], #e.g.: from n01, we can go
-          "n02" : [["n04","R"],["n08","S"]],     # 'L' to get to n04 or
-          "n03" : [["n12","L"],["n08","R"]],     # 'S' to get to n12
-          "n04" : [["n07","L"],["n11","R"]],
-          "n05" : [["n03","L"],["n07","S"]],
-          "n06" : [["n03","R"],["n11","S"]],
-          "n07" : [["n10","S"],["n01","L"]],
-          "n08" : [["n10","L"],["n06","R"]],
-          "n09" : [["n01","R"],["n06","S"]],
-          "n10" : [["n02","L"],["n05","S"]],
-          "n11" : [["n02","R"],["n09","S"]],
-          "n12" : [["n05","L"],["n09","R"]]
+graph = { "n01" : [["n04",TURN_L],["n12",TURN_S]], #e.g.: from n01, we can go
+          "n02" : [["n04",TURN_R],["n08",TURN_S]],     # 'L' to get to n04 or
+          "n03" : [["n12",TURN_L],["n08",TURN_R]],     # 'S' to get to n12
+          "n04" : [["n07",TURN_L],["n11",TURN_R]],
+          "n05" : [["n03",TURN_L],["n07",TURN_S]],
+          "n06" : [["n03",TURN_R],["n11",TURN_S]],
+          "n07" : [["n10",TURN_S],["n01",TURN_L]],
+          "n08" : [["n10",TURN_L],["n06",TURN_R]],
+          "n09" : [["n01",TURN_R],["n06",TURN_S]],
+          "n10" : [["n02",TURN_L],["n05",TURN_S]],
+          "n11" : [["n02",TURN_R],["n09",TURN_S]],
+          "n12" : [["n05",TURN_L],["n09",TURN_R]]
         }
 
 #function input_helper
@@ -31,10 +32,9 @@ graph = { "n01" : [["n04","L"],["n12","S"]], #e.g.: from n01, we can go
 #
 #just a simple function to parse our input
 def input_helper(nodes):
-
-    #TODO: parse input into a list
-    nodes_list = nodes #sample path
-    if(nodes_list < 2):
+    #Currently assumes input such as the string: "n01 n02 n03"
+    nodes_list = nodes.split(" ")
+    if(len(nodes_list) < 2):
         print("You have already arrived at your destination. Try adding a longer path")
         exit()
     return nodes_list
