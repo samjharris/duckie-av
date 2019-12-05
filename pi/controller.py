@@ -129,10 +129,7 @@ if __name__ == "__main__":
                 bytes_buffer += new_byte
 
                 if len(bytes_buffer) == 10:
-                    # extract the encoder values
                     # extract the encoder values, and ping_distance (0 means nothing detected)
-                    left_encoder, right_encoder, ping_distance = 
-                    
                     l_encod, r_encod, ping_distance = struct.unpack('<hhh', bytes_buffer[2:8])
                     if debug_mode:
                         print("arduino->pi encoder values (l,r): ", "(", left_encoder, ") (" , right_encoder,") (", ping_distance, ")")
