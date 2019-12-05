@@ -103,11 +103,11 @@ def clear_visual_globals():
 prev_t = 0
 prev_encoder_sum = 0
 
-def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev, turn_direction, cam):
+def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev, hug, cam):
     global stopping, adjusted_speed, prev_t, prev_encoder_sum
 
     PWM_l, PWM_r = 0, 0
-    lane_error_pix, stop_marker_seen, saw_green = cam.get_error(turn_direction)
+    lane_error_pix, saw_red, saw_green = cam.get_error(hug)
 
     # print("left_encoder", left_encoder)
     # print("right_encoder", right_encoder)
@@ -144,39 +144,14 @@ def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_l
     # PWM_l_prev, PWM_r_prev = convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT), convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT)
     PWM_l_prev, PWM_r_prev = convert_vel_to_PWM(adjusted_speed), convert_vel_to_PWM(adjusted_speed)
 
-    if stop_marker_seen or stopping:
-        if DEBUG_INFO_ON:
-            print("Stopping On Red")
-            print("{:>22} : {}".format("lane_error_pix", lane_error_pix))
-            print("{:>22} : {}".format("dt", delta_t))
-            print("{:>22} : {}".format("stop_marker_seen", stop_marker_seen))
-            print("{:>22} : {}".format("PWM_l_prev", PWM_l_prev))
-            print("{:>22} : {}".format("PWM_r_prev", PWM_r_prev))
-            print("{:>22} : {}".format("PWM_l", PWM_l))
-            print("{:>22} : {}".format("PWM_r", PWM_r))
-            print("="*30)
 
-        # TODO: may need to stop more suddenly for the green LEDs
-        # PWM_l = convert_vel_to_PWM(convert_PWM_to_vel(PWM_l_prev) / 2)
-        # PWM_r = convert_vel_to_PWM(convert_PWM_to_vel(PWM_r_prev) / 2)
-        stopping = True
-
-        PWM_l = 0
-        PWM_r = 0
-
-        if saw_green:
-            ## If we want to pass right through the easiest way is to reuse the previous values
-            return left_motor_prev, right_motor_prev, True
-        else:
-            return PWM_l, PWM_r, False
-
-    PWM_l, PWM_r = get_PWMs_from_visual(lane_error_pix, delta_t, PWM_l_prev, PWM_r_prev, turn_direction)
+    PWM_l, PWM_r = get_PWMs_from_visual(lane_error_pix, delta_t, PWM_l_prev, PWM_r_prev, hug)
 
     # make sure that we send something valid to the motors
     PWM_l = np.clip(PWM_l, -400, 400)
     PWM_r = np.clip(PWM_r, -400, 400)
 
-    return PWM_l, PWM_r, False
+    return PWM_l, PWM_r, saw_red, saw_green
 
 
 def test():

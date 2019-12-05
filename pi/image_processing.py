@@ -34,7 +34,7 @@ def is_green_vectorized(hsv_image):
     return (hsv_image[:,:,2] >= 100) & (60 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 170)
 
 
-def get_pixel_error_from_image(frame, turn_direction):
+def get_pixel_error_from_image(frame, hug):
     height, width, depth = frame.shape
 
     # crop a horizontal strip from the center
@@ -95,7 +95,7 @@ def get_pixel_error_from_image(frame, turn_direction):
 
     image_center = white_mask.shape[1] // 2
 
-    if turn_direction == "left":
+    if hug == HUG_WHITE:
         if saw_white:
             lane_center = whi_edge - WHITE_OFFSET_PIX
         elif not saw_white and saw_yellow:
