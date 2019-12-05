@@ -9,8 +9,11 @@ from config import *
 import numpy as np
 from collections import deque
 from time import sleep
+from camera import Camera
 
 sleep(2)
+
+cam = Camera()
 
 adjusted_speed = 0
 

@@ -11,64 +11,63 @@ from serial.tools.list_ports import comports as get_serial_ports
 import struct
 from time import time, sleep
 from visual_control import visual_compute_motor_values, convert_vel_to_PWM
-from camera import Camera
+#from camera import Camera
 from open_control import open_compute_motor_values
 from path_planner import plan_path
 
-# class Controller():
-#     def __init__(self, instructions, full_path):
-#         #Control type: 0 for visual, 1 for open, 2 for stopped
-#         self.control_type = CONTROL_VISUAL #start in visual (we will see red), then wait for geen
+class Controller():
+    def __init__(self, instructions, full_path):
+        #Control type: 0 for visual, 1 for open, 2 for stopped
+        self.control_type = CONTROL_VISUAL #start in visual (we will see red), then wait for geen
         
-#         self.instructions = instructions
-#         self.full_path = full_path
+        self.instructions = instructions
+        self.full_path = full_path
 
-#         # turn_type: 'L' for left, 'R' for right, 'S' for straight
-#         self.instruction = self.instructions.pop(0)
-#         # hug: 0 for white, 1 for yellow
-#         self.hug = HUG_WHITE
-#         # prev_hug: 0 for white, 1 for yellow
-#         self.prev_hug = HUG_WHITE
-#         #self.cur_node = full_path[0]
-#         #self.nxt_node = full_path[1]
-#         self.cam = Camera()
+        # turn_type: 'L' for left, 'R' for right, 'S' for straight
+        self.instruction = self.instructions.pop(0)
+        # hug: 0 for white, 1 for yellow
+        self.hug = HUG_WHITE
+        # prev_hug: 0 for white, 1 for yellow
+        self.prev_hug = HUG_WHITE
+        #self.cur_node = full_path[0]
+        #self.nxt_node = full_path[1]
 
-#     def computer_motor_values(self, t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev):
-#         l_motor = 0
-#         r_motor = 0 
+    def computer_motor_values(self, t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev):
+        l_motor = 0
+        r_motor = 0 
         
-#         saw_red = False
-#         saw_green = False
-#         done = False
+        saw_red = False
+        saw_green = False
+        done = False
 
-#         #compute motor values
-#         if(self.control_type == CONTROL_VISUAL): #visual control
-#             l_motor,r_motor,saw_red,saw_green = visual_compute_motor_values(t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev, self.hug, self.cam)
-#         elif(self.control_type == CONTROL_OPEN): #open-loop control
-#             l_motor,r_motor,done = open_compute_motor_values(self.prev_hug, self.instruction, delta_l_encod, delta_r_encod)
-#         else: #self.control_type == CONTROL_STOP we are "stopped"
-#             l_motor,r_motor = 0, 0
-#             return l_motor, r_motor
+        #compute motor values
+        if(self.control_type == CONTROL_VISUAL): #visual control
+            l_motor,r_motor,saw_red,saw_green = visual_compute_motor_values(t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev, self.hug, self.cam)
+        elif(self.control_type == CONTROL_OPEN): #open-loop control
+            l_motor,r_motor,done = open_compute_motor_values(self.prev_hug, self.instruction, delta_l_encod, delta_r_encod)
+        else: #self.control_type == CONTROL_STOP we are "stopped"
+            l_motor,r_motor = 0, 0
+            return l_motor, r_motor
         
-#         #update state
-#         if saw_red:
-#             if not instructions: #no more instructions, we are done
-#                 self.control_type = CONTROL_STOP
-#                 return l_motor, r_motor
-#             if saw_green:
-#                 self.control_type = CONTROL_OPEN
-#                 self.instruction = instructions.pop(0)
-#                 self.prev_hug = self.hug
-#                 if self.instruction == TURN_R:
-#                     self.hug = HUG_YELLOW #Right, hug yellow
-#                 elif self.instruction == TURN_L:
-#                     self.hug = HUG_WHITE #Left, hug white
-#                 else:
-#                     self.hug = self.prev_hug #Straight, hug the same as before
-#         elif done:
-#             self.control_type = CONTROL_VISUAL
+        #update state
+        if saw_red:
+            if not instructions: #no more instructions, we are done
+                self.control_type = CONTROL_STOP
+                return l_motor, r_motor
+            if saw_green:
+                self.control_type = CONTROL_OPEN
+                self.instruction = instructions.pop(0)
+                self.prev_hug = self.hug
+                if self.instruction == TURN_R:
+                    self.hug = HUG_YELLOW #Right, hug yellow
+                elif self.instruction == TURN_L:
+                    self.hug = HUG_WHITE #Left, hug white
+                else:
+                    self.hug = self.prev_hug #Straight, hug the same as before
+        elif done:
+            self.control_type = CONTROL_VISUAL
 
-#         return l_motor, r_motor
+        return l_motor, r_motor
 
 if __name__ == "__main__":
     # connect to the open serial port
@@ -103,7 +102,7 @@ if __name__ == "__main__":
         path_input = "n01 n02"
         instructions, full_path = plan_path(path_input)
         # Instantiate our controller
-        # cont = Controller(instructions, full_path)
+        cont = Controller(instructions, full_path)
 
         # These variables will hold the incoming serial data
         bytes_buffer = b""
@@ -152,8 +151,8 @@ if __name__ == "__main__":
                         delta_r_encod = r_encod - r_encod_prev
 
                         # ask the controller what to do
-                        # l_motor, r_motor = cont.compute_motor_values(t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev)
-                        l_motor,r_motor,done = open_compute_motor_values(HUG_WHITE, "left", delta_l_encod, delta_r_encod)
+                        l_motor, r_motor = cont.compute_motor_values(t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev)
+                        #l_motor,r_motor,done = open_compute_motor_values(HUG_WHITE, "left", delta_l_encod, delta_r_encod)
                         
                         # do what the controller said to do
                         to_write = struct.pack('hhc', int(l_motor), int(r_motor), b'A')

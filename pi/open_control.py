@@ -21,15 +21,15 @@ def open_compute_motor_values(prev_hug, traversal_type, delta_l_encoder, delta_r
 
     # set parameters
     # TODO convert to 2, 0, 1
-    if traversal_type == "straight":
+    if traversal_type == TURN_S:
         straight_goal = STRAIGHT_DIST
         turn_goal = 0
 
-    if traversal_type == "left":
+    if traversal_type == TURN_L:
         straight_goal = LEFT_TURN_DIST
         turn_goal = QUARTER_TURN
     
-    if traversal_type == "right":
+    if traversal_type == TURN_R:
         straight_goal = DIST_FROM_STOP_LINE
         turn_goal = QUARTER_TURN
 
@@ -47,7 +47,7 @@ def open_compute_motor_values(prev_hug, traversal_type, delta_l_encoder, delta_r
     
     # if we have gone straight far enough turn
     if dist_turned < turn_goal:
-        if traversal_type == "left":
+        if traversal_type == TURN_L:
             return pwm, 0, False
         else:
             return 0, pwm, False
