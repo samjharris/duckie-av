@@ -23,7 +23,7 @@ class Controller():
         self.full_path = full_path
 
         # turn_type: 'L' for left, 'R' for right, 'S' for straight
-        self.instruction = self.instructions.pop(0)
+        self.instruction = TURN_R #Magic turn
         # hug: 0 for white, 1 for yellow
         self.hug = HUG_WHITE
         # prev_hug: 0 for white, 1 for yellow
