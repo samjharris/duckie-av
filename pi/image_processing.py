@@ -99,6 +99,8 @@ def get_pixel_error_from_image(frame, hug):
     saw_yellow = (yel_edge != len(yel_col_sum)-1) and percentage_yellow > 0.01
     if saw_red:
         saw_green = percentage_green > min_percentage_green_threshold
+        if DEBUG_INFO_ON:
+            print(saw_green)
     else:
         saw_green = False
         
@@ -121,21 +123,21 @@ def get_pixel_error_from_image(frame, hug):
 
     error = lane_center - image_center
 
-    if DEBUG_INFO_ON:
-        print("Image Processing")
-        print("{:>22} : {}".format("percentage_white", percentage_white))
-        print("{:>22} : {}".format("percentage_yellow", percentage_yellow))
-        print("{:>22} : {}".format("percentage_red", percentage_red))
-        print("{:>22} : {}".format("saw_white", saw_white))
-        print("{:>22} : {}".format("saw_yellow", saw_yellow))
-        print("{:>22} : {}".format("yel_edge", yel_edge))
-        print("{:>22} : {}".format("whi_edge", whi_edge))
-        print("{:>22} : {}".format("image_center", image_center))
-        print("{:>22} : {}".format("lane_center", lane_center))
-        print("{:>22} : {}".format("error", error))
-        print("{:>22} : {}".format("saw_red", saw_red))
-        print("{:>22} : {}".format("saw_green", saw_green))
-        print("="*30)
+    # if DEBUG_INFO_ON:
+    #     print("Image Processing")
+    #     print("{:>22} : {}".format("percentage_white", percentage_white))
+    #     print("{:>22} : {}".format("percentage_yellow", percentage_yellow))
+    #     print("{:>22} : {}".format("percentage_red", percentage_red))
+    #     print("{:>22} : {}".format("saw_white", saw_white))
+    #     print("{:>22} : {}".format("saw_yellow", saw_yellow))
+    #     print("{:>22} : {}".format("yel_edge", yel_edge))
+    #     print("{:>22} : {}".format("whi_edge", whi_edge))
+    #     print("{:>22} : {}".format("image_center", image_center))
+    #     print("{:>22} : {}".format("lane_center", lane_center))
+    #     print("{:>22} : {}".format("error", error))
+    #     print("{:>22} : {}".format("saw_red", saw_red))
+    #     print("{:>22} : {}".format("saw_green", saw_green))
+    #     print("="*30)
 
     return (error, saw_red, SAW_GREEN)
 
