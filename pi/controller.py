@@ -66,20 +66,20 @@ with Serial(port=ports[0], baudrate=115200) as ser:
                     if len(bytes_buffer) == 1 and new_byte != b'\xad':
                         bytes_buffer = b""
                         continue
-                    if len(bytes_buffer) == 6 and new_byte != b'\xca':
+                    if len(bytes_buffer) == 8 and new_byte != b'\xca':
                         bytes_buffer = b""
                         continue
-                    if len(bytes_buffer) == 7 and new_byte != b'\xfe':
+                    if len(bytes_buffer) == 9 and new_byte != b'\xfe':
                         bytes_buffer = b""
                         continue
 
                     bytes_buffer += new_byte
 
                     if len(bytes_buffer) == 8:
-                        # extract the encoder values
-                        left_encoder, right_encoder = struct.unpack('<hh', bytes_buffer[2:6])
+                        # extract the encoder values, and ping_distance (0 means nothing detected)
+                        left_encoder, right_encoder, ping_distance = struct.unpack('<hhh', bytes_buffer[2:8])
                         if debug_mode:
-                            print("arduino->pi encoder values (l,r): ", "(", left_encoder, ") (" , right_encoder,")")
+                            print("arduino->pi encoder values (l,r): ", "(", left_encoder, ") (" , right_encoder,") (", ping_distance, ")")
                             # print("arduino->pi {:08b}".format(int(bytes_buffer.hex(),16)))
                         bytes_buffer = b""
 

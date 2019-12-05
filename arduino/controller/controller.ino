@@ -123,7 +123,7 @@ void loop() {
   if(count % 30 == 0) { // check every 30th time
     chirp();
     pinMode(PING_PIN, INPUT);
-    ping_duration = pulseIn(PING_PIN, HIGH, 3500);
+    ping_duration = pulseIn(PING_PIN, HIGH, 4000);
     ping_distance = ping_duration / 29 / 2;
     bool did_timeout = (ping_duration == 0);
     bool is_close = (ping_distance <= DISTANCE_THRESHOLD);
