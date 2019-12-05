@@ -130,9 +130,8 @@ if __name__ == "__main__":
                 bytes_buffer += new_byte
 
                 if len(bytes_buffer) == 10:
-                    # extract the encoder values
                     # extract the encoder values, and ping_distance (0 means nothing detected)
-                    
+
                     l_encod, r_encod, ping_distance = struct.unpack('<hhh', bytes_buffer[2:8])
                     bytes_buffer = b""
 
