@@ -17,17 +17,17 @@ from path_planner import plan_path
 class Controller():
     def __init__(self, instructions, full_path):
         #Control type: 0 for visual, 1 for open, 2 for stopped
-        self.control_type == 0 #start in visual (we will see red), then wait for geen
+        self.control_type == CONTROL_VISUAL #start in visual (we will see red), then wait for geen
         
         self.instructions = instructions
         self.full_path = full_path
 
-        # turn_type: 0 for left, 1 for right, 2 for straight
+        # turn_type: 'L' for left, 'R' for right, 'S' for straight
         self.instruction = self.instructions.pop(0)
         # hug: 0 for white, 1 for yellow
-        self.hug = 0
+        self.hug = HUG_WHITE
         # prev_hug: 0 for white, 1 for yellow
-        self.prev_hug = 0
+        self.prev_hug = HUG_WHITE
         #self.cur_node = full_path[0]
         #self.nxt_node = full_path[1]
 
@@ -39,30 +39,32 @@ class Controller():
         saw_green = False
         done = False
 
-        #compute motor valuesS
-        if(self.control_type == 0): #visual control
+        #compute motor values
+        if(self.control_type == CONTROL_VISUAL): #visual control
             l_motor,r_motor,saw_red,saw_green = visual_compute_motor_values(t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev, self.hug)
-        elif(self.control_type == 1): #open-loop control
+        elif(self.control_type == CONTROL_OPEN): #open-loop control
             l_motor,r_motor,done = open_compute_motor_values(self.prev_hug, self.instruction, delta_l_encod, delta_r_encod)
-        else: #we are "stopped"
+        else: #self.control_type == CONTROL_STOP we are "stopped"
             l_motor,r_motor = 0, 0
             return l_motor, r_motor
         
         #update state
         if saw_red:
             if not instructions: #no more instructions, we are done
-                self.control_type = 2
+                self.control_type = CONTROL_STOP
                 return l_motor, r_motor
             if saw_green:
-                self.control_type = 1
+                self.control_type = CONTROL_OPEN
                 self.instruction = instructions.pop(0)
                 self.prev_hug = self.hug
-                if self.instruction == "R": #TODO: check for correctness
-                    self.hug = 1 #Right, hug yellow
+                if self.instruction == 'R':
+                    self.hug = HUG_YELLOW #Right, hug yellow
+                elif self.instruction == 'L':
+                    self.hug = HUG_WHITE #Left, hug white
                 else:
-                    self.hug = 0 #Left or straight, hug white
+                    self.hug = self.prev_hug #Straight, hug the same as before
         elif done:
-            self.control_type = 0
+            self.control_type = CONTROL_VISUAL
 
         return l_motor, r_motor
 
