@@ -11,9 +11,10 @@ from collections import deque
 from time import sleep
 from camera import Camera
 
-sleep(2)
 
 cam = Camera()
+
+sleep(2)
 
 adjusted_speed = 0
 
@@ -103,8 +104,8 @@ def clear_visual_globals():
 prev_t = 0
 prev_encoder_sum = 0
 
-def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev, hug, cam):
-    global stopping, adjusted_speed, prev_t, prev_encoder_sum
+def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev, hug):
+    global stopping, adjusted_speed, prev_t, prev_encoder_sum, cam
 
     PWM_l, PWM_r = 0, 0
     lane_error_pix, saw_red, saw_green = cam.get_error(hug)

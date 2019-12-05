@@ -47,6 +47,6 @@ class Camera():
 
     def get_error(self, turn_direction):
         if self.cur_frame is None:
-            return 0, True
+            return 0, True, False
         cur_error, saw_red, saw_green = get_pixel_error_from_image(self.cur_frame, turn_direction)
-        return cur_error, saw_red
+        return cur_error, saw_red, saw_green
