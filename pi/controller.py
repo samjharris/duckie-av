@@ -97,7 +97,8 @@ if __name__ == "__main__":
     r_encod_prev = 0
 
     # Get the user input path
-    path_input = input("Enter a list of nodes to traverse:")
+    # path_input = input("Enter a list of nodes to traverse:")
+    path_input = "n01 n02"
     instructions, full_path = plan_path(path_input)
     # Instantiate our controller
     cont = Controller(instructions, full_path)
@@ -150,7 +151,8 @@ if __name__ == "__main__":
                     delta_r_encod = r_encod - r_encod_prev
 
                     # ask the controller what to do
-                    l_motor, r_motor = cont.compute_motor_values(t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev)
+                    # l_motor, r_motor = cont.compute_motor_values(t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev)
+                    l_motor,r_motor,done = open_compute_motor_values(HUG_WHITE, "left", delta_l_encod, delta_r_encod)
                     
                     # do what the controller said to do
                     to_write = struct.pack('hhc', int(l_motor), int(r_motor), b'A')

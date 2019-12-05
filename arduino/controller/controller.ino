@@ -25,7 +25,7 @@ volatile long last_update_right;
 //PING sensor variables
 volatile short ping_duration = 0;
 volatile short ping_distance = 0;
-bool halting = false;
+// bool halting = false;
 int count = 0;
 
 // used for serial communication
@@ -39,6 +39,7 @@ union ShortsOrBytes
 };
 char motorBufferIndex = 0;
 char motorBuffer[4];
+// TODO: eliminate this
 char encoderBuffer[10];
 
 
@@ -127,11 +128,11 @@ void loop() {
     ping_distance = ping_duration / 29 / 2;
     bool did_timeout = (ping_duration == 0);
     bool is_close = (ping_distance <= DISTANCE_THRESHOLD);
-    if(is_close && !did_timeout){
-      halting = true;
-    } else {
-      halting = false;
-    }
+    // if(is_close && !did_timeout){
+    //   halting = true;
+    // } else {
+    //   halting = false;
+    // }
 
     // Serial.print(0);
     // Serial.print("\t");
@@ -148,7 +149,8 @@ void loop() {
   // }
   
   // receive motor commands
-  if(Serial.available() && !halting) {
+  // if(Serial.available() && !halting) {
+  if(Serial.available()) {
     char newChar = Serial.read();
 
     // read in motor command bytes
