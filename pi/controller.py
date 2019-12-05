@@ -11,7 +11,7 @@ from serial.tools.list_ports import comports as get_serial_ports
 import struct
 from time import time, sleep
 from visual_control import visual_compute_motor_values, convert_vel_to_PWM
-#from camera import Camera
+from camera import Camera
 from open_control import open_compute_motor_values
 from path_planner import plan_path
 
@@ -42,7 +42,7 @@ class Controller():
 
         #compute motor values
         if(self.control_type == CONTROL_VISUAL): #visual control
-            l_motor,r_motor,saw_red,saw_green = visual_compute_motor_values(t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev, self.hug, self.cam)
+            l_motor,r_motor,saw_red,saw_green = visual_compute_motor_values(t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev, self.hug, cam)
         elif(self.control_type == CONTROL_OPEN): #open-loop control
             l_motor,r_motor,done = open_compute_motor_values(self.prev_hug, self.instruction, delta_l_encod, delta_r_encod)
         else: #self.control_type == CONTROL_STOP we are "stopped"
@@ -104,6 +104,9 @@ if __name__ == "__main__":
         # Instantiate our controller
         cont = Controller(instructions, full_path)
 
+        # Instantiate our controller
+        cam = Camera()
+
         # These variables will hold the incoming serial data
         bytes_buffer = b""
         buffer_i = 0
@@ -151,7 +154,7 @@ if __name__ == "__main__":
                         delta_r_encod = r_encod - r_encod_prev
 
                         # ask the controller what to do
-                        l_motor, r_motor = cont.compute_motor_values(t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev)
+                        l_motor, r_motor = cont.compute_motor_values(t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev,cam)
                         #l_motor,r_motor,done = open_compute_motor_values(HUG_WHITE, "left", delta_l_encod, delta_r_encod)
                         
                         # do what the controller said to do
