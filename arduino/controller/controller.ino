@@ -4,6 +4,9 @@
 #include "DualMC33926MotorShield.h"
 DualMC33926MotorShield md;
 
+#define PING_PIN 11 //USDS signal pin (one of the few digital GPIOs not used by MC3392)
+#define DISTANCE_THRESHOLD 20 //Object detection threshold within which to halt (in cms)
+
 // We assume that the two back encoders plugged into the interrupt pins
 // Note: interrupt pin 0 is actually pin 2
 // Note: interrupt pin 1 is actually pin 3
@@ -19,6 +22,12 @@ const int encoder_debounce_time = 10;
 volatile long last_update_left;
 volatile long last_update_right;
 
+//PING sensor variables
+volatile short ping_duration = 0;
+volatile short ping_distance = 0;
+bool halting = false;
+int count = 0;
+
 // used for serial communication
 union ShortsOrBytes
 {
@@ -30,7 +39,7 @@ union ShortsOrBytes
 };
 char motorBufferIndex = 0;
 char motorBuffer[4];
-char encoderBuffer[8];
+char encoderBuffer[10];
 
 
 // called when either of the motors fails
@@ -99,10 +108,47 @@ void setup() {
   last_update_right = millis();
 }
 
+//send out a PING chirp
+void chirp(){
+  pinMode(PING_PIN, OUTPUT);
+  digitalWrite(PING_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(PING_PIN, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(PING_PIN, LOW);
+}
 
 void loop() {
+  //detect objects
+  if(count % 30 == 0) { // check every 30th time
+    chirp();
+    pinMode(PING_PIN, INPUT);
+    ping_duration = pulseIn(PING_PIN, HIGH, 4000);
+    ping_distance = ping_duration / 29 / 2;
+    bool did_timeout = (ping_duration == 0);
+    bool is_close = (ping_distance <= DISTANCE_THRESHOLD);
+    if(is_close && !did_timeout){
+      halting = true;
+    } else {
+      halting = false;
+    }
+
+    // Serial.print(0);
+    // Serial.print("\t");
+    // Serial.print(4000);
+    // Serial.print("\t");
+    // Serial.println(ping_duration);
+  }
+
+  count++;
+
+  // if(halting){
+  //   md.setM1Speed(0);
+  //   md.setM2Speed(0);
+  // }
+  
   // receive motor commands
-  if(Serial.available()) {
+  if(Serial.available() && !halting) {
     char newChar = Serial.read();
 
     // read in motor command bytes
@@ -143,8 +189,10 @@ void loop() {
       encoderBuffer[3] = highByte(temp_left_encoder_counter);
       encoderBuffer[4] = lowByte(temp_right_encoder_counter);
       encoderBuffer[5] = highByte(temp_right_encoder_counter);
-      encoderBuffer[6] = 0xCA;
-      encoderBuffer[7] = 0xFE;
+      encoderBuffer[6] = lowByte(ping_distance);
+      encoderBuffer[7] = highByte(ping_distance);
+      encoderBuffer[8] = 0xCA;
+      encoderBuffer[9] = 0xFE;
       
       // send the encoder values over serial
       Serial.write(encoderBuffer, sizeof(encoderBuffer));
