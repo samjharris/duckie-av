@@ -167,12 +167,12 @@ if __name__ == "__main__":
                         r_encod_prev = r_encod
 
 
-                    else:
-                        if time() - last_write > 0.01:
-                            to_write = struct.pack('hhc', int(l_motor_prev), int(r_motor_prev), b'A')
-                            ser.write(to_write)
-                            last_write = time()
-                            sleep(0.01)
+                else:
+                    if time() - last_write > 0.01:
+                        to_write = struct.pack('hhc', int(l_motor_prev), int(r_motor_prev), b'A')
+                        ser.write(to_write)
+                        last_write = time()
+                        sleep(0.01)
                 pass
             except KeyboardInterrupt:
                 print('Interrupted with ctrl+c')
