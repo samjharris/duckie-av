@@ -98,8 +98,7 @@ if __name__ == "__main__":
         r_encod_prev = 0
 
         # Get the user input path
-        # path_input = input("Enter a list of nodes to traverse:")
-        path_input = "n01 n02"
+        path_input = input("Enter a list of nodes to traverse:")
         instructions, full_path = plan_path(path_input)
         # Instantiate our controller
         cont = Controller(instructions, full_path)
