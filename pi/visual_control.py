@@ -81,7 +81,7 @@ def get_PWMs_from_visual(lane_error_pix, dt, PWM_l_prev, PWM_r_prev, turn_direct
     PWM_l = convert_vel_to_PWM(vel_l)
     PWM_r = convert_vel_to_PWM(vel_r)
 
-    if DEBUG_INFO_ON:
+    if False:
         print("Visual Controller")
         print("{:>22} : {}".format("lane_error_pix", lane_error_pix))
         print("{:>22} : {}".format("dt", dt))

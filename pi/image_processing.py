@@ -55,7 +55,7 @@ def get_pixel_error_from_image(frame, hug):
     green_mask = (is_green_vectorized(gLED_strip_hsv))
 
 
-    if DEBUG_INFO_ON:
+    if False:
         yellow_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
         white_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
         red_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
