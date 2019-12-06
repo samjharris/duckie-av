@@ -27,6 +27,12 @@ previous_theta_dts = deque()
 stopping = False
 # pwm_total = convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT) + convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT)
 
+ping_is_modulating_speed = False
+
+def change_ping_is_modulating_speed(some_bool):
+    global ping_is_modulating_speed
+    ping_is_modulating_speed = some_bool
+
 def convert_vel_to_PWM(velocity):
     if(velocity > 0):
         # positive function: VELOCITY = 0.1305(PWM) - 11.649, x-intercept =89.2644
@@ -127,10 +133,17 @@ def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_l
     # print("sum(previous_encoder_dts)", sum(previous_encoder_dts))
     # print("CM_PER_TICK", CM_PER_TICK)
     true_speed = CM_PER_TICK * avg_encoder / sum(previous_encoder_dts)
-    print("true_speed", true_speed)
+    if DEBUG_INFO_ON:
+        print("true_speed", true_speed)
 
     # speed calc
-    adjustment_factor = 0.005
+    global ping_is_modulating_speed
+        if ping_is_modulating_speed:
+            adjustment_factor = 0
+            ping_is_modulating_speed = False
+        else:
+            adjustment_factor = 0.005
+
     # adjustment_factor = 0.1  #sine wave mode
     error = STRAIGHT_SPEED_LIMIT - true_speed
     adj_to_speed = adjustment_factor * error

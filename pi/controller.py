@@ -10,7 +10,7 @@ from serial import Serial
 from serial.tools.list_ports import comports as get_serial_ports
 import struct
 from time import time, sleep
-from visual_control import visual_compute_motor_values, convert_vel_to_PWM
+from visual_control import visual_compute_motor_values, convert_vel_to_PWM, change_ping_is_modulating_speed
 from open_control import open_compute_motor_values
 from path_planner import plan_path
 
@@ -78,6 +78,7 @@ class Controller():
         if ping_distance <= 0 or ping_distance > 40 or self.control_type == CONTROL_OPEN:
             return l_motor, r_motor
         else:
+            change_ping_is_modulating_speed(True)
             return self.ping_scaling(l_motor, ping_distance), self.ping_scaling(r_motor, ping_distance)
 
     def ping_scaling(self, pwm, ping_distance):
