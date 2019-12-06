@@ -123,7 +123,7 @@ def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_l
 
     # store past thetas and calculate moving average theta_dot
     global ping_is_modulating_speed
-    if ping_is_modulating_speed:
+    if not ping_is_modulating_speed:
         ping_is_modulating_speed = False
 
         cur_encoder_avg = (delta_left_encoder + delta_right_encoder)/2

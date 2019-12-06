@@ -27,11 +27,11 @@ def open_compute_motor_values(prev_hug, traversal_type, delta_l_encoder, delta_r
 
     if traversal_type == TURN_L:
         straight_goal = LEFT_TURN_DIST
-        turn_goal = QUARTER_TURN
+        turn_goal = LEFT_TURN
     
     if traversal_type == TURN_R:
         straight_goal = DIST_FROM_STOP_LINE
-        turn_goal = QUARTER_TURN
+        turn_goal = RIGHT_TURN
 
     # update distances traveled
     if dist_traveled_straight < straight_goal:
