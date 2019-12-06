@@ -72,7 +72,8 @@ class Controller():
         elif done:
             self.control_type = CONTROL_VISUAL
 
-        return self.scale_pwm_by_ping(l_motor, r_motor, ping_distance)
+        return l_motor, r_motor
+        # return self.scale_pwm_by_ping(l_motor, r_motor, ping_distance)
 
     def scale_pwm_by_ping(self, l_motor, r_motor, ping_distance):
         if ping_distance <= 0 or ping_distance > 40 or self.control_type == CONTROL_OPEN:
@@ -119,6 +120,8 @@ if __name__ == "__main__":
         # Get the user input path
         path_input = input("Enter a list of nodes to traverse:")
         instructions, full_path = plan_path(path_input)
+        print(instructions)
+        print(full_path)
         # Instantiate our controller
         cont = Controller(instructions, full_path)
 

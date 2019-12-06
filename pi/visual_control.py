@@ -137,7 +137,7 @@ def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_l
         # print("sum(previous_encoder_dts)", sum(previous_encoder_dts))
         # print("CM_PER_TICK", CM_PER_TICK)
         true_speed = CM_PER_TICK * avg_encoder / sum(previous_encoder_dts)
-        if DEBUG_INFO_ON:
+        if False:
             print("true_speed", true_speed)
 
         # speed calc
