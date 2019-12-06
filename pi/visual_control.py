@@ -122,32 +122,31 @@ def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_l
     # print("delta_right_encoder", delta_right_encoder)
 
     # store past thetas and calculate moving average theta_dot
-    cur_encoder_avg = (delta_left_encoder + delta_right_encoder)/2
-    previous_encoders.append(cur_encoder_avg)
-    previous_encoder_dts.append(delta_t)
-    if len(previous_encoders) > ENCODER_VEL_WINDOW:
-        previous_encoders.popleft()
-        previous_encoder_dts.popleft()
-    avg_encoder = sum(previous_encoders)
-    # print("avg_encoder", avg_encoder)
-    # print("sum(previous_encoder_dts)", sum(previous_encoder_dts))
-    # print("CM_PER_TICK", CM_PER_TICK)
-    true_speed = CM_PER_TICK * avg_encoder / sum(previous_encoder_dts)
-    if DEBUG_INFO_ON:
-        print("true_speed", true_speed)
-
-    # speed calc
     global ping_is_modulating_speed
     if ping_is_modulating_speed:
-        adjustment_factor = 0
         ping_is_modulating_speed = False
-    else:
+
+        cur_encoder_avg = (delta_left_encoder + delta_right_encoder)/2
+        previous_encoders.append(cur_encoder_avg)
+        previous_encoder_dts.append(delta_t)
+        if len(previous_encoders) > ENCODER_VEL_WINDOW:
+            previous_encoders.popleft()
+            previous_encoder_dts.popleft()
+        avg_encoder = sum(previous_encoders)
+        # print("avg_encoder", avg_encoder)
+        # print("sum(previous_encoder_dts)", sum(previous_encoder_dts))
+        # print("CM_PER_TICK", CM_PER_TICK)
+        true_speed = CM_PER_TICK * avg_encoder / sum(previous_encoder_dts)
+        if DEBUG_INFO_ON:
+            print("true_speed", true_speed)
+
+        # speed calc
         adjustment_factor = 0.005
 
-    # adjustment_factor = 0.1  #sine wave mode
-    error = STRAIGHT_SPEED_LIMIT - true_speed
-    adj_to_speed = adjustment_factor * error
-    adjusted_speed += adj_to_speed
+        # adjustment_factor = 0.1  #sine wave mode
+        error = STRAIGHT_SPEED_LIMIT - true_speed
+        adj_to_speed = adjustment_factor * error
+        adjusted_speed += adj_to_speed
 
     # print("adjustment_factor", adjustment_factor)
     # print("adj_to_speed", adj_to_speed)
