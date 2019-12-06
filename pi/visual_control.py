@@ -138,11 +138,11 @@ def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_l
 
     # speed calc
     global ping_is_modulating_speed
-        if ping_is_modulating_speed:
-            adjustment_factor = 0
-            ping_is_modulating_speed = False
-        else:
-            adjustment_factor = 0.005
+    if ping_is_modulating_speed:
+        adjustment_factor = 0
+        ping_is_modulating_speed = False
+    else:
+        adjustment_factor = 0.005
 
     # adjustment_factor = 0.1  #sine wave mode
     error = STRAIGHT_SPEED_LIMIT - true_speed
