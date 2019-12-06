@@ -31,7 +31,7 @@ class Controller():
         #self.cur_node = full_path[0]
         #self.nxt_node = full_path[1]
 
-    def compute_motor_values(self, t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev):
+    def compute_motor_values(self, t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev, ping_distance):
         l_motor = 0
         r_motor = 0 
         
@@ -68,7 +68,20 @@ class Controller():
         elif done:
             self.control_type = CONTROL_VISUAL
 
-        return l_motor, r_motor
+        return self.scale_pwm_by_ping(l_motor, r_motor, ping_distance)
+
+    def scale_pwm_by_ping(self, l_motor, r_motor, ping_distance):
+        if ping_distance <= 0 or ping_distance > 40 or self.control_type == CONTROL_OPEN:
+            return l_motor, r_motor
+        else:
+            return self.ping_scaling(l_motor, ping_distance), self.ping_scaling(r_motor, ping_distance)
+
+    def ping_scaling(self, pwm, ping_distance):
+        if ping_distance > 20:
+            return pwm * (ping_distance - 20) / 40
+        else:
+            return 0
+
 
 if __name__ == "__main__":
     # connect to the open serial port
@@ -151,7 +164,7 @@ if __name__ == "__main__":
                         delta_r_encod = r_encod - r_encod_prev
 
                         # ask the controller what to do
-                        l_motor, r_motor = cont.compute_motor_values(t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev)
+                        l_motor, r_motor = cont.compute_motor_values(t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev, ping_distance)
                         #l_motor,r_motor,done = open_compute_motor_values(HUG_WHITE, "left", delta_l_encod, delta_r_encod)
                         
                         # do what the controller said to do
