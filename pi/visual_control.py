@@ -112,6 +112,9 @@ prev_encoder_sum = 0
 
 def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev, hug):
     global stopping, adjusted_speed, prev_t, prev_encoder_sum, cam
+    global previous_encoders, previous_encoder_dts, previous_thetas, previous_theta_dts
+
+stopping = False
 
     PWM_l, PWM_r = 0, 0
     lane_error_pix, saw_red, saw_green = cam.get_error(hug)
