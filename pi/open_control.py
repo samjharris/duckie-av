@@ -58,7 +58,7 @@ def open_compute_motor_values(prev_hug, traversal_type, delta_l_encoder, delta_r
         else:
             return 0, pwm, False
 
-    if dist_second_straight < second_straight_goal
+    if dist_second_straight < second_straight_goal:
         return pwm, pwm, False
     else:
         # reset globals and pass control
