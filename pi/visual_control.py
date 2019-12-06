@@ -164,6 +164,15 @@ def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_l
     PWM_l = np.clip(PWM_l, -400, 400)
     PWM_r = np.clip(PWM_r, -400, 400)
 
+    # reset globals when passing control
+    if saw_red and saw_green:
+        adjusted_speed = 0
+        previous_encoders.clear()
+        previous_encoder_dts.clear()
+        previous_thetas.clear()
+        previous_theta_dts.clear()
+        stopping = False
+
     return PWM_l, PWM_r, saw_red, saw_green
 
 

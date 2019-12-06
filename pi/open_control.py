@@ -4,13 +4,14 @@ from visual_control import convert_vel_to_PWM
 dist_traveled_straight, dist_turned, dist_second_straight = 0, 0, 0
 need_to_square = True
 pwm = convert_vel_to_PWM(TURN_SPEED_LIMIT)
+# pwm_high = pwm * 1.05
 
 # TODO Account for moving start
 # TODO Account for tilted start
 # Go Straight and then maybe turn, then return
 # returns l_motor r_motor, done
 def open_compute_motor_values(prev_hug, traversal_type, delta_l_encoder, delta_r_encoder):
-    global dist_traveled_straight, dist_turned, need_to_square, pwm
+    global dist_traveled_straight, dist_turned, dist_second_straight, need_to_square, pwm, pwm_high
     
     # if need_to_square:
     #     need_to_square = False
@@ -39,16 +40,17 @@ def open_compute_motor_values(prev_hug, traversal_type, delta_l_encoder, delta_r
     # update distances traveled
     if dist_traveled_straight < straight_goal:
         dist_traveled_straight += ((delta_l_encoder + delta_r_encoder) / 2) * CM_PER_TICK
-    elif dist_turned < turn_goal:
+    else:# dist_turned < turn_goal:
         # one of these should be zero
         dist_turned += (delta_l_encoder + delta_r_encoder) * CM_PER_TICK
-    else:
-        dist_traveled_straight += ((delta_l_encoder + delta_r_encoder) / 2) * CM_PER_TICK
+    # else:
+    #     dist_second_straight += ((delta_l_encoder + delta_r_encoder) / 2) * CM_PER_TICK
 
     
 
     # if we haven't gone straight far enough go straight
     if dist_traveled_straight < straight_goal:
+        # if delta_l_encoder >
         return pwm, pwm, False
     
     # if we have gone straight far enough turn
@@ -57,9 +59,8 @@ def open_compute_motor_values(prev_hug, traversal_type, delta_l_encoder, delta_r
             return pwm, 0, False
         else:
             return 0, pwm, False
-
-    if dist_second_straight < second_straight_goal:
-        return pwm, pwm, False
+    # if dist_second_straight < second_straight_goal:
+    #     return pwm, pwm, False
     else:
         # reset globals and pass control
         dist_traveled_straight, dist_turned, second_straight_goal = 0, 0, 0
