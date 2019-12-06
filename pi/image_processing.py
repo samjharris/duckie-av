@@ -100,7 +100,7 @@ def get_pixel_error_from_image(frame, hug):
     if saw_red:
         saw_green = percentage_green > min_percentage_green_threshold
         if DEBUG_INFO_ON:
-            print(saw_green)
+            print("green: " + str(saw_green) + "; red: " + str(saw_red))
     else:
         saw_green = False
         
@@ -139,7 +139,7 @@ def get_pixel_error_from_image(frame, hug):
     #     print("{:>22} : {}".format("saw_green", saw_green))
     #     print("="*30)
 
-    return (error, saw_red, SAW_GREEN)
+    return (error, saw_red, saw_green)
 
 
 if __name__ == "__main__":
