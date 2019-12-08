@@ -45,7 +45,7 @@ def open_compute_motor_values(prev_hug, traversal_type, delta_l_encoder, delta_r
     # update distances traveled
     if dist_traveled_straight < straight_goal:
         dist_traveled_straight += ((delta_l_encoder + delta_r_encoder) / 2) * CM_PER_TICK
-    else: dist_turned < turn_goal:
+    elif dist_turned < turn_goal:
         # one of these should be zero
         dist_turned += (delta_l_encoder + delta_r_encoder) * CM_PER_TICK
     else:
