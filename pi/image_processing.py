@@ -35,15 +35,13 @@ def is_green_vectorized(hsv_image):
     return (hsv_image[:,:,2] >= 100) & (60 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 170)
 
 
-def get_pixel_error_from_image(frame, hug):
+def super_get_pixel_error_from_image(frame, hug):
     height, width, depth = frame.shape
 
     # crop a horizontal strip from the center
-    # rgb_strip = frame[height//2-int(height*crop_percentage):height//2+int(height*crop_percentage), ::down_sample_steps , :]
     rgb_strip = frame[height//2 + STRIP_LOCATION*int(height*crop_percentage):height//2+(STRIP_LOCATION + 2) * int(height*crop_percentage), ::down_sample_steps , :]
-    # gLED_strip = frame[height//2 + 4*int(height*crop_percentage):height//2+(4 + 5) * int(height*crop_percentage), 100:540 , :]
-    # gLED_strip = gLED_strip[::2,::2,:]
-    gLED_strip = frame[height//2::10, width//3:width-width//3:10, :]
+    DOWNSAMPLE_NUM = 2
+    gLED_strip = frame[height//2::10, width//3:width-width//3:DOWNSAMPLE_NUM, :]
 
     # convert the strip to hsv
     hsv_strip = np.array(Image.fromarray(rgb_strip).convert('HSV'))
@@ -123,33 +121,14 @@ def get_pixel_error_from_image(frame, hug):
 
     error = lane_center - image_center
 
-    # if DEBUG_INFO_ON:
-    #     print("Image Processing")
-    #     print("{:>22} : {}".format("percentage_white", percentage_white))
-    #     print("{:>22} : {}".format("percentage_yellow", percentage_yellow))
-    #     print("{:>22} : {}".format("percentage_red", percentage_red))
-    #     print("{:>22} : {}".format("saw_white", saw_white))
-    #     print("{:>22} : {}".format("saw_yellow", saw_yellow))
-    #     print("{:>22} : {}".format("yel_edge", yel_edge))
-    #     print("{:>22} : {}".format("whi_edge", whi_edge))
-    #     print("{:>22} : {}".format("image_center", image_center))
-    #     print("{:>22} : {}".format("lane_center", lane_center))
-    #     print("{:>22} : {}".format("error", error))
-    #     print("{:>22} : {}".format("saw_red", saw_red))
-    #     print("{:>22} : {}".format("saw_green", saw_green))
-    #     print("="*30)
+    return (error, saw_red, saw_green, yel_edge/rgb_strip.shape[1])
 
-    return (error, saw_red, saw_green)
+
+def get_pixel_error_from_image(frame, hug):
+    return super_get_pixel_error_from_image(frame, hug)
 
 
 if __name__ == "__main__":
-
-    # # read in image
-    # image_in = Image.open(image_path + 'dist_to_red_15cm.png', 'r')
-    # rgb_frame = np.array(image_in)
-    # error = get_pixel_error_from_image(rgb_frame)
-    # print(error)
-
 
     import picamera, time
     with picamera.PiCamera() as camera:
