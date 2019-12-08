@@ -10,7 +10,7 @@ from serial import Serial
 from serial.tools.list_ports import comports as get_serial_ports
 import struct
 from time import time, sleep
-from visual_control import visual_compute_motor_values, convert_vel_to_PWM, change_ping_is_modulating_speed
+from visual_control import visual_compute_motor_values, convert_vel_to_PWM
 from open_control import open_compute_motor_values
 from path_planner import plan_path
 
@@ -18,18 +18,14 @@ class Controller():
     def __init__(self, instructions, full_path):
         #Control type: 0 for visual, 1 for open, 2 for stopped
         self.control_type = CONTROL_VISUAL #start in visual (we will see red), then wait for geen
-        
         self.instructions = instructions
         self.full_path = full_path
-
         # turn_type: 'L' for left, 'R' for right, 'S' for straight
         self.instruction = TURN_R #Magic turn
         # hug: 0 for white, 1 for yellow
         self.hug = HUG_WHITE
         # prev_hug: 0 for white, 1 for yellow
         self.prev_hug = HUG_WHITE
-        #self.cur_node = full_path[0]
-        #self.nxt_node = full_path[1]
 
     def compute_motor_values(self, t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev, ping_distance):
         l_motor = 0
@@ -78,21 +74,6 @@ class Controller():
             self.control_type = CONTROL_VISUAL
 
         return l_motor, r_motor
-        # return self.scale_pwm_by_ping(l_motor, r_motor, ping_distance)
-
-    def scale_pwm_by_ping(self, l_motor, r_motor, ping_distance):
-        if ping_distance > 40 or self.control_type == CONTROL_OPEN or ping_distance <= 0:
-            return l_motor, r_motor
-        else:
-            change_ping_is_modulating_speed(True)
-            return self.ping_scaling(l_motor, ping_distance), self.ping_scaling(r_motor, ping_distance)
-
-    def ping_scaling(self, pwm, ping_distance):
-        if ping_distance > 20:
-            return pwm * (ping_distance - 20) / 40
-        else:
-            return 0
-
 
 if __name__ == "__main__":
     # connect to the open serial port
@@ -105,7 +86,6 @@ if __name__ == "__main__":
     #create the serial connection object
     with Serial(port=ports[0], baudrate=115200) as ser:
         ser.flushInput()
-
 
         last_write = time()
         received_first_message = False
@@ -125,8 +105,10 @@ if __name__ == "__main__":
         # Get the user input path
         path_input = input("Enter a list of nodes to traverse:")
         instructions, full_path = plan_path(path_input)
+        
         print(instructions)
         print(full_path)
+        
         # Instantiate our controller
         cont = Controller(instructions, full_path)
 
