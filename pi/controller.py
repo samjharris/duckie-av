@@ -10,7 +10,7 @@ from serial import Serial
 from serial.tools.list_ports import comports as get_serial_ports
 import struct
 from time import time, sleep
-from visual_control import visual_compute_motor_values, convert_vel_to_PWM
+from visual_control import visual_compute_motor_values, convert_vel_to_PWM, cam
 from open_control import open_compute_motor_values
 from path_planner import plan_path
 
@@ -38,8 +38,9 @@ class Controller():
         #compute motor values
         if(self.control_type == CONTROL_VISUAL): #visual control
             l_motor,r_motor,saw_red,saw_green = visual_compute_motor_values(t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev, self.hug, ping_distance)
-        elif(self.control_type == CONTROL_OPEN): #open-loop control
-            l_motor,r_motor,done = open_compute_motor_values(self.prev_hug, self.instruction, delta_l_encod, delta_r_encod, ping_distance)
+        elif(self.control_type == CONTROL_OPEN): #open-loop control:w
+
+            l_motor,r_motor,done = open_compute_motor_values(self.prev_hug, self.instruction, delta_l_encod, delta_r_encod, ping_distance, cam)
         elif self.control_type == CONTROL_STOP: #we are "stopped"
             _,_,saw_red,saw_green = visual_compute_motor_values(t, delta_t, l_encod, r_encod, delta_l_encod, delta_r_encod, l_motor_prev, r_motor_prev, self.hug, ping_distance)
             l_motor,r_motor = 0, 0
