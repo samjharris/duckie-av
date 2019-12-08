@@ -43,7 +43,7 @@ def get_pixel_error_from_image(frame, hug):
     rgb_strip = frame[height//2 + STRIP_LOCATION*int(height*crop_percentage):height//2+(STRIP_LOCATION + 2) * int(height*crop_percentage), ::down_sample_steps , :]
     # gLED_strip = frame[height//2 + 4*int(height*crop_percentage):height//2+(4 + 5) * int(height*crop_percentage), 100:540 , :]
     # gLED_strip = gLED_strip[::2,::2,:]
-    gLed_strip = frame[height//2::10, width//3:width-width//3:10, :]
+    gLED_strip = frame[height//2::10, width//3:width-width//3:10, :]
 
     # convert the strip to hsv
     hsv_strip = np.array(Image.fromarray(rgb_strip).convert('HSV'))
