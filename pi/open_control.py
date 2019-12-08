@@ -4,7 +4,7 @@ from visual_control import convert_vel_to_PWM
 dist_traveled_straight, dist_turned, dist_second_straight = 0, 0, 0
 need_to_square = True
 pwm = convert_vel_to_PWM(TURN_SPEED_LIMIT)
-# pwm_high = pwm * 1.05
+pwm_high = pwm * 1.1
 
 # TODO Account for moving start
 # TODO Account for tilted start
@@ -53,8 +53,13 @@ def open_compute_motor_values(prev_hug, traversal_type, delta_l_encoder, delta_r
 
     # if we haven't gone straight far enough go straight
     if dist_traveled_straight < straight_goal:
-        # if delta_l_encoder >
-        return pwm, pwm, False
+        if delta_l_encoder == delta_r_encoder:
+            l_pwm, r_pwm = pwm, pwm
+        elif delta_l_encoder < delta_r_encoder:
+            l_pwm, r_pwm = pwm_high, pwm
+        else:
+            l_pwm, r_pwm = pwm, pwm_high
+        return l_pwm, r_pwm, False
     
     # if we have gone straight far enough turn
     if dist_turned < turn_goal:
