@@ -15,7 +15,7 @@ import numpy as np
 crop_percentage = 0.05
 down_sample_steps = 8
 min_percentage_red_threshold = 0.5  # TODO: tune this value
-min_percentage_green_threshold = 0.01 #TODO: tune this value
+min_percentage_green_threshold = 0.00 #TODO: tune this value
 
 parent_dir = os.path.dirname(os.getcwd())
 image_path = os.path.join(parent_dir, 'test_road_images/')
@@ -41,9 +41,9 @@ def get_pixel_error_from_image(frame, hug):
     # crop a horizontal strip from the center
     # rgb_strip = frame[height//2-int(height*crop_percentage):height//2+int(height*crop_percentage), ::down_sample_steps , :]
     rgb_strip = frame[height//2 + STRIP_LOCATION*int(height*crop_percentage):height//2+(STRIP_LOCATION + 2) * int(height*crop_percentage), ::down_sample_steps , :]
-    gLED_strip = frame[height//2 + 4*int(height*crop_percentage):height//2+(4 + 5) * int(height*crop_percentage), 100:540 , :]
-    gLED_strip = gLED_strip[::2,::2,:]
-
+    # gLED_strip = frame[height//2 + 4*int(height*crop_percentage):height//2+(4 + 5) * int(height*crop_percentage), 100:540 , :]
+    # gLED_strip = gLED_strip[::2,::2,:]
+    gLed_strip = frame[height//2::10, width//3:width-width//3:10, :]
 
     # convert the strip to hsv
     hsv_strip = np.array(Image.fromarray(rgb_strip).convert('HSV'))
