@@ -13,7 +13,7 @@ pwm = convert_vel_to_PWM(TURN_SPEED_LIMIT)
 def open_compute_motor_values(prev_hug, traversal_type, delta_l_encoder, delta_r_encoder, ping_distance):
     # If we encounter an obstruction VERY close in the intersection, 
     # we stop right away without bothering to match speed
-    if(ping_distance < PING_THRESHOLD_INTERSECTION and ping_distance > 0):
+    if(ping_distance < PING_MIN_INTERSECTION and ping_distance > 0):
         return 0, 0, False
 
     global dist_traveled_straight, dist_turned, dist_second_straight, need_to_square, pwm, pwm_high

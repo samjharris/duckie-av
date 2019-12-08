@@ -109,10 +109,10 @@ def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_l
     global previous_thetas, previous_theta_dts
 
     target_speed = STRAIGHT_SPEED_LIMIT
-    if(ping_distance < PING_THRESHOLD_STRAIGHT and ping_distance > 0):
-        target_speed = target_speed * (ping_distance /20)/40
-        return
-
+    if(ping_distance > PING_MIN_STRAIGHT and ping_distance < (PING_MIN_STRAIGHT + PING_WINDOW_STRAIGHT)):
+        target_speed = target_speed * (ping_distance - PING_MIN_STRAIGHT) / PING_WINDOW_STRAIGHT
+    elif (ping_distance < PING_MIN_STRAIGHT and ping_distance > 0):
+        target_speed = 0
 
     PWM_l, PWM_r = 0, 0
     lane_error_pix, saw_red, saw_green = cam.get_error(hug)
@@ -134,7 +134,7 @@ def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_l
     adjustment_factor = 0.005
 
     # adjustment_factor = 0.1  #sine wave mode
-    error = STRAIGHT_SPEED_LIMIT - true_speed
+    error = target_speed - true_speed
     adj_to_speed = adjustment_factor * error
     adjusted_speed += adj_to_speed
 
