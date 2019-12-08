@@ -26,7 +26,7 @@ volatile long last_update_right;
 volatile short ping_duration = 0;
 volatile short ping_distance = 0;
 // bool halting = false;
-int count = 0;
+int count = 1;
 
 // used for serial communication
 union ShortsOrBytes
@@ -126,8 +126,9 @@ void loop() {
     pinMode(PING_PIN, INPUT);
     ping_duration = pulseIn(PING_PIN, HIGH, 4000);
     ping_distance = ping_duration / 29 / 2;
-    bool did_timeout = (ping_duration == 0);
-    bool is_close = (ping_distance <= DISTANCE_THRESHOLD);
+    count = 0;
+    //bool did_timeout = (ping_duration == 0);
+    //bool is_close = (ping_distance <= DISTANCE_THRESHOLD);
     // if(is_close && !did_timeout){
     //   halting = true;
     // } else {
