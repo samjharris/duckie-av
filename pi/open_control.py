@@ -10,7 +10,12 @@ pwm = convert_vel_to_PWM(TURN_SPEED_LIMIT)
 # TODO Account for tilted start
 # Go Straight and then maybe turn, then return
 # returns l_motor r_motor, done
-def open_compute_motor_values(prev_hug, traversal_type, delta_l_encoder, delta_r_encoder):
+def open_compute_motor_values(prev_hug, traversal_type, delta_l_encoder, delta_r_encoder, ping_distance):
+    # If we encounter an obstruction VERY close in the intersection, 
+    # we stop right away without bothering to match speed
+    if(ping_distance < PING_THRESHOLD_INTERSECTION and ping_distance > 0):
+        return 0, 0, False
+
     global dist_traveled_straight, dist_turned, dist_second_straight, need_to_square, pwm, pwm_high
     
     # if need_to_square:
@@ -45,8 +50,6 @@ def open_compute_motor_values(prev_hug, traversal_type, delta_l_encoder, delta_r
         dist_turned += (delta_l_encoder + delta_r_encoder) * CM_PER_TICK
     # else:
     #     dist_second_straight += ((delta_l_encoder + delta_r_encoder) / 2) * CM_PER_TICK
-
-    
 
     # if we haven't gone straight far enough go straight
     if dist_traveled_straight < straight_goal:

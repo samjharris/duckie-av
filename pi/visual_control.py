@@ -11,7 +11,6 @@ from collections import deque
 from time import sleep
 from camera import Camera
 
-
 cam = Camera()
 
 sleep(2)
@@ -26,12 +25,6 @@ previous_theta_dts = deque()
 
 stopping = False
 # pwm_total = convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT) + convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT)
-
-ping_is_modulating_speed = False
-
-def change_ping_is_modulating_speed(some_bool):
-    global ping_is_modulating_speed
-    ping_is_modulating_speed = some_bool
 
 def convert_vel_to_PWM(velocity):
     if(velocity > 0):
@@ -110,54 +103,43 @@ def clear_visual_globals():
 prev_t = 0
 prev_encoder_sum = 0
 
-def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev, hug):
+def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_left_encoder, delta_right_encoder, left_motor_prev, right_motor_prev, hug, ping_distance):
     global stopping, adjusted_speed, prev_t, prev_encoder_sum, cam
-    global previous_encoders, previous_encoder_dts, previous_thetas, previous_theta_dts
+    global previous_encoders, previous_encoder_dts
+    global previous_thetas, previous_theta_dts
+
+    target_speed = STRAIGHT_SPEED_LIMIT
+    if(ping_distance < PING_THRESHOLD_STRAIGHT and ping_distance > 0):
+        target_speed = target_speed * (ping_distance /20)/40
+        return
+
 
     PWM_l, PWM_r = 0, 0
     lane_error_pix, saw_red, saw_green = cam.get_error(hug)
 
-    # print("left_encoder", left_encoder)
-    # print("right_encoder", right_encoder)
-    # print("delta_left_encoder", delta_left_encoder)
-    # print("delta_right_encoder", delta_right_encoder)
-
     # store past thetas and calculate moving average theta_dot
-    global ping_is_modulating_speed
-    if not ping_is_modulating_speed:
-        ping_is_modulating_speed = False
+    cur_encoder_avg = (delta_left_encoder + delta_right_encoder)/2
+    previous_encoders.append(cur_encoder_avg)
+    previous_encoder_dts.append(delta_t)
+    
+    if len(previous_encoders) > ENCODER_VEL_WINDOW:
+        previous_encoders.popleft()
+        previous_encoder_dts.popleft()
+    avg_encoder = sum(previous_encoders)
+    true_speed = CM_PER_TICK * avg_encoder / sum(previous_encoder_dts)
+    if False:
+        print("true_speed", true_speed)
 
-        cur_encoder_avg = (delta_left_encoder + delta_right_encoder)/2
-        previous_encoders.append(cur_encoder_avg)
-        previous_encoder_dts.append(delta_t)
-        if len(previous_encoders) > ENCODER_VEL_WINDOW:
-            previous_encoders.popleft()
-            previous_encoder_dts.popleft()
-        avg_encoder = sum(previous_encoders)
-        # print("avg_encoder", avg_encoder)
-        # print("sum(previous_encoder_dts)", sum(previous_encoder_dts))
-        # print("CM_PER_TICK", CM_PER_TICK)
-        true_speed = CM_PER_TICK * avg_encoder / sum(previous_encoder_dts)
-        if False:
-            print("true_speed", true_speed)
+    # speed calc
+    adjustment_factor = 0.005
 
-        # speed calc
-        adjustment_factor = 0.005
+    # adjustment_factor = 0.1  #sine wave mode
+    error = STRAIGHT_SPEED_LIMIT - true_speed
+    adj_to_speed = adjustment_factor * error
+    adjusted_speed += adj_to_speed
 
-        # adjustment_factor = 0.1  #sine wave mode
-        error = STRAIGHT_SPEED_LIMIT - true_speed
-        adj_to_speed = adjustment_factor * error
-        adjusted_speed += adj_to_speed
-
-    # print("adjustment_factor", adjustment_factor)
-    # print("adj_to_speed", adj_to_speed)
-    # print("adjusted_speed", adjusted_speed)
-
-
-    # TODO: Alex B., check this
     # PWM_l_prev, PWM_r_prev = convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT), convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT)
     PWM_l_prev, PWM_r_prev = convert_vel_to_PWM(adjusted_speed), convert_vel_to_PWM(adjusted_speed)
-
 
     PWM_l, PWM_r = get_PWMs_from_visual(lane_error_pix, delta_t, PWM_l_prev, PWM_r_prev, hug)
 
