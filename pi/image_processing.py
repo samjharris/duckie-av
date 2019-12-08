@@ -125,7 +125,8 @@ def super_get_pixel_error_from_image(frame, hug):
 
 
 def get_pixel_error_from_image(frame, hug):
-    return super_get_pixel_error_from_image(frame, hug)
+    a, b, c, _ = super_get_pixel_error_from_image(frame, hug)
+    return a,b,c
 
 
 if __name__ == "__main__":
