@@ -12,7 +12,7 @@ from time import sleep
 from threading import Lock, Thread
 import picamera
 import picamera.array
-from image_processing import get_pixel_error_from_image
+from image_processing import get_pixel_error_from_image, super_get_pixel_error_from_image
 
 
 class Camera():
