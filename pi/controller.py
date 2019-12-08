@@ -81,7 +81,7 @@ class Controller():
         # return self.scale_pwm_by_ping(l_motor, r_motor, ping_distance)
 
     def scale_pwm_by_ping(self, l_motor, r_motor, ping_distance):
-        if ping_distance <= 0 or ping_distance > 40 or self.control_type == CONTROL_OPEN:
+        if ping_distance > 40 or self.control_type == CONTROL_OPEN or ping_distance <= 0:
             return l_motor, r_motor
         else:
             change_ping_is_modulating_speed(True)
