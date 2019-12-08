@@ -131,12 +131,13 @@ def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_l
         print("true_speed", true_speed)
 
     # speed calc
-    adjustment_factor = 0.005
+    adjustment_factor = 0.01
 
     # adjustment_factor = 0.1  #sine wave mode
     error = target_speed - true_speed
     adj_to_speed = adjustment_factor * error
     adjusted_speed += adj_to_speed
+    adjusted_speed = max(0, adjusted_speed)
 
     # PWM_l_prev, PWM_r_prev = convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT), convert_vel_to_PWM(STRAIGHT_SPEED_LIMIT)
     PWM_l_prev, PWM_r_prev = convert_vel_to_PWM(adjusted_speed), convert_vel_to_PWM(adjusted_speed)
