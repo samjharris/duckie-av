@@ -52,8 +52,8 @@ class Camera():
         return cur_error, saw_red, saw_green
 
 
-    def get_yellow_error(self, turn_direction):
+    def get_yellow_error(self):
         if self.cur_frame is None:
             return 0, True, False
-        cur_error, saw_red, saw_green, yellow_edge = super_get_pixel_error_from_image(self.cur_frame, turn_direction)
+        cur_error, saw_red, saw_green, yellow_edge = super_get_pixel_error_from_image(self.cur_frame, LEFT_TURN)
         return cur_error, saw_red, saw_green, yellow_edge
