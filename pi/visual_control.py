@@ -118,7 +118,8 @@ def visual_compute_motor_values(t, delta_t, left_encoder, right_encoder, delta_l
     lane_error_pix, saw_red, saw_green = cam.get_error(hug)
 
     # store past thetas and calculate moving average theta_dot
-    cur_encoder_avg = (delta_left_encoder + delta_right_encoder)/2
+    cur_encoder_avg = (delta_right_encoder)
+    # cur_encoder_avg = (delta_left_encoder + delta_right_encoder)/2
     previous_encoders.append(cur_encoder_avg)
     previous_encoder_dts.append(delta_t)
     
