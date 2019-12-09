@@ -17,6 +17,8 @@ down_sample_steps = 8
 min_percentage_red_threshold = 0.5  # TODO: tune this value
 min_percentage_green_threshold = 0.00 #TODO: tune this value
 
+DEBUG_IMAGE_PROCESSING = False
+
 parent_dir = os.path.dirname(os.getcwd())
 image_path = os.path.join(parent_dir, 'test_road_images/')
 #image_path = os.path.join(parent_dir, 'test_road_images\\')
@@ -41,7 +43,7 @@ def super_get_pixel_error_from_image(frame, hug):
     # crop a horizontal strip from the center
     rgb_strip = frame[height//2 + STRIP_LOCATION*int(height*crop_percentage):height//2+(STRIP_LOCATION + 2) * int(height*crop_percentage), ::down_sample_steps , :]
     DOWNSAMPLE_NUM = 2
-    gLED_strip = frame[height//2::10, width//3:width-width//3:DOWNSAMPLE_NUM, :]
+    gLED_strip = frame[height*3//4::5, width//4:width-width//4:DOWNSAMPLE_NUM, :]
 
     # convert the strip to hsv
     hsv_strip = np.array(Image.fromarray(rgb_strip).convert('HSV'))
@@ -50,10 +52,10 @@ def super_get_pixel_error_from_image(frame, hug):
     white_mask = is_white_vectorized(hsv_strip)
     yellow_mask = is_yellow_vectorized(hsv_strip)
     red_mask = is_red_vectorized(hsv_strip)
-    green_mask = (is_green_vectorized(gLED_strip_hsv))
+    green_mask = is_green_vectorized(gLED_strip_hsv)
 
 
-    if False:
+    if DEBUG_IMAGE_PROCESSING:
         yellow_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
         white_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
         red_strip = np.zeros((hsv_strip.shape[0],hsv_strip.shape[1]), dtype=hsv_strip.dtype)
@@ -71,6 +73,7 @@ def super_get_pixel_error_from_image(frame, hug):
         Image.fromarray(yellow_strip, 'L').convert('RGB').save(image_path + 'test_yellow.jpg')
         Image.fromarray(red_strip, 'L').convert('RGB').save(image_path + 'test_red.jpg')
         Image.fromarray(green_strip, 'L').convert('RGB').save(image_path + 'test_green.jpg')
+        Image.fromarray(gLED_strip, 'RGB').convert('RGB').save(image_path + 'test_green2.jpg')
         print("saved images to files")
 
 
@@ -130,6 +133,7 @@ def get_pixel_error_from_image(frame, hug):
 
 
 if __name__ == "__main__":
+    DEBUG_IMAGE_PROCESSING = True
 
     import picamera, time
     with picamera.PiCamera() as camera:
@@ -139,7 +143,7 @@ if __name__ == "__main__":
         time.sleep(2)
         rgb_frame = np.empty((h, w, 3), dtype=np.uint8)
         camera.capture(rgb_frame, 'rgb')
-        error, saw_red = get_pixel_error_from_image(rgb_frame, TURN_DIRECTION)
+        error, saw_red, saw_green = get_pixel_error_from_image(rgb_frame, TURN_DIRECTION)
         print(error, "px error")
         x = 2.6153846153846154
         print("PIX_PER_CM", PIX_PER_CM)
