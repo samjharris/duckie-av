@@ -13,6 +13,9 @@ from time import time, sleep
 from visual_control import visual_compute_motor_values, convert_vel_to_PWM, cam
 from open_control import open_compute_motor_values
 from path_planner import plan_path
+from sys import argv as args
+args = args[1:]
+
 
 class Controller():
     def __init__(self, instructions, full_path):
@@ -105,7 +108,10 @@ if __name__ == "__main__":
         r_encod_prev = 0
 
         # Get the user input path
-        path_input = input("Enter a list of nodes to traverse:")
+        if len(args) > 0:
+            path_input = " ".join(args)
+        else:
+            path_input = input("Enter a list of nodes to traverse:")
         instructions, full_path = plan_path(path_input)
         
         print(instructions)
