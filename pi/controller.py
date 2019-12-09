@@ -51,6 +51,7 @@ class Controller():
         #update state
         if saw_red:
             if not instructions: #no more instructions, we are done
+                print("NO MORE INSTRUCTIONS")
                 self.control_type = CONTROL_STOP
                 return l_motor, r_motor
             if saw_green:
@@ -185,12 +186,11 @@ if __name__ == "__main__":
             except KeyboardInterrupt:
                 print('Interrupted with ctrl+c')
                 try:
-                    # Controller.cam.should_stop = True
                     to_write = struct.pack('hhc', 0, 0, b'A')
                     ser.write(to_write)
-                    # ser.close()
                     break
                 except SystemExit:
                     break
-    #Clean-up
-    # ser.close()
+        #Clean-up
+        cam.should_stop = True
+        ser.close()
