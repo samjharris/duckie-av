@@ -32,8 +32,11 @@ graph = { "n01" : [["n04",TURN_L],["n12",TURN_S]], #e.g.: from n01, we can go
 #
 #just a simple function to parse our input
 def input_helper(nodes):
-    #Currently assumes input such as the string: "n01 n02 n03"
-    nodes_list = nodes.split(" ")
+    #Assumes input such as the string: "1 2 3"
+    nodes_list = ["n{:0>2}".format(x) for x in nodes.split(" ")]
+
+    # #Currently assumes input such as the string: "n01 n02 n03"
+    # nodes_list = nodes.split(" ")
     if(len(nodes_list) < 2):
         print("You have already arrived at your destination. Try adding a longer path")
         exit()
