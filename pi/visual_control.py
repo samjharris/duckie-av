@@ -13,7 +13,7 @@ from camera import Camera
 
 cam = Camera()
 
-sleep(2)
+sleep(1)
 
 adjusted_speed = 0
 

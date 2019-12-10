@@ -15,7 +15,7 @@ import numpy as np
 crop_percentage = 0.05
 down_sample_steps = 8
 min_percentage_red_threshold = 0.5  # TODO: tune this value
-min_percentage_green_threshold = 0.00 #TODO: tune this value
+min_percentage_green_threshold = 0.000 #TODO: tune this value
 
 DEBUG_IMAGE_PROCESSING = False
 
@@ -34,7 +34,7 @@ def is_red_vectorized(hsv_image):
     return (hsv_image[:,:,1] >= 125) & (hsv_image[:,:,0] >= 240)
 
 def is_green_vectorized(hsv_image):
-    return (hsv_image[:,:,2] >= 100) & (60 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 170)
+    return (hsv_image[:,:,1] >= 50) & (hsv_image[:,:,2] >= 100) & (60 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 170)
 
 
 def super_get_pixel_error_from_image(frame, hug):
@@ -42,8 +42,11 @@ def super_get_pixel_error_from_image(frame, hug):
 
     # crop a horizontal strip from the center
     rgb_strip = frame[height//2 + STRIP_LOCATION*int(height*crop_percentage):height//2+(STRIP_LOCATION + 2) * int(height*crop_percentage), ::down_sample_steps , :]
+    # rgb_strip = frame[height//2 + STRIP_LOCATION*int(height*crop_percentage):height//2+(STRIP_LOCATION + 2) * int(height*crop_percentage), ::down_sample_steps , :]
     DOWNSAMPLE_NUM = 2
-    gLED_strip = frame[height*3//4::5, width//4:width-width//4:DOWNSAMPLE_NUM, :]
+    # gLED_strip = frame[height//2::5, width//4:width-width//4:DOWNSAMPLE_NUM, :]
+    # gLED_strip = frame[height//2::5, width//4:width-width//4:DOWNSAMPLE_NUM, :]
+    gLED_strip = frame[height//2::1, width//4:width-width//4:1, :]
 
     # convert the strip to hsv
     hsv_strip = np.array(Image.fromarray(rgb_strip).convert('HSV'))
@@ -67,13 +70,14 @@ def super_get_pixel_error_from_image(frame, hug):
         red_strip[red_mask] = 255
         green_strip[green_mask] = 255
 
-        Image.fromarray(rgb_strip, 'RGB').convert('RGB').save(image_path + 'test_rgb.jpg')
-        Image.fromarray(hsv_strip[:,:,0], 'L').convert('RGB').save(image_path + 'test_hsv.jpg')
-        Image.fromarray(white_strip, 'L').convert('RGB').save(image_path + 'test_white.jpg')
-        Image.fromarray(yellow_strip, 'L').convert('RGB').save(image_path + 'test_yellow.jpg')
-        Image.fromarray(red_strip, 'L').convert('RGB').save(image_path + 'test_red.jpg')
-        Image.fromarray(green_strip, 'L').convert('RGB').save(image_path + 'test_green.jpg')
-        Image.fromarray(gLED_strip, 'RGB').convert('RGB').save(image_path + 'test_green2.jpg')
+        Image.fromarray(frame, 'RGB').convert('RGB').save(image_path + 'frame.jpg')
+        Image.fromarray(rgb_strip, 'RGB').convert('RGB').save(image_path + 'rgb_strip.jpg')
+        Image.fromarray(hsv_strip[:,:,0], 'L').convert('RGB').save(image_path + 'hsv_strip.jpg')
+        Image.fromarray(white_strip, 'L').convert('RGB').save(image_path + 'white_strip.jpg')
+        Image.fromarray(yellow_strip, 'L').convert('RGB').save(image_path + 'yellow_strip.jpg')
+        Image.fromarray(red_strip, 'L').convert('RGB').save(image_path + 'red_strip.jpg')
+        Image.fromarray(green_strip, 'L').convert('RGB').save(image_path + 'green_strip.jpg')
+        Image.fromarray(gLED_strip, 'RGB').convert('RGB').save(image_path + 'gLED_strip.jpg')
         print("saved images to files")
 
 
@@ -98,14 +102,42 @@ def super_get_pixel_error_from_image(frame, hug):
     saw_red = percentage_red > min_percentage_red_threshold
     saw_white = (whi_edge != 0) and percentage_white > 0.01
     saw_yellow = (yel_edge != len(yel_col_sum)-1) and percentage_yellow > 0.01
+    # print("saw_white: {}".format(saw_white))
+    # print("saw_yellow: {}".format(saw_yellow))
+
     if saw_red:
+        # print(percentage_green)
+        # saw_green = np.sum(green_mask) > 5
         saw_green = percentage_green > min_percentage_green_threshold
+
+        if saw_green:
+            green_strip = np.zeros((gLED_strip_hsv.shape[0],gLED_strip_hsv.shape[1]), dtype=hsv_strip.dtype)
+            green_strip[green_mask] = 255
+            Image.fromarray(green_strip, 'L').convert('RGB').save(image_path + 'test_green.jpg')
+            Image.fromarray(gLED_strip, 'RGB').convert('RGB').save(image_path + 'test_green2.jpg')
+            print("saved green images to files")
+
         if DEBUG_INFO_ON:
             print("green: " + str(saw_green) + "; red: " + str(saw_red))
     else:
         saw_green = False
         
     image_center = white_mask.shape[1] // 2
+
+    # if hug == HUG_WHITE:
+    #     if saw_white:
+    #         lane_center = whi_edge - WHITE_OFFSET_PIX
+    #     elif not saw_white and saw_yellow:
+    #         lane_center = yel_edge + LANE_WIDTH_PIX - WHITE_OFFSET_PIX
+    #     else:
+    #         lane_center = image_center
+    # else:
+    #     if saw_yellow:
+    #         lane_center = yel_edge + YELLOW_OFFSET_PIX
+    #     elif not saw_yellow and saw_white:
+    #         lane_center = whi_edge - LANE_WIDTH_PIX + YELLOW_OFFSET_PIX
+    #     else:
+    #         lane_center = image_center
 
     if hug == HUG_WHITE:
         if saw_white:

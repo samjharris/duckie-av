@@ -72,7 +72,8 @@ class Controller():
                 elif self.instruction == TURN_L:
                     self.hug = HUG_WHITE #Left, hug white
                 else:
-                    self.hug = self.prev_hug #Straight, hug the same as before
+                    # self.hug = self.prev_hug #Straight, hug the same as before
+                    self.hug = HUG_WHITE #Straight
             else:
                 self.control_type = CONTROL_STOP
         elif done:

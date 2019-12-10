@@ -55,12 +55,13 @@ def open_compute_motor_values(prev_hug, traversal_type, delta_l_encoder, delta_r
 
     # if we haven't gone straight far enough go straight
     if dist_traveled_straight < straight_goal:
-        if delta_l_encoder == delta_r_encoder:
-            l_pwm, r_pwm = pwm, pwm
-        elif delta_l_encoder < delta_r_encoder:
-            l_pwm, r_pwm = pwm_high, pwm
-        else:
-            l_pwm, r_pwm = pwm, pwm_high
+        l_pwm, r_pwm = pwm * 1.05, pwm
+        # if delta_l_encoder == delta_r_encoder:
+        #     l_pwm, r_pwm = pwm, pwm
+        # elif delta_l_encoder < delta_r_encoder:
+        #     l_pwm, r_pwm = pwm_high, pwm
+        # else:
+        #     l_pwm, r_pwm = pwm, pwm_high
         return l_pwm, r_pwm, False
     
     # if we have gone straight far enough turn
@@ -69,12 +70,18 @@ def open_compute_motor_values(prev_hug, traversal_type, delta_l_encoder, delta_r
             return pwm, 0, False
         else:
             return 0, pwm, False
+
     if dist_second_straight < second_straight_goal:
         return pwm, pwm, False
 
     if traversal_type == TURN_L:
         _, _, _, yellow_edge = cam.get_yellow_error()
         if yellow_edge > 0.5 or yellow_edge < 0.1:
+            return pwm, 0, False
+
+    elif traversal_type == TURN_R:
+        _, _, _, yellow_edge = cam.get_yellow_error()
+        if yellow_edge < 0.1:
             return pwm, 0, False
 
     # reset globals and pass control
