@@ -15,9 +15,11 @@ import numpy as np
 crop_percentage = 0.05
 down_sample_steps = 8
 min_percentage_red_threshold = 0.5  # TODO: tune this value
+
 min_percentage_green_threshold = 0.000 #TODO: tune this value
 
 DEBUG_IMAGE_PROCESSING = False
+
 
 parent_dir = os.path.dirname(os.getcwd())
 image_path = os.path.join(parent_dir, 'test_road_images/')
@@ -37,17 +39,19 @@ def is_green_vectorized(hsv_image):
     return (hsv_image[:,:,1] >= 50) & (hsv_image[:,:,2] >= 100) & (60 <= hsv_image[:,:,0]) & (hsv_image[:,:,0] <= 170)
 
 
+
 def super_get_pixel_error_from_image(frame, hug):
     height, width, depth = frame.shape
 
     # crop a horizontal strip from the center
     rgb_strip = frame[height//2 + STRIP_LOCATION*int(height*crop_percentage):height//2+(STRIP_LOCATION + 2) * int(height*crop_percentage), ::down_sample_steps , :]
+
     # rgb_strip = frame[height//2 + STRIP_LOCATION*int(height*crop_percentage):height//2+(STRIP_LOCATION + 2) * int(height*crop_percentage), ::down_sample_steps , :]
     DOWNSAMPLE_NUM = 2
     # gLED_strip = frame[height//2::5, width//4:width-width//4:DOWNSAMPLE_NUM, :]
     # gLED_strip = frame[height//2::5, width//4:width-width//4:DOWNSAMPLE_NUM, :]
     gLED_strip = frame[height//2::1, width//4:width-width//4:1, :]
-
+    
     # convert the strip to hsv
     hsv_strip = np.array(Image.fromarray(rgb_strip).convert('HSV'))
     gLED_strip_hsv = np.array(Image.fromarray(gLED_strip).convert('HSV'))
@@ -56,6 +60,7 @@ def super_get_pixel_error_from_image(frame, hug):
     yellow_mask = is_yellow_vectorized(hsv_strip)
     red_mask = is_red_vectorized(hsv_strip)
     green_mask = is_green_vectorized(gLED_strip_hsv)
+
 
 
     if DEBUG_IMAGE_PROCESSING:
@@ -69,6 +74,7 @@ def super_get_pixel_error_from_image(frame, hug):
         yellow_strip[yellow_mask] = 255
         red_strip[red_mask] = 255
         green_strip[green_mask] = 255
+        
 
         Image.fromarray(frame, 'RGB').convert('RGB').save(image_path + 'frame.jpg')
         Image.fromarray(rgb_strip, 'RGB').convert('RGB').save(image_path + 'rgb_strip.jpg')
@@ -78,6 +84,7 @@ def super_get_pixel_error_from_image(frame, hug):
         Image.fromarray(red_strip, 'L').convert('RGB').save(image_path + 'red_strip.jpg')
         Image.fromarray(green_strip, 'L').convert('RGB').save(image_path + 'green_strip.jpg')
         Image.fromarray(gLED_strip, 'RGB').convert('RGB').save(image_path + 'gLED_strip.jpg')
+
         print("saved images to files")
 
 
@@ -102,6 +109,7 @@ def super_get_pixel_error_from_image(frame, hug):
     saw_red = percentage_red > min_percentage_red_threshold
     saw_white = (whi_edge != 0) and percentage_white > 0.01
     saw_yellow = (yel_edge != len(yel_col_sum)-1) and percentage_yellow > 0.01
+
     # print("saw_white: {}".format(saw_white))
     # print("saw_yellow: {}".format(saw_yellow))
 
@@ -122,6 +130,7 @@ def super_get_pixel_error_from_image(frame, hug):
     else:
         saw_green = False
         
+
     image_center = white_mask.shape[1] // 2
 
     # if hug == HUG_WHITE:
@@ -181,3 +190,4 @@ if __name__ == "__main__":
         print("PIX_PER_CM", PIX_PER_CM)
 
         print(error / PIX_PER_CM, "cm error")
+
